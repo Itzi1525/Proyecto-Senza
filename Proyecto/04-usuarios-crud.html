@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Senza - Administrar usuarios</title>
+    <link rel="icon" type="image/png" href="Imagenes\Senza.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --color-primary: #D2B48C; /* Café claro */
+            --color-secondary: #4B3832; /* Café oscuro */
+            --color-background: #F8F8F8; /* Blanco muy sutil */
+            --color-card-bg: #FFFFFF; /* Blanco puro para las tarjetas */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-secondary);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Estilos del nuevo Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: var(--color-card-bg);
+            border-bottom: 1px solid #EAEAEA;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        header h2 {
+            font-size: 1.5em;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* Estilos de la navegación del encabezado */
+        .nav-admin ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-admin a {
+            text-decoration: none;
+            color: var(--color-secondary);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-admin a:hover {
+            color: var(--color-primary);
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 30px;
+        }
+        
+        .card {
+            background-color: var(--color-card-bg);
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+        }
+
+        h3 {
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #E0E0E0;
+            box-sizing: border-box;
+            background-color: transparent;
+            font-family: 'Poppins', sans-serif;
+            color: var(--color-secondary);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #EAEAEA;
+            text-align: left;
+        }
+        
+        th {
+            font-weight: 600;
+            background-color: var(--color-card-bg);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 0;
+            background-color: var(--color-secondary);
+            color: var(--color-card-bg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background-color: #382D26;
+        }
+
+        .btn.delete {
+            background-color: #C14B3B;
+        }
+        
+        .btn.delete:hover {
+            background-color: #A94343;
+        }
+
+        h4 {
+            font-size: 1.2em;
+            margin-top: 0;
+            font-weight: 600;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        ul li {
+            margin-bottom: 8px;
+        }
+        
+        code {
+            background-color: #F0F0F0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Administrar usuarios</h2>
+        <nav class="nav-admin">
+            <ul>
+                <li><a href="Incio.html">Inicio</a></li>
+                <li><a href="#">Reportes</a></li>
+                <li><a href="#">Productos</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="grid">
+            <div class="card">
+                <h3>Crear / Editar usuario</h3>
+                <form method="post" action="/usuarios/save">
+                    <input type="hidden" name="user_id" value="">
+                    <label for="uname">Nombre de usuario</label>
+                    <input id="uname" name="username" type="text" required>
+        
+                    <label for="role">Rol</label>
+                    <select id="role" name="role">
+                        <option value="vendedor">Vendedor</option>
+                        <option value="admin">Administrador</option>
+                        <option value="cajero">Cajero</option>
+                    </select>
+        
+                    <label for="email">Correo</label>
+                    <input id="email" name="email" type="text">
+        
+                    <div style="margin-top:20px;display:flex;gap:12px">
+                        <button class="btn" type="submit">Guardar</button>
+                        <button class="btn" type="reset">Limpiar</button>
+                    </div>
+                </form>
+            </div>
+        
+            <div>
+                <div class="card">
+                    <h3>Lista de usuarios</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th>Correo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>itzel</td>
+                                <td>Administrador</td>
+                                <td>itzel@gmail.com</td>
+                                <td class="actions">
+                                    <form style="display:inline" method="get" action="/usuarios/edit">
+                                        <input type="hidden" name="id" value="1">
+                                        <button class="btn" type="submit">Editar</button>
+                                    </form>
+                                    <form style="display:inline" method="post" action="/usuarios/delete">
+                                        <input type="hidden" name="id" value="1">
+                                        <button class="btn delete" type="submit">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card" style="margin-top:20px">
+                <h4>Guía rápida</h4>
+                <ul>
+                    <li><strong>Crear:</strong> POST a <code>/usuarios/save</code></li>
+                    <li><strong>Editar (cargar formulario):</strong> GET a <code>/usuarios/ID</code></li>
+                    <li><strong>Eliminar:</strong> POST a <code>/usuarios/delete</code></li>
+                </ul>
+            </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse - Senza</title>
+    <link rel="icon" type="image/png" href="Imagenes\Senza.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --color-primary: #D2B48C;
+            --color-secondary: #4B3832;
+            --color-background: #F5F5DC;
+            --color-light-bg: #FFF7EB;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-secondary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Estilos del Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            transition: background-color 0.4s ease;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .nav-menu ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--color-secondary);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: #3B2B24;
+        }
+
+        /* Estilos para el formulario */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-container {
+            background-color: var(--color-light-bg);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .register-container h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: var(--color-secondary);
+        }
+
+        .register-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--color-secondary);
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: transparent;
+            font-family: 'Poppins', sans-serif;
+            color: var(--color-secondary);
+        }
+
+        .register-form button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background-color: var(--color-secondary);
+            color: var(--color-light-bg);
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .register-form button:hover {
+            background-color: #382D26;
+        }
+
+        .link-text {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .link-text a {
+            color: var(--color-secondary);
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        /* Estilos para las ventanas emergentes (tooltips) */
+        .input-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            background-color: var(--color-secondary);
+            color: var(--color-light-bg);
+            border-radius: 5px;
+            font-size: 0.8em;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            text-align: left;
+        }
+
+        .tooltip.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>Senza</h1>
+        </div>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="Inicio.html">Inicio</a></li>
+                <li><a href="03-productos.html">Menú</a></li>
+                <li><a href="Login.html">Iniciar Sesión</a></li>
+                <li><a href="Inicio.html#historia">Nosotros</a></li>
+                <li><a href="Inicio.html#Contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="main-content">
+        <div class="register-container">
+            <h2>Crear Cuenta</h2>
+            <form class="register-form" action="#" method="POST">
+                <div class="input-container">
+                    <input type="text" name="name" placeholder="Nombre completo" required>
+                </div>
+                <div class="input-container">
+                    <input type="email" name="email" placeholder="Correo electrónico" required>
+                    <div class="tooltip">
+                        El correo debe tener un formato válido (ej. tu_correo@dominio.com).
+                    </div>
+                </div>
+                <div class="input-container">
+                    <input type="password" name="password" placeholder="Contraseña" required>
+                    <div class="tooltip">
+                        La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, un número y un carácter especial.
+                    </div>
+                </div>
+                <div class="input-container">
+                    <input type="password" name="confirm-password" placeholder="Confirmar contraseña" required>
+                </div>
+                <button type="submit">Registrarse</button>
+            </form>
+            <p class="link-text">¿Ya tienes una cuenta? <a href="Login.html">Inicia sesión aquí</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.register-form');
+            const emailInput = form.querySelector('input[name="email"]');
+            const passwordInput = form.querySelector('input[name="password"]');
+
+            // Seleccionamos los tooltips
+            const emailTooltip = document.querySelector('.input-container:nth-child(2) .tooltip');
+            const passwordTooltip = document.querySelector('.input-container:nth-child(3) .tooltip');
+
+            // Función para mostrar el tooltip
+            function showTooltip(tooltipElement) {
+                document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.classList.remove('active'));
+                tooltipElement.classList.add('active');
+            }
+
+            // Función para ocultar los tooltips
+            function hideTooltips() {
+                document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.classList.remove('active'));
+            }
+
+            // Eventos para mostrar/ocultar los tooltips
+            emailInput.addEventListener('focus', () => showTooltip(emailTooltip));
+            passwordInput.addEventListener('focus', () => showTooltip(passwordTooltip));
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.input-container')) {
+                    hideTooltips();
+                }
+            });
+
+            // Validación del formulario
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+                let errorMessage = '';
+
+                if (!emailInput.value.includes('@')) {
+                    isValid = false;
+                    errorMessage += 'El correo electrónico debe ser válido.\n';
+                }
+
+                const password = passwordInput.value;
+                const hasUpperCase = /[A-Z]/.test(password);
+                const hasNumber = /[0-9]/.test(password);
+                const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+
+                if (password.length < 8) {
+                    isValid = false;
+                    errorMessage += 'La contraseña debe tener al menos 8 caracteres.\n';
+                }
+                if (!hasUpperCase) {
+                    isValid = false;
+                    errorMessage += 'La contraseña debe contener al menos una letra mayúscula.\n';
+                }
+                if (!hasNumber) {
+                    isValid = false;
+                    errorMessage += 'La contraseña debe contener al menos un número.\n';
+                }
+                if (!hasSpecialChar) {
+                    isValid = false;
+                    errorMessage += 'La contraseña debe contener al menos un carácter especial.\n';
+                }
+
+                if (!isValid) {
+                    event.preventDefault();
+                    alert('Por favor, corrige los siguientes errores:\n\n' + errorMessage);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

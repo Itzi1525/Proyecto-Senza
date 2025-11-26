@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Repostería - Panel</title>
+  <style>
+    :root{--accent:#8b3e2f}
+    body{font-family: Arial, Helvetica, sans-serif;margin:0;background:#fff9f6}
+    header{background:linear-gradient(90deg,#fff 0%, rgba(139,62,47,0.05) 100%);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+    header h1{margin:0;color:var(--accent)}
+    .container{padding:22px}
+    .cards{display:flex;gap:14px;margin-bottom:18px}
+    .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.04);flex:1}
+    nav{display:flex;gap:12px}
+    nav a{padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--accent);border:1px solid rgba(139,62,47,0.08)}
+    .profile{display:flex;align-items:center;gap:12px}
+    .avatar{width:42px;height:42px;border-radius:50%;background:#fdecea;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Repostería "Senza" — Panel</h1>
+    <div style="display:flex;gap:16px;align-items:center">
+      <nav>
+        <a href="02-dashboard.html">Inicio</a>
+        <a href="03-productos.html">Productos</a>
+        <a href="04-usuarios-crud.html">Usuarios</a>
+      </nav>
+      <div class="profile">
+        <div class="avatar">I</div>
+        <div>
+          <div style="font-weight:700">Itzel</div>
+          <div style="font-size:12px;color:#6b6b6b">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="cards">
+      <div class="card">
+        <h3>Ventas hoy</h3>
+        <p style="margin:6px 0 0;color:#6b6b6b">$0.00 </p>
+      </div>
+      <div class="card">
+        <h3>Pedidos pendientes</h3>
+        <p style="margin:6px 0 0;color:#6b6b6b">0</p>
+      </div>
+      <div class="card">
+        <h3>Productos activos</h3>
+        <p style="margin:6px 0 0;color:#6b6b6b">12</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Atajos</h2>
+      <ul>
+        <li><a href="03-productos.html">Ver / seleccionar productos</a></li>
+        <li><a href="04-usuarios-crud.html">Administrar usuarios</a></li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Senza</title>
+    <link rel="icon" type="image/png" href="Imagenes\Senza.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --color-primary: #D2B48C;
+            --color-secondary: #4B3832;
+            --color-background: #F5F5DC;
+            --color-light-bg: #FFF7EB;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-secondary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Estilos del Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            transition: background-color 0.4s ease;
+        }
+        
+       
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .nav-menu ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--color-secondary);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-menu a:hover {
+            color: #3B2B24;
+        }
+
+        /* Estilos para el formulario */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background-color: var(--color-light-bg);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-container h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: var(--color-secondary);
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--color-secondary);
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: transparent;
+            font-family: 'Poppins', sans-serif;
+            color: var(--color-secondary);
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background-color: var(--color-secondary);
+            color: var(--color-light-bg);
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-form button:hover {
+            background-color: #382D26;
+        }
+        
+        .link-text {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .link-text a {
+            color: var(--color-secondary);
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <h1>Senza</h1>
+        </div>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="Inicio.html">Inicio</a></li>
+                <li><a href="03-productos.html">Menú</a></li>
+                <li><a href="Login.html">Iniciar Sesión</a></li>
+                <li><a href="Inicio.html#historia">Nosotros</a></li>
+                <li><a href="Inicio.html#Contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="main-content">
+        <div class="login-container">
+            <h2>Iniciar Sesión</h2>
+            <form class="login-form" action="#" method="POST">
+                <input type="email" name="email" placeholder="Correo electrónico" required>
+                <input type="password" name="password" placeholder="Contraseña" required>
+                <button type="submit">Ingresar</button>
+            </form>
+            <p class="link-text">¿No tienes una cuenta? <a href="RegUsu.html">Regístrate aquí</a></p>
+        </div>
+    </div>
+</body>
+</html>
