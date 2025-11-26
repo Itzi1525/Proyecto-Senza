@@ -142,17 +142,22 @@
         display: none;
     }
 
-    .product-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        background-color: var(--color-primary);
-        color: var(--color-secondary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2em;
-    }
+.product-image {
+    width: 100%;
+    height: 200px;
+    background-color: var(--color-primary); /* Mantiene el fondo café */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Evita que la imagen se salga del cuadro */
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* La imagen se ajusta al tamaño sin deformarse */
+}
+
 
     .product-content {
         padding: 20px;
@@ -284,7 +289,11 @@
             </div>
         </div>
         <div class="product-card" data-category="panaderia" data-name="baguette francesa">
-            <div class="product-image"><span>Baguette Francesa</span></div>
+<div class="product-image">
+    <img src="Imagenes/baguette.jpeg" alt="Baguette Francesa">
+</div>
+
+
             <div class="product-content">
                 <h3>Baguette Francesa</h3>
                 <p>Pan crujiente por fuera y suave por dentro.</p>
@@ -294,7 +303,10 @@
         </div>
 
         <div class="product-card" data-category="pasteles" data-name="tarta de bayas">
-            <div class="product-image"><span>Tarta de Bayas</span></div>
+      <div class="product-image">
+    <img src="Imagenes/tarta_bayas.jpeg" alt="Tarta de Bayas">
+</div>
+
             <div class="product-content">
                 <h3>Tarta de Bayas</h3>
                 <p>Base de mantequilla, crema y frutas mixtas.</p>
@@ -303,7 +315,10 @@
             </div>
         </div>
         <div class="product-card" data-category="pasteles" data-name="cheesecake">
-            <div class="product-image"><span>Cheesecake</span></div>
+<div class="product-image">
+    <img src="Imagenes/cheesecakefresa.jpeg" alt="Cheesecake de fresa">
+</div>
+
             <div class="product-content">
                 <h3>Cheesecake</h3>
                 <p>Clásico con cobertura de frutos rojos.</p>
@@ -313,7 +328,10 @@
         </div>
 
         <div class="product-card" data-category="galletas" data-name="galleta con chispas">
-            <div class="product-image"><span>Galleta con Chispas</span></div>
+       <div class="product-image">
+    <img src="Imagenes/galleta_chispas.jpeg" alt="Galleta con Chispas">
+</div>
+
             <div class="product-content">
                 <h3>Galleta con Chispas</h3>
                 <p>Galleta de mantequilla con chispas de chocolate belga.</p>
@@ -322,7 +340,9 @@
             </div>
         </div>
         <div class="product-card" data-category="galletas" data-name="galleta de avena">
-            <div class="product-image"><span>Galleta de Avena</span></div>
+    <div class="product-image">
+    <img src="Imagenes/galleta_avena.jpg" alt="Galleta de Avena">
+</div>
             <div class="product-content">
                 <h3>Galleta de Avena</h3>
                 <p>Suave y crujiente, con avena y un toque de canela.</p>
@@ -331,8 +351,13 @@
             </div>
         </div>
 
+
+        
         <div class="product-card" data-category="bebidas" data-name="café americano">
-            <div class="product-image"><span>Café Americano</span></div>
+        <div class="product-image">
+    <img src="Imagenes/cafe_americano.jpeg" alt="Café Americano">
+</div>
+
             <div class="product-content">
                 <h3>Café Americano</h3>
                 <p>Café de grano 100% mexicano recién molido.</p>
@@ -341,7 +366,10 @@
             </div>
         </div>
         <div class="product-card" data-category="bebidas" data-name="té chai latte">
-            <div class="product-image"><span>Té Chai Latte</span></div>
+        <div class="product-image">
+    <img src="Imagenes/te_chai_latte.jpeg" alt="Té Chai Latte">
+</div>
+
             <div class="product-content">
                 <h3>Té Chai Latte</h3>
                 <p>Mezcla de especias y leche espumosa.</p>
@@ -350,6 +378,29 @@
             </div>
         </div>
     </div>
+<div class="product-card" data-category="bebidas" data-name="matcha">
+    <div class="product-image">
+        <img src="Imagenes/matcha.jpeg" alt="Matcha">
+    </div>
+    <div class="product-content">
+        <h3>Matcha</h3>
+        <p>Descripción breve de la bebida.</p>
+        <p class="price">$00.00</p>
+        <button class="btn-add-to-cart">Agregar al Carrito</button>
+    </div>
+
+
+    <div class="product-card" data-category="bebidas" data-name="webos">
+    <div class="product-image">
+        <img src="Imagenes/matcha.jpg" alt="Matcha">
+    </div>
+    <div class="product-content">
+        <h3>Matcha</h3>
+        <p>Descripción breve de la bebida.</p>
+        <p class="price">$00.00</p>
+        <button class="btn-add-to-cart">Agregar al Carrito</button>
+    </div>
+
 </main>
 
 <div id="accountModal" class="modal" style="display: none;">
