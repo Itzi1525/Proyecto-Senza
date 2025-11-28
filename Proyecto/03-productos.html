@@ -951,46 +951,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* =======================
-       ✅ AGREGAR AL CARRITO
-       (TU CÓDIGO)
-    ======================= */
-
-    document.addEventListener('DOMContentLoaded', () => {
-
-  document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+/*Agregar al carrito*/
+document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
     btn.addEventListener('click', () => {
+        const card = btn.closest('.product-card');
 
-      const card = btn.closest('.product-card');
+        const name = card.dataset.name;
+        
+        // --- CAMBIO AQUÍ ---
+        // 1. Buscamos el elemento <p> que tiene la clase .price inside de la tarjeta
+        const priceText = card.querySelector('.price').textContent; 
+        // 2. Le quitamos el signo de "$" y lo convertimos a número
+        const price = Number(priceText.replace('$', '')); 
+        // -------------------
 
-      // ✅ Nombre del producto
-      const name = card.dataset.name;
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-      // ✅ Precio tomado del <p class="price">
-      const priceText = card.querySelector('.price').textContent;
-      const price = Number(priceText.replace('$', ''));
+        let prod = cart.find(p => p.name === name);
 
-      let cart = JSON.parse(localStorage.getItem('cart')) || [];
-      let prod = cart.find(p => p.name === name);
+        if (prod) {
+            prod.qty++;
+        } else {
+            cart.push({
+                name: name,
+                price: price,
+                qty: 1
+            });
+        }
 
-      if (prod) {
-        prod.qty++;
-      } else {
-        cart.push({
-          name: name,
-          price: price,
-          qty: 1
-        });
-      }
-
-      localStorage.setItem('cart', JSON.stringify(cart));
-
-      alert(`Agregado al carrito ✅\n${name} - $${price}`);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        alert("Agregado al carrito ✅");
     });
-  
+    });
 
 });
-
 </script>
 </body>
 </html>
