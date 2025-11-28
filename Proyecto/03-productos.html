@@ -260,7 +260,7 @@
             <li><a href="Inicio.html">Inicio</a></li>
             <li><a href="03-productos.html">Menú</a></li>
             <li><a href="#" id="accountLink">Cuenta</a></li>
-            <li><a href="#">Carrito</a></li>
+            <li><a href="Carrito.html">Carrito</a></li>
         </ul>
     </nav>
 </header>
@@ -894,58 +894,103 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const productCards = document.querySelectorAll('.product-card');
-        const searchInput = document.getElementById('searchInput');
-        const accountLink = document.getElementById('accountLink');
-        const accountModal = document.getElementById('accountModal');
+document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const productCards = document.querySelectorAll('.product-card');
+    const searchInput = document.getElementById('searchInput');
+    const accountLink = document.getElementById('accountLink');
+    const accountModal = document.getElementById('accountModal');
 
-        // Funcionalidad para filtrar por categoría
-        filterButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
+    /* =======================
+       FILTRO POR CATEGORÍA
+    ======================= */
+    filterButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
 
-                const category = button.dataset.category;
-                productCards.forEach(card => {
-                    const productCategory = card.dataset.category;
-                    if (category === 'all' || productCategory === category) {
-                        card.classList.remove('hidden');
-                    } else {
-                        card.classList.add('hidden');
-                    }
-                });
-            });
-        });
-        
-        // Funcionalidad para la barra de búsqueda
-        searchInput.addEventListener('keyup', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
+            const category = button.dataset.category;
             productCards.forEach(card => {
-                const productName = card.dataset.name.toLowerCase();
-                if (productName.includes(searchTerm)) {
+                const productCategory = card.dataset.category;
+                if (category === 'all' || productCategory === category) {
                     card.classList.remove('hidden');
                 } else {
                     card.classList.add('hidden');
                 }
             });
         });
-        
-        // Funcionalidad para la ventana modal
-        accountLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            accountModal.style.display = 'flex';
-        });
-        
-        // Ocultar modal al hacer clic fuera
-        window.addEventListener('click', (e) => {
-            if (e.target === accountModal) {
-                accountModal.style.display = 'none';
+    });
+
+    /* =======================
+       BÚSQUEDA
+    ======================= */
+    searchInput.addEventListener('keyup', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        productCards.forEach(card => {
+            const productName = card.dataset.name.toLowerCase();
+            if (productName.includes(searchTerm)) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
             }
         });
     });
+
+    /* =======================
+       MODAL CUENTA
+    ======================= */
+    accountLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        accountModal.style.display = 'flex';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === accountModal) {
+            accountModal.style.display = 'none';
+        }
+    });
+
+    /* =======================
+       ✅ AGREGAR AL CARRITO
+       (TU CÓDIGO)
+    ======================= */
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+  document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+    btn.addEventListener('click', () => {
+
+      const card = btn.closest('.product-card');
+
+      // ✅ Nombre del producto
+      const name = card.dataset.name;
+
+      // ✅ Precio tomado del <p class="price">
+      const priceText = card.querySelector('.price').textContent;
+      const price = Number(priceText.replace('$', ''));
+
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      let prod = cart.find(p => p.name === name);
+
+      if (prod) {
+        prod.qty++;
+      } else {
+        cart.push({
+          name: name,
+          price: price,
+          qty: 1
+        });
+      }
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+
+      alert(`Agregado al carrito ✅\n${name} - $${price}`);
+    });
+  
+
+});
+
 </script>
 </body>
 </html>
