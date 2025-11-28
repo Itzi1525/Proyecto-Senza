@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Senza - Repostería artesanal</title>
-    <link rel="icon" type="image/png" href="Imagenes\Senza.png">
+    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
@@ -34,6 +34,17 @@
             background-color: var(--color-card-bg);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Espacio entre imagen y texto */
+        }
+
+        .logo img {
+            height: 50px; /* Tamaño del logo */
+            width: auto;
         }
 
         .logo h1 {
@@ -91,7 +102,9 @@
             justify-content: center;
             min-height: 80vh;
             text-align: center;
-            background-image: url('URL_DE_TU_IMAGEN_DE_FONDO.jpg');
+            /* RECUERDA CAMBIAR ESTA URL POR TU IMAGEN DE PORTADA */
+            background-image: url('Imagenes/portada.jpg'); 
+            background-color: var(--color-secondary); /* Color de respaldo si no hay imagen */
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -119,6 +132,7 @@
             padding: 20px;
             background-color: rgba(75, 56, 50, 0.6);
             border-radius: 10px;
+            backdrop-filter: blur(5px); /* Efecto borroso elegante */
         }
 
         .hero-content h1 {
@@ -168,6 +182,11 @@
             overflow: hidden;
             text-align: center;
             padding-bottom: 20px;
+            transition: transform 0.3s ease; /* Animación al pasar mouse */
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px); /* Se levanta un poco */
         }
 
         .carousel-btn {
@@ -180,37 +199,44 @@
             padding: 10px;
             cursor: pointer;
             z-index: 10;
+            border-radius: 50%; /* Botones redondos */
+            width: 40px;
+            height: 40px;
         }
 
-        .carousel-btn.prev {
-            left: 10px;
-        }
+        .carousel-btn.prev { left: 10px; }
+        .carousel-btn.next { right: 10px; }
 
-        .carousel-btn.next {
-            right: 10px;
-        }
-
+        /* --- AQUÍ ESTÁ EL ARREGLO DE LAS IMÁGENES --- */
         .product-image {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
+            height: 250px; /* Hice el cuadro un poco más alto */
             background-color: var(--color-primary);
-            color: var(--color-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            margin-bottom: 10px;
+            overflow: hidden; /* Para que la imagen no se salga al hacer zoom */
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* CLAVE: Esto recorta la imagen para llenar el cuadro sin deformar */
+            transition: transform 0.5s ease; /* Suavidad para el zoom */
+        }
+
+        /* Efecto Zoom en la imagen al pasar el mouse */
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
         }
 
         .product-content h3 {
-            margin: 0;
+            margin: 15px 0 5px;
             font-size: 1.2em;
+            padding: 0 10px;
         }
 
         .product-content .price {
             font-weight: 700;
-            font-size: 1.1em;
+            font-size: 1.2em;
+            color: var(--color-primary);
         }
 
         /* Sección de Nuestra Historia */
@@ -229,6 +255,8 @@
 
         .about-image img {
             width: 100%;
+            height: 350px; /* Altura fija para uniformidad */
+            object-fit: cover; /* Recorte perfecto */
             border-radius: 10px;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
         }
@@ -283,21 +311,22 @@
             color: var(--color-primary);
         }
 
+        /* Modal */
         .modal {
-            display: none; /* Asegura que esté oculto por defecto */
+            display: none; 
             position: fixed;
-            z-index: 1000; /* Un z-index alto para que aparezca por encima de todo */
+            z-index: 1000; 
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente oscuro */
+            background-color: rgba(0, 0, 0, 0.6); 
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background-color: var(--color-card-bg); /* Fondo blanco puro */
+            background-color: var(--color-card-bg); 
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -306,39 +335,18 @@
             text-align: center;
             position: relative;
         }
-        
-       
 
-            .modal-content h2 {
-                font-size: 2em;
-                margin-bottom: 20px;
-            }
-
-            .modal-content p {
-                font-size: 0.9em;
-                margin-bottom: 10px;
-            }
-
-            .modal-content a {
-                text-decoration: none;
-                color: var(--color-secondary);
-                font-weight: 600;
-            }
-
-            .modal-content a:hover {
-                text-decoration: underline;
-            }
-
-            .modal-icon {
-                font-size: 3em;
-                margin-bottom: 15px;
-                color: var(--color-secondary);
-            }
+        .modal-content h2 { font-size: 2em; margin-bottom: 20px; }
+        .modal-content p { font-size: 0.9em; margin-bottom: 10px; }
+        .modal-content a { text-decoration: none; color: var(--color-secondary); font-weight: 600; }
+        .modal-content a:hover { text-decoration: underline; }
+        .modal-icon { font-size: 3em; margin-bottom: 15px; color: var(--color-secondary); }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">
+            <img src="Imagenes/Senza.png" alt="Senza Logo">
             <h1>Senza</h1>
         </div>
         <div class="search-bar">
@@ -349,7 +357,7 @@
                 <li><a href="Inicio.html">Inicio</a></li>
                 <li><a href="03-productos.html">Menú</a></li>
                 <li><a href="#" id="accountLink">Cuenta</a></li>
-                <li><a href="#">Carrito</a></li>
+                <li><a href="Carrito.html">Carrito</a></li>
             </ul>
         </nav>
     </header>
@@ -367,41 +375,67 @@
             <h2 class="section-title">Productos Más Vendidos</h2>
             <div class="carousel-container">
                 <div class="carousel">
-                    <div class="product-card" data-name="croissant de almendra">
-                        <div class="product-image"><span>Croissant</span></div>
+                    
+                    <div class="product-card" data-name="pastel de fresas con crema">
+                        <div class="product-image">
+                            <img src="Imagenes/pastel_fresa.jpeg" alt="Pastel de fresas con crema">
+                        </div>
                         <div class="product-content">
-                            <h3>Croissant de Almendra</h3>
-                            <p class="price">$45.00</p>
+                            <h3>Pastel de Fresa con Crema</h3>
+                            <p class="price">$480.00</p>
                         </div>
                     </div>
+
                     <div class="product-card" data-name="tarta de bayas">
-                        <div class="product-image"><span>Tarta de Bayas</span></div>
+                        <div class="product-image">
+                            <img src="Imagenes/tarta_bayas.jpeg" alt="Tarta de Bayas">
+                        </div>
                         <div class="product-content">
                             <h3>Tarta de Bayas</h3>
                             <p class="price">$450.00</p>
                         </div>
                     </div>
+
                     <div class="product-card" data-name="cheesecake">
-                        <div class="product-image"><span>Cheesecake</span></div>
+                        <div class="product-image">
+                            <img src="Imagenes/cheesecakefresa.jpeg" alt="Cheesecake de fresa">
+                        </div>
                         <div class="product-content">
-                            <h3>Cheesecake</h3>
-                            <p class="price">$55.00</p>
+                            <h3>Cheesecake de Fresa</h3>
+                            <p class="price">$100.00</p>
                         </div>
                     </div>
+
                     <div class="product-card" data-name="pan de masa madre">
-                        <div class="product-image"><span>Pan de Masa Madre</span></div>
+                        <div class="product-image">
+                            <img src="Imagenes/pan_masa_madre.jpg" alt="Pan de Masa Madre">
+                        </div>
                         <div class="product-content">
                             <h3>Pan de Masa Madre</h3>
-                            <p class="price">$80.00</p>
+                            <p class="price">$30.00</p>
                         </div>
                     </div>
-                    <div class="product-card" data-name="galleta de avena">
-                        <div class="product-image"><span>Galleta de Avena</span></div>
+
+                    <div class="product-card" data-name="galleta con chispas">
+                        <div class="product-image">
+                            <img src="Imagenes/galleta_chispas.jpeg" alt="Galleta con chispas">
+                        </div>
                         <div class="product-content">
-                            <h3>Galleta de Avena</h3>
+                            <h3>Galleta con Chispas</h3>
                             <p class="price">$20.00</p>
                         </div>
                     </div>
+
+                    <div class="product-card" data-name="tiramisú de matcha">
+                        <div class="product-image">
+                            <img src="Imagenes/tiramisu_matcha.jpeg" alt="Tiramisú de matcha">
+                        </div>
+                        <div class="product-content">
+                            <h3>Tiramisú de Matcha</h3>
+                            <p class="price">$150.00</p>
+                        </div>
+                    </div>
+
                 </div>
                 <button class="carousel-btn prev">&#10094;</button>
                 <button class="carousel-btn next">&#10095;</button>
@@ -412,7 +446,7 @@
             <h2 class="section-title">Nuestra Historia</h2>
             <div class="about-section">
                 <div class="about-image">
-                    <img src="URL_IMAGEN_SOBRE_NOSOTROS.jpg" alt="Historia de Senza">
+                    <img src="Imagenes/Senza.png" alt="Historia de Senza">
                 </div>
                 <div class="about-content">
                     <h3>La pasión por la repostería</h3>
@@ -425,7 +459,7 @@
 
     <footer>
         <div class="footer-content">
-            <div class="footer-section"id="Contacto">
+            <div class="footer-section" id="Contacto">
                 <h4>Contacto</h4>
                 <p>Dirección: Salaverry 1075, CDMX, Gustavo Madero</p>
                 <p>Teléfono: +52 56 4760 5376</p>
@@ -434,9 +468,8 @@
             <div class="footer-section">
                 <h4>Síguenos</h4>
                 <div class="social-icons">
-                    
                     <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
                 </div>
             </div>
         </div>
@@ -456,20 +489,23 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // CARRUSEL
             const carousel = document.querySelector('.carousel');
             const prevBtn = document.querySelector('.carousel-btn.prev');
             const nextBtn = document.querySelector('.carousel-btn.next');
             const productCards = document.querySelectorAll('.product-card');
 
             let currentIndex = 0;
-            const cardWidth = productCards[0].offsetWidth + 30; // Ancho de la tarjeta + margin
+            // Calculamos ancho tarjeta + margen (30px de margin horizontal total)
+            const cardWidth = productCards[0].offsetWidth + 30; 
 
             function updateCarousel() {
                 carousel.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
             }
 
             nextBtn.addEventListener('click', () => {
-                if (currentIndex < productCards.length - 1) {
+                // Ajuste para que no se pase del final
+                if (currentIndex < productCards.length - 3) { // Muestra 3 a la vez aprox
                     currentIndex++;
                 } else {
                     currentIndex = 0;
@@ -481,12 +517,12 @@
                 if (currentIndex > 0) {
                     currentIndex--;
                 } else {
-                    currentIndex = productCards.length - 1;
+                    currentIndex = productCards.length - 3;
                 }
                 updateCarousel();
             });
             
-            // Funcionalidad para la barra de búsqueda
+            // BUSCADOR
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('keyup', (e) => {
                 const searchTerm = e.target.value.toLowerCase();
@@ -500,7 +536,7 @@
                 });
             });
 
-            // Funcionalidad para la ventana modal
+            // MODAL
             const accountLink = document.getElementById('accountLink');
             const accountModal = document.getElementById('accountModal');
             
@@ -513,6 +549,27 @@
                 if (e.target === accountModal) {
                     accountModal.style.display = 'none';
                 }
+            });
+
+            // REDIRECCIÓN A DETALLE (Igual que en productos)
+            document.querySelectorAll('.product-image').forEach(div => {
+                div.style.cursor = "pointer"; 
+                div.addEventListener('click', () => {
+                    const card = div.closest('.product-card');
+
+                    const nombre = card.querySelector('h3').innerText;
+                    const precioTexto = card.querySelector('.price').innerText;
+                    const imagenSrc = card.querySelector('img').src;
+                    
+                    // Descripción genérica ya que en inicio no tenemos la descripción larga
+                    const descripcion = "Delicioso producto artesanal elaborado con los mejores ingredientes.";
+
+                    const precio = precioTexto.replace('$', '').trim();
+
+                    const url = `DetalleProducto.html?nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&desc=${encodeURIComponent(descripcion)}&img=${encodeURIComponent(imagenSrc)}`;
+
+                    window.location.href = url;
+                });
             });
         });
     </script>
