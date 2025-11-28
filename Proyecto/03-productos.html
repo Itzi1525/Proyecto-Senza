@@ -895,6 +895,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
     const filterButtons = document.querySelectorAll('.filter-btn');
     const productCards = document.querySelectorAll('.product-card');
     const searchInput = document.getElementById('searchInput');
@@ -905,7 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
        FILTRO POR CATEGORÍA
     ======================= */
     filterButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
+        button.addEventListener('click', e => {
             e.preventDefault();
             filterButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
@@ -913,11 +914,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const category = button.dataset.category;
             productCards.forEach(card => {
                 const productCategory = card.dataset.category;
-                if (category === 'all' || productCategory === category) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
+                card.classList.toggle(
+                    'hidden',
+                    !(category === 'all' || productCategory === category)
+                );
             });
         });
     });
@@ -925,66 +925,81 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =======================
        BÚSQUEDA
     ======================= */
-    searchInput.addEventListener('keyup', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        productCards.forEach(card => {
-            const productName = card.dataset.name.toLowerCase();
-            if (productName.includes(searchTerm)) {
-                card.classList.remove('hidden');
-            } else {
-                card.classList.add('hidden');
-            }
+    if (searchInput) {
+        searchInput.addEventListener('keyup', e => {
+            const searchTerm = e.target.value.toLowerCase();
+            productCards.forEach(card => {
+                const productName = card.dataset.name.toLowerCase();
+                card.classList.toggle('hidden', !productName.includes(searchTerm));
+            });
         });
-    });
+    }
 
     /* =======================
        MODAL CUENTA
     ======================= */
-    accountLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        accountModal.style.display = 'flex';
+    if (accountLink && accountModal) {
+        accountLink.addEventListener('click', e => {
+            e.preventDefault();
+            accountModal.style.display = 'flex';
+        });
+
+        window.addEventListener('click', e => {
+            if (e.target === accountModal) {
+                accountModal.style.display = 'none';
+            }
+        });
+    }
+
+    /* =======================
+       AGREGAR AL CARRITO
+    ======================= */
+    document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const card = btn.closest('.product-card');
+
+            const name = card.dataset.name;
+            const priceText = card.querySelector('.price').textContent;
+            const price = Number(priceText.replace('$',''));
+
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let prod = cart.find(p => p.name === name);
+
+            if (prod) {
+                prod.qty++;
+            } else {
+                cart.push({ name, price, qty: 1 });
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert("Agregado al carrito ✅");
+        });
     });
 
-    window.addEventListener('click', (e) => {
-        if (e.target === accountModal) {
-            accountModal.style.display = 'none';
-        }
-    });
+    /* =======================
+       IR A DETALLE DE PRODUCTO
+    ======================= */
+    document.querySelectorAll('.product-image').forEach(div => {
+        div.style.cursor = 'pointer';
+        div.addEventListener('click', () => {
+            const card = div.closest('.product-card');
 
-/*Agregar al carrito*/
-document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const card = btn.closest('.product-card');
+            const nombre = card.querySelector('h3').innerText;
+            const precio = card.querySelector('.price').innerText.replace('$','').trim();
+            const descripcion = card.querySelector('p').innerText;
+            const imagenSrc = card.querySelector('img').src;
 
-        const name = card.dataset.name;
-        
-        // --- CAMBIO AQUÍ ---
-        // 1. Buscamos el elemento <p> que tiene la clase .price inside de la tarjeta
-        const priceText = card.querySelector('.price').textContent; 
-        // 2. Le quitamos el signo de "$" y lo convertimos a número
-        const price = Number(priceText.replace('$', '')); 
-        // -------------------
+            const url = `DetalleProducto.html?nombre=${encodeURIComponent(nombre)}
+            &precio=${encodeURIComponent(precio)}
+            &desc=${encodeURIComponent(descripcion)}
+            &img=${encodeURIComponent(imagenSrc)}`;
 
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-        let prod = cart.find(p => p.name === name);
-
-        if (prod) {
-            prod.qty++;
-        } else {
-            cart.push({
-                name: name,
-                price: price,
-                qty: 1
-            });
-        }
-
-        localStorage.setItem('cart', JSON.stringify(cart));
-        alert("Agregado al carrito ✅");
-    });
+            window.location.href = url;
+        });
     });
 
 });
 </script>
+
 </body>
 </html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Producto | Senza</title>
+    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        
+        :root {
+            --color-primary: #D2B48C; /* Café claro */
+            --color-secondary: #4B3832; /* Café oscuro */
+            --color-background: #F8F8F8; /* Blanco muy sutil */
+            --color-card-bg: #FFFFFF; /* Blanco puro */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-secondary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Header (Igual al inicio) */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: var(--color-card-bg);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo h1 {
+            font-size: 1.5em;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .main-nav a {
+            text-decoration: none;
+            color: var(--color-secondary);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .main-nav a:hover {
+            color: var(--color-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* --- ESTILOS ESPECÍFICOS DE DETALLE --- */
+        
+        /* Layout principal */
+        .detail-wrapper {
+            display: flex;
+            gap: 50px;
+            flex-wrap: wrap;
+            background-color: var(--color-card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Imagen */
+        .product-img-container {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-background); /* Fondo sutil detrás de la imagen */
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .product-img-container img {
+            width: 100%;
+            max-width: 450px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Información */
+        .product-info {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .product-info h2 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: var(--color-secondary);
+            text-transform: capitalize;
+        }
+
+        .price {
+            font-size: 2em;
+            color: var(--color-primary); /* Tu color café claro */
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stars-display {
+            color: #FFD700; /* Oro para estrellas */
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .description {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Botón estilo Senza */
+        .btn-add {
+            background-color: var(--color-secondary);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: fit-content;
+        }
+
+        .btn-add:hover {
+            background-color: #382D26; /* Un poco más oscuro */
+        }
+
+        /* --- SECCIÓN DE RESEÑAS --- */
+        .reviews-section {
+            margin-top: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .reviews-section h3 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: var(--color-secondary);
+        }
+        
+        /* Formulario de reseña */
+        .review-form {
+            background: var(--color-card-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+            border: 1px solid #e0caa1;
+        }
+
+        .review-form h4 {
+            margin-top: 0;
+            color: var(--color-secondary);
+        }
+        
+        .star-rating {
+            font-size: 2em;
+            color: #ddd;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .star-rating span:hover,
+        .star-rating span.active {
+            color: #FFD700;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--color-primary); /* Borde café claro */
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            resize: none;
+            box-sizing: border-box;
+            background-color: var(--color-background);
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-secondary);
+        }
+
+        .btn-submit-review {
+            background-color: var(--color-primary);
+            color: var(--color-secondary);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit-review:hover {
+            background-color: #c0a075;
+            color: white;
+        }
+
+        /* Lista de reseñas */
+        .review-card {
+            background: var(--color-card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--color-primary); /* Detalle visual */
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--color-secondary);
+        }
+
+        .review-stars { color: #FFD700; }
+        .review-date { font-size: 0.85em; color: #999; margin-bottom: 10px; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <h1>Senza</h1>
+    </div>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="Inicio.html">Inicio</a></li>
+            <li><a href="03-productos.html">Menú</a></li>
+            <li><a href="Carrito.html">Carrito</a></li>
+            <li><a href="#">Cuenta</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    
+    <div class="detail-wrapper">
+        <div class="product-img-container">
+            <img id="imgProd" src="" alt="Cargando imagen...">
+        </div>
+        
+        <div class="product-info">
+            <h2 id="nameProd">Cargando...</h2>
+            <div class="stars-display">★★★★☆ (4.5)</div>
+            <p class="price" id="priceProd">--</p>
+            <p class="description" id="descProd">...</p>
+            
+            <button class="btn-add" id="btnAdd">Agregar al Carrito</button>
+        </div>
+    </div>
+
+    <div class="reviews-section">
+        <h3>Opiniones de nuestros clientes</h3>
+
+        <div class="review-form">
+            <h4>Deja tu reseña</h4>
+            <div class="star-rating" id="starRating">
+                <span data-value="1">★</span>
+                <span data-value="2">★</span>
+                <span data-value="3">★</span>
+                <span data-value="4">★</span>
+                <span data-value="5">★</span>
+            </div>
+            <textarea id="reviewComment" placeholder="¿Qué te pareció este postre? Cuéntanos tu experiencia..."></textarea>
+            <button class="btn-submit-review" id="btnSubmitReview">Publicar Reseña</button>
+        </div>
+
+        <div id="reviewsList" class="reviews-list">
+            </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- 1. CARGAR DATOS DEL PRODUCTO ---
+        const params = new URLSearchParams(window.location.search);
+        const nombre = params.get('nombre');
+        const precio = params.get('precio');
+        const desc = params.get('desc');
+        const img = params.get('img');
+
+        if (nombre) {
+            document.getElementById('nameProd').textContent = nombre;
+            document.getElementById('priceProd').textContent = "$" + precio;
+            document.getElementById('descProd').textContent = desc || "Un sabor inolvidable elaborado artesanalmente.";
+            document.getElementById('imgProd').src = img;
+            
+            // Botón Agregar al Carrito
+            document.getElementById('btnAdd').addEventListener('click', () => {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                let existing = cart.find(p => p.name === nombre);
+                if(existing) { existing.qty++; } 
+                else { cart.push({ name: nombre, price: Number(precio), qty: 1 }); }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                alert("¡" + nombre + " agregado al carrito! 🛒");
+            });
+
+            // Cargar reseñas existentes
+            loadReviews(nombre);
+        } else {
+             document.querySelector('.detail-wrapper').innerHTML = "<h2>Selecciona un producto del menú.</h2>";
+        }
+
+        // --- 2. LÓGICA DE ESTRELLAS (Rating) ---
+        let selectedRating = 0;
+        const stars = document.querySelectorAll('#starRating span');
+
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                selectedRating = this.getAttribute('data-value');
+                updateStars(selectedRating);
+            });
+        });
+
+        function updateStars(rating) {
+            stars.forEach(star => {
+                if(star.getAttribute('data-value') <= rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // --- 3. PUBLICAR RESEÑA ---
+        document.getElementById('btnSubmitReview').addEventListener('click', () => {
+            const comment = document.getElementById('reviewComment').value;
+
+            if (selectedRating === 0) {
+                alert("Por favor selecciona las estrellas.");
+                return;
+            }
+            if (comment.trim() === "") {
+                alert("Por favor escribe un comentario.");
+                return;
+            }
+
+            // Objeto compatible con tu BD SQL
+            const nuevaResena = {
+                id_producto: nombre,
+                id_cliente: 1, 
+                calificacion: selectedRating,
+                comentario: comment,
+                fecha: new Date().toLocaleDateString()
+            };
+
+            let allReviews = JSON.parse(localStorage.getItem('reviews_db')) || [];
+            allReviews.push(nuevaResena);
+            localStorage.setItem('reviews_db', JSON.stringify(allReviews));
+
+            document.getElementById('reviewComment').value = "";
+            selectedRating = 0;
+            updateStars(0);
+            loadReviews(nombre);
+            alert("¡Gracias por tu opinión!");
+        });
+
+        // --- 4. MOSTRAR RESEÑAS ---
+        function loadReviews(productName) {
+            const reviewsContainer = document.getElementById('reviewsList');
+            reviewsContainer.innerHTML = ""; 
+            
+            let allReviews = JSON.parse(localStorage.getItem('reviews_db')) || [];
+            const productReviews = allReviews.filter(r => r.id_producto === productName);
+
+            if (productReviews.length === 0) {
+                reviewsContainer.innerHTML = "<p style='color:#888; text-align:center; font-style:italic;'>Aún no hay reseñas. ¡Sé el primero en opinar!</p>";
+                return;
+            }
+
+            productReviews.forEach(r => {
+                let starsHTML = "";
+                for(let i=0; i<5; i++) {
+                    starsHTML += i < r.calificacion ? "★" : "☆";
+                }
+
+                const card = document.createElement('div');
+                card.className = "review-card";
+                card.innerHTML = `
+                    <div class="review-header">
+                        <span>Cliente Verificado</span>
+                        <span class="review-stars">${starsHTML}</span>
+                    </div>
+                    <div class="review-date">${r.fecha}</div>
+                    <p>${r.comentario}</p>
+                `;
+                reviewsContainer.appendChild(card);
+            });
+        }
+    });
+</script>
+</body>
+</html>
