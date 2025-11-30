@@ -1,0 +1,27 @@
+{
+  "name": "proyecto-senza",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Itzi1525/Proyecto-Senza.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Itzi1525/Proyecto-Senza/issues"
+  },
+  "homepage": "https://github.com/Itzi1525/Proyecto-Senza#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "msnodesqlv8": "^5.1.1",
+    "mssql": "^12.1.1"
+  }
+}
