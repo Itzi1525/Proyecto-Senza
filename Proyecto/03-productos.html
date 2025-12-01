@@ -935,6 +935,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
     /* =======================
        MODAL CUENTA
     ======================= */
@@ -998,6 +999,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+});
+</script>
+<script src="buscador.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('searchInput');
+  if (!searchInput) return;
+
+  // Leer parámetro "search" de la URL
+  const params = new URLSearchParams(window.location.search);
+  const term = params.get('search');
+  if(term) {
+    searchInput.value = term;
+    // Ejecutar el filtrado automáticamente
+    searchInput.dispatchEvent(new Event('input'));
+  }
 });
 </script>
 

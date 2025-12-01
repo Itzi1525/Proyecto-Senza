@@ -111,4 +111,3 @@ CREATE TABLE CarritoItem(
         ON DELETE CASCADE,
     FOREIGN KEY (id_producto) REFERENCES Producto(id_producto)
 );
-
