@@ -355,10 +355,17 @@
     </style>
 </head>
 <body>
+<<<<<<< HEAD
  <header>
         <div style="display: flex; align-items: center; gap: 10px;">
         <div class="user-icon" onclick="location.href='Cuenta.html'">
             <i class="fas fa-user"></i>
+=======
+    <header>
+        <div class="logo">
+            <img src="Imagenes/Senza.png" alt="Senza Logo">
+            <h1>Senza</h1>
+>>>>>>> c79cdbfe94d6a67aa81faf7e98ae7f8b0dd6e1b1
         </div>
     <div class="logo">
         <img src="Imagenes/Senza.png" alt="Senza Logo">
@@ -367,6 +374,7 @@
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Buscar productos...">
         </div>
+<<<<<<< HEAD
     </div>
 
     <nav class="main-nav">
@@ -378,6 +386,17 @@
         </ul>
     </nav>
 </header>
+=======
+        <nav class="main-nav">
+            <ul>
+                <li><a href="Inicio.html">Inicio</a></li>
+                <li><a href="03-productos.html">Menú</a></li>
+                <li><a href="#" id="accountLink">Cuenta</a></li>
+                <li><a href="Carrito.html">Carrito</a></li>
+            </ul>
+        </nav>
+    </header>
+>>>>>>> c79cdbfe94d6a67aa81faf7e98ae7f8b0dd6e1b1
 
     <main>
         <section class="hero-section">
@@ -540,6 +559,7 @@
             });
             
             // BUSCADOR
+<<<<<<< HEAD
             // const searchInput = document.getElementById('searchInput');
             // searchInput.addEventListener('keyup', (e) => {
             //     const searchTerm = e.target.value.toLowerCase();
@@ -552,6 +572,20 @@
             //         }
             //     });
             // });
+=======
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keyup', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                productCards.forEach(card => {
+                    const productName = card.dataset.name.toLowerCase();
+                    if (productName.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+>>>>>>> c79cdbfe94d6a67aa81faf7e98ae7f8b0dd6e1b1
 
             // MODAL
             const accountLink = document.getElementById('accountLink');
