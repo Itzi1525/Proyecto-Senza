@@ -355,27 +355,16 @@
     </style>
 </head>
 <body>
-<<<<<<< HEAD
  <header>
-        <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="user-icon" onclick="location.href='Cuenta.html'">
-            <i class="fas fa-user"></i>
-=======
-    <header>
+       
         <div class="logo">
             <img src="Imagenes/Senza.png" alt="Senza Logo">
             <h1>Senza</h1>
->>>>>>> c79cdbfe94d6a67aa81faf7e98ae7f8b0dd6e1b1
+
         </div>
-    <div class="logo">
-        <img src="Imagenes/Senza.png" alt="Senza Logo">
-        <h1>Senza</h1>
-    </div>
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Buscar productos...">
         </div>
-<<<<<<< HEAD
-    </div>
 
     <nav class="main-nav">
         <ul>
@@ -386,17 +375,6 @@
         </ul>
     </nav>
 </header>
-=======
-        <nav class="main-nav">
-            <ul>
-                <li><a href="Inicio.html">Inicio</a></li>
-                <li><a href="03-productos.html">Menú</a></li>
-                <li><a href="#" id="accountLink">Cuenta</a></li>
-                <li><a href="Carrito.html">Carrito</a></li>
-            </ul>
-        </nav>
-    </header>
->>>>>>> c79cdbfe94d6a67aa81faf7e98ae7f8b0dd6e1b1
 
     <main>
         <section class="hero-section">
@@ -532,7 +510,7 @@
             const productCards = document.querySelectorAll('.product-card');
 
             let currentIndex = 0;
-            // Calculamos ancho tarjeta + margen (30px de margin horizontal total)
+    
             const cardWidth = productCards[0].offsetWidth + 30; 
 
             function updateCarousel() {
@@ -540,7 +518,7 @@
             }
 
             nextBtn.addEventListener('click', () => {
-                // Ajuste para que no se pase del final
+    
                 if (currentIndex < productCards.length - 3) { // Muestra 3 a la vez aprox
                     currentIndex++;
                 } else {
@@ -558,34 +536,7 @@
                 updateCarousel();
             });
             
-            // BUSCADOR
-<<<<<<< HEAD
-            // const searchInput = document.getElementById('searchInput');
-            // searchInput.addEventListener('keyup', (e) => {
-            //     const searchTerm = e.target.value.toLowerCase();
-            //     productCards.forEach(card => {
-            //         const productName = card.dataset.name.toLowerCase();
-            //         if (productName.includes(searchTerm)) {
-            //             card.style.display = 'block';
-            //         } else {
-            //             card.style.display = 'none';
-            //         }
-            //     });
-            // });
-=======
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('keyup', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                productCards.forEach(card => {
-                    const productName = card.dataset.name.toLowerCase();
-                    if (productName.includes(searchTerm)) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
->>>>>>> c79cdbfe94d6a67aa81faf7e98ae7f8b0dd6e1b1
+    
 
             // MODAL
             const accountLink = document.getElementById('accountLink');
