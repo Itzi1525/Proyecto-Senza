@@ -18,6 +18,16 @@
     .avatar{width:42px;height:42px;border-radius:50%;background:#fdecea;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700}
   </style>
 </head>
+<script>
+    // PROTECCIÓN DE SEGURIDAD
+    const rolUsuario = localStorage.getItem('usuarioRol');
+
+    // Si no hay rol, o si es Cliente, lo sacamos de aquí
+    if (!rolUsuario || rolUsuario === 'Cliente') {
+        alert("⛔ Acceso denegado. No tienes permisos de Administrador u Operador.");
+        window.location.href = 'Inicio.html';
+    }
+</script>
 <body>
   <header>
     <h1>Repostería "Senza" — Panel</h1>

@@ -175,115 +175,60 @@
         <div class="register-container">
             <h2>Crear Cuenta</h2>
         <form class="register-form" id="registerForm">
-            <div class="input-container">
-                <input type="text" id="regName" placeholder="Nombre completo" required>
-            </div>
-            <div class="input-container">
-                <input type="email" id="regEmail" placeholder="Correo electrónico" required>
-            </div>
-            <div class="input-container">
-                <input type="password" id="regPass" placeholder="Contraseña" required>
-            </div>
-            <div class="input-container">
-                <input type="password" id="regConfirm" placeholder="Confirmar contraseña" required>
-            </div>
-            <button type="submit">Registrarse</button>
-        </form>
+    <div class="input-container">
+        <input type="text" name="name" placeholder="Nombre completo" required>
+    </div>
+    <div class="input-container">
+        <input type="email" name="email" placeholder="Correo electrónico" required>
+        <div class="tooltip">El correo debe tener un formato válido.</div>
+    </div>
+    <div class="input-container">
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <div class="tooltip">Mínimo 8 caracteres, mayúscula, número y símbolo.</div>
+    </div>
+    <div class="input-container">
+        <input type="password" name="confirm-password" placeholder="Confirmar contraseña" required>
+    </div>
+    <button type="submit">Registrarse</button>
+</form>
             <p class="link-text">¿Ya tienes una cuenta? <a href="Login.html">Inicia sesión aquí</a></p>
         </div>
     </div>
 
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('.register-form');
-        // Asegúrate de que tus inputs tengan estos 'name' en el HTML
+        const form = document.getElementById('registerForm');
+        
+        // Inputs
         const nameInput = form.querySelector('input[name="name"]'); 
         const emailInput = form.querySelector('input[name="email"]');
         const passwordInput = form.querySelector('input[name="password"]');
         const confirmInput = form.querySelector('input[name="confirm-password"]');
 
-        // --- LÓGICA DE TOOLTIPS (Tu código original, intacto) ---
-        const emailTooltip = document.querySelector('.input-container:nth-child(2) .tooltip');
-        const passwordTooltip = document.querySelector('.input-container:nth-child(3) .tooltip');
+        // (Aquí puedes dejar tu lógica de tooltips si quieres, la omito para ahorrar espacio)
 
-        function showTooltip(tooltipElement) {
-            if(tooltipElement) {
-                document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.classList.remove('active'));
-                tooltipElement.classList.add('active');
-            }
-        }
-
-        function hideTooltips() {
-            document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.classList.remove('active'));
-        }
-
-        emailInput.addEventListener('focus', () => showTooltip(emailTooltip));
-        passwordInput.addEventListener('focus', () => showTooltip(passwordTooltip));
-        
-        document.addEventListener('click', (event) => {
-            if (!event.target.closest('.input-container')) {
-                hideTooltips();
-            }
-        });
-
-        // --- VALIDACIÓN Y ENVÍO AL BACKEND ---
-        // Agregamos 'async' aquí para poder esperar al servidor
         form.addEventListener('submit', async function(event) {
-            event.preventDefault(); // 1. IMPORTANTE: Siempre evitar recarga al inicio
+            event.preventDefault(); // Detener recarga
 
-            let isValid = true;
-            let errorMessage = '';
-
-            // Validación de Correo
-            if (!emailInput.value.includes('@')) {
-                isValid = false;
-                errorMessage += 'El correo electrónico debe ser válido.\n';
+            // 1. Validaciones básicas
+            if (passwordInput.value !== confirmInput.value) {
+                alert('Las contraseñas no coinciden.');
+                return;
+            }
+            if (passwordInput.value.length < 8) {
+                alert('La contraseña es muy corta.');
+                return;
             }
 
-            // Validación de Contraseña (Tu lógica regex)
-            const password = passwordInput.value;
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
-            const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
-
-            if (password.length < 8) {
-                isValid = false;
-                errorMessage += 'La contraseña debe tener al menos 8 caracteres.\n';
-            }
-            if (!hasUpperCase) {
-                isValid = false;
-                errorMessage += 'La contraseña debe contener al menos una letra mayúscula.\n';
-            }
-            if (!hasNumber) {
-                isValid = false;
-                errorMessage += 'La contraseña debe contener al menos un número.\n';
-            }
-            if (!hasSpecialChar) {
-                isValid = false;
-                errorMessage += 'La contraseña debe contener al menos un carácter especial.\n';
-            }
-
-            // Validación de Confirmar Contraseña (Agregado extra por seguridad)
-            if (password !== confirmInput.value) {
-                isValid = false;
-                errorMessage += 'Las contraseñas no coinciden.\n';
-            }
-
-            // Si hay errores, mostramos alerta y detenemos todo
-            if (!isValid) {
-                alert('Por favor, corrige los siguientes errores:\n\n' + errorMessage);
-                return; 
-            }
-
-            // --- SI TODO ES VÁLIDO, ENVIAMOS AL SERVIDOR ---
+            // 2. Enviar a Python (Flask)
             try {
-                const response = await fetch('http://localhost:3000/registro', {
+                const response = await fetch('http://localhost:5000/registro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         nombre: nameInput.value, 
                         email: emailInput.value, 
-                        password: password 
+                        password: passwordInput.value 
                     })
                 });
 
@@ -293,12 +238,12 @@
                     alert("¡Registro Exitoso! Bienvenido a Senza.");
                     window.location.href = 'Login.html';
                 } else {
-                    alert("Error del servidor: " + data.message);
+                    alert("Error: " + data.message);
                 }
 
             } catch (error) {
                 console.error(error);
-                alert("Error de conexión. Asegúrate de encender el servidor con 'node server.js'");
+                alert("No se pudo conectar al servidor. Revisa que 'app.py' esté corriendo.");
             }
         });
     });

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Senza</title>
-    <link rel="icon" type="image/png" href="Imagenes\Senza.png">
+    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
@@ -34,8 +34,6 @@
             padding: 20px 40px;
             transition: background-color 0.4s ease;
         }
-        
-       
 
         .logo {
             display: flex;
@@ -129,7 +127,6 @@
             text-decoration: underline;
             font-weight: 600;
         }
-
     </style>
 </head>
 <body>
@@ -151,7 +148,7 @@
     <div class="main-content">
         <div class="login-container">
             <h2>Iniciar Sesión</h2>
-            <form class="login-form" action="#" method="POST">
+            <form class="login-form" id="loginForm">
                 <input type="email" name="email" placeholder="Correo electrónico" required>
                 <input type="password" name="password" placeholder="Contraseña" required>
                 <button type="submit">Ingresar</button>
@@ -159,5 +156,58 @@
             <p class="link-text">¿No tienes una cuenta? <a href="RegUsu.html">Regístrate aquí</a></p>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+
+            // Verificamos que el formulario exista antes de agregar el evento
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault(); // Evita que se recargue la página
+
+                    // Buscamos los inputs por su nombre (name="...")
+                    const emailInput = form.querySelector('input[name="email"]');
+                    const passwordInput = form.querySelector('input[name="password"]');
+
+                    const email = emailInput.value;
+                    const password = passwordInput.value;
+
+                    try {
+                        // Enviamos los datos a tu servidor Python (puerto 5000)
+                        const response = await fetch('http://localhost:5000/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Guardamos los datos del usuario en el navegador
+                            localStorage.setItem('usuarioNombre', data.user.nombre);
+                            localStorage.setItem('usuarioRol', data.user.rol);
+                            
+                            alert("¡Hola de nuevo, " + data.user.nombre + "!");
+
+                            // Redirigimos según el rol
+                            if (data.user.rol === 'Administrador') {
+                                window.location.href = '02-dashboard.html';
+                            } else {
+                                window.location.href = 'Inicio.html';
+                            }
+                        } else {
+                            alert("Error: " + data.message);
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        alert("Error de conexión. ¿Está encendido el servidor (python app.py)?");
+                    }
+                });
+            } else {
+                console.error("No se encontró el formulario con id='loginForm'");
+            }
+        });
+    </script>
 </body>
 </html>

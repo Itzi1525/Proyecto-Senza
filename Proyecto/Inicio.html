@@ -356,21 +356,32 @@
 </head>
 <body>
  <header>
-       
-        <div class="logo">
-            <img src="Imagenes/Senza.png" alt="Senza Logo">
-            <h1>Senza</h1>
-
-        </div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Buscar productos...">
-        </div>
-
+    <div class="logo">
+        <img src="Imagenes/Senza.png" alt="Senza Logo" style="height: 50px;">
+        <h1>Senza</h1>
+    </div>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Buscar productos...">
+    </div>
     <nav class="main-nav">
         <ul>
             <li><a href="Inicio.html">Inicio</a></li>
             <li><a href="03-productos.html">Menú</a></li>
-            <li><a href="#" id="accountLink">Cuenta</a></li>
+            
+            <li id="adminLink" style="display: none;">
+                <a href="02-dashboard.html" style="color: #D2B48C;">Panel Admin</a>
+            </li>
+            
+            <li id="operadorLink" style="display: none;">
+                <a href="Inventario.html" style="color: #D2B48C;">Inventario</a>
+            </li>
+
+            <li><a href="Login.html" id="accountLink">Cuenta</a></li>
+            
+            <li id="logoutItem" style="display: none;">
+                <a href="#" id="logoutLink" style="color: #e74c3c;"><i class="fas fa-sign-out-alt"></i> Salir</a>
+            </li>
+            
             <li><a href="Carrito.html">Carrito</a></li>
         </ul>
     </nav>
@@ -501,16 +512,63 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // CARRUSEL
-            const carousel = document.querySelector('.carousel');
-            const prevBtn = document.querySelector('.carousel-btn.prev');
-            const nextBtn = document.querySelector('.carousel-btn.next');
-            const productCards = document.querySelectorAll('.product-card');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // ==========================================
+        // 1. LÓGICA DE USUARIO Y ROLES (NUEVO)
+        // ==========================================
+        const nombreUsuario = localStorage.getItem('usuarioNombre');
+        const rolUsuario = localStorage.getItem('usuarioRol');
 
+        // Elementos del menú
+        const accountLink = document.getElementById('accountLink');
+        const adminLink = document.getElementById('adminLink');
+        const operadorLink = document.getElementById('operadorLink');
+        const logoutItem = document.getElementById('logoutItem');
+        const logoutLink = document.getElementById('logoutLink');
+
+        // Si hay un usuario logueado...
+        if (nombreUsuario && accountLink) {
+            // A. Cambiar texto de "Cuenta" a "Hola, [Nombre]"
+            accountLink.textContent = nombreUsuario;
+            accountLink.href = "#"; // Desactivar link a login
+
+            // B. Mostrar botón de "Salir"
+            if (logoutItem) logoutItem.style.display = 'block';
+
+            // C. Mostrar enlaces según el ROL
+            if (rolUsuario === 'Administrador') {
+                if(adminLink) adminLink.style.display = 'block';     // Panel Admin
+                if(operadorLink) operadorLink.style.display = 'block'; // Inventario
+            } 
+            else if (rolUsuario === 'Operador') {
+                if(adminLink) adminLink.style.display = 'block';     // Panel Admin (si aplica)
+                if(operadorLink) operadorLink.style.display = 'block'; // Inventario
+            }
+        }
+
+        // D. Configurar botón de CERRAR SESIÓN
+        if (logoutLink) {
+            logoutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if(confirm("¿Deseas cerrar tu sesión?")) {
+                    localStorage.clear(); // Borra datos del navegador
+                    window.location.href = "Login.html"; // Manda al login
+                }
+            });
+        }
+
+        // ==========================================
+        // 2. LÓGICA DEL CARRUSEL (TU CÓDIGO)
+        // ==========================================
+        const carousel = document.querySelector('.carousel');
+        const prevBtn = document.querySelector('.carousel-btn.prev');
+        const nextBtn = document.querySelector('.carousel-btn.next');
+        const productCards = document.querySelectorAll('.product-card');
+
+        if (carousel && productCards.length > 0) {
             let currentIndex = 0;
-    
             const cardWidth = productCards[0].offsetWidth + 30; 
 
             function updateCarousel() {
@@ -518,8 +576,7 @@
             }
 
             nextBtn.addEventListener('click', () => {
-    
-                if (currentIndex < productCards.length - 3) { // Muestra 3 a la vez aprox
+                if (currentIndex < productCards.length - 3) { 
                     currentIndex++;
                 } else {
                     currentIndex = 0;
@@ -535,15 +592,23 @@
                 }
                 updateCarousel();
             });
-            
-    
+        }
 
-            // MODAL
-            const accountLink = document.getElementById('accountLink');
-            const accountModal = document.getElementById('accountModal');
-            
+        // ==========================================
+        // 3. LÓGICA DEL MODAL (MODIFICADA)
+        // ==========================================
+        const accountModal = document.getElementById('accountModal');
+        
+        if (accountLink && accountModal) {
             accountLink.addEventListener('click', (e) => {
                 e.preventDefault();
+                
+                // IMPORTANTE: Si ya está logueado, NO abrir el modal de login
+                if (localStorage.getItem('usuarioNombre')) {
+                    return; 
+                }
+
+                // Si no está logueado, abrir modal normal
                 accountModal.style.display = 'flex';
             });
             
@@ -552,30 +617,32 @@
                     accountModal.style.display = 'none';
                 }
             });
+        }
 
-            // REDIRECCIÓN A DETALLE (Igual que en productos)
-            document.querySelectorAll('.product-image').forEach(div => {
-                div.style.cursor = "pointer"; 
-                div.addEventListener('click', () => {
-                    const card = div.closest('.product-card');
+        // ==========================================
+        // 4. REDIRECCIÓN A DETALLE (TU CÓDIGO)
+        // ==========================================
+        document.querySelectorAll('.product-image').forEach(div => {
+            div.style.cursor = "pointer"; 
+            div.addEventListener('click', () => {
+                const card = div.closest('.product-card');
 
-                    const nombre = card.querySelector('h3').innerText;
-                    const precioTexto = card.querySelector('.price').innerText;
-                    const imagenSrc = card.querySelector('img').src;
-                    
-                    // Descripción genérica ya que en inicio no tenemos la descripción larga
-                    const descripcion = "Delicioso producto artesanal elaborado con los mejores ingredientes.";
+                const nombre = card.querySelector('h3').innerText;
+                const precioTexto = card.querySelector('.price').innerText;
+                const imagenSrc = card.querySelector('img').src;
+                
+                const descripcion = "Delicioso producto artesanal elaborado con los mejores ingredientes.";
+                const precio = precioTexto.replace('$', '').trim();
 
-                    const precio = precioTexto.replace('$', '').trim();
+                const url = `Detalle.html?nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&desc=${encodeURIComponent(descripcion)}&img=${encodeURIComponent(imagenSrc)}`;
 
-                    const url = `DetalleProducto.html?nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&desc=${encodeURIComponent(descripcion)}&img=${encodeURIComponent(imagenSrc)}`;
-
-                    window.location.href = url;
-                });
+                window.location.href = url;
             });
         });
-    </script>
-    <script src="buscador.js"></script>
+
+    });
+</script>
+<script src="buscador.js"></script>
 
 </body>
 
