@@ -922,26 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    /* =======================
-       BÚSQUEDA
-    ======================= */
-    if (searchInput) {
-        searchInput.addEventListener('keyup', e => {
-            const searchTerm = e.target.value.toLowerCase();
-            productCards.forEach(card => {
-                const productName = card.dataset.name.toLowerCase();
-                card.classList.toggle('hidden', !productName.includes(searchTerm));
-            });
-        });
-    }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> c79cdbfe94d6a67aa81faf7e98ae7f8b0dd6e1b1
-    /* =======================
-       MODAL CUENTA
-    ======================= */
     if (accountLink && accountModal) {
         accountLink.addEventListener('click', e => {
             e.preventDefault();
@@ -1004,26 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 </script>
-<<<<<<< HEAD
-<script src="buscador.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const searchInput = document.getElementById('searchInput');
-  if (!searchInput) return;
-
-  // Leer parámetro "search" de la URL
-  const params = new URLSearchParams(window.location.search);
-  const term = params.get('search');
-  if(term) {
-    searchInput.value = term;
-    // Ejecutar el filtrado automáticamente
-    searchInput.dispatchEvent(new Event('input'));
-  }
-});
-</script>
-=======
->>>>>>> c79cdbfe94d6a67aa81faf7e98ae7f8b0dd6e1b1
+  <script src="buscador.js"></script>
 
 </body>
 </html>

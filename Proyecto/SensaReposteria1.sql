@@ -162,4 +162,6 @@ BEGIN
 END;
 
 select * from Usuario;
-DELETE FROM Usuario WHERE correo = 'cacorra12@gmail.com';
+ALTER TABLE Producto
+ADD categoria NVARCHAR(100);
+

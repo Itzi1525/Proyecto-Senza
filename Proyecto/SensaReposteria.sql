@@ -162,3 +162,6 @@ BEGIN
 END;
 
 select * from Usuario;
+ALTER TABLE Producto
+ADD categoria NVARCHAR(100);
+
