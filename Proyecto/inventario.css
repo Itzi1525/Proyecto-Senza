@@ -1,0 +1,109 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: #f6f6f6;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    color: #333;
+}
+
+.btn-add {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: .3s;
+}
+
+.btn-add:hover {
+    background-color: #43a047;
+}
+
+/* Buscador */
+.search-container {
+    margin-bottom: 15px;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    font-size: 16px;
+}
+
+/* Tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+thead {
+    background-color: #333;
+    color: white;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Imágenes */
+td img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* Botones acciones */
+.btn-edit {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.btn-edit:hover {
+    background-color: #1976D2;
+}
+
+.btn-delete {
+    background-color: #E53935;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.btn-delete:hover {
+    background-color: #C62828;
+}
