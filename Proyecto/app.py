@@ -1,30 +1,72 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import pyodbc
+import sqlite3
+import os
 
 # --- IMPORTACIONES PARA GOOGLE ---
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 
-# --- 1. CONFIGURACIÓN DE BASE DE DATOS (Tus datos) ---
-server = r'DESKTOP-9LUBVQE'
-database = 'SensaReposteria'
-username = 'Gerente'
-password = 'Gerente123'
-driver = '{ODBC Driver 17 for SQL Server}'
-
-conn_str = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+# --- CONFIGURACIÓN DE BASE DE DATOS (SQLite) ---
+DB_NAME = 'SensaReposteria.db'
 
 def get_db_connection():
     try:
-        conn = pyodbc.connect(conn_str)
+        conn = sqlite3.connect(DB_NAME)
+        # Esto permite acceder a las columnas por nombre (ej: row['email'])
+        conn.row_factory = sqlite3.Row 
         return conn
     except Exception as e:
         print("❌ Error de conexión:", e)
         return None
+
+# --- INICIALIZAR TABLAS (Para que no de error si está vacía) ---
+def init_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Tabla Usuario
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Usuario (
+            id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT,
+            correo TEXT,
+            contrasena TEXT,
+            rol TEXT
+        )
+    ''')
+    
+    # Tabla Cliente
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Cliente (
+            id_cliente INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_usuario INTEGER,
+            FOREIGN KEY(id_usuario) REFERENCES Usuario(id_usuario)
+        )
+    ''')
+
+    # Tabla Producto
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Producto (
+            id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT,
+            descripcion TEXT,
+            precio REAL,
+            stock INTEGER,
+            imagen TEXT,
+            activo INTEGER DEFAULT 1
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+# Ejecutamos la creación de tablas al iniciar
+with app.app_context():
+    init_db()
 
 # ==========================================
 # 1. RUTA NUEVA: LOGIN CON GOOGLE
@@ -51,7 +93,7 @@ def google_login():
             
         cursor = conn.cursor()
         
-        # 3. Buscar si el usuario ya existe en SQL Server
+        # 3. Buscar si el usuario ya existe
         cursor.execute("SELECT id_usuario, nombre, rol FROM Usuario WHERE correo = ?", (email,))
         row = cursor.fetchone()
 
@@ -60,17 +102,18 @@ def google_login():
             return jsonify({
                 'success': True, 
                 'message': 'Bienvenido de nuevo',
-                'user': {'nombre': row[1], 'rol': row[2]}
+                'user': {'nombre': row['nombre'], 'rol': row['rol']}
             })
         else:
             # B) NO EXISTE -> REGISTRARLO AUTOMÁTICAMENTE
             password_dummy = "GOOGLE_LOGIN_USER" # Contraseña interna
             
             # Insertar en Usuario
-            sql_usuario = "INSERT INTO Usuario (nombre, correo, contrasena, rol) OUTPUT INSERTED.id_usuario VALUES (?, ?, ?, ?)"
+            sql_usuario = "INSERT INTO Usuario (nombre, correo, contrasena, rol) VALUES (?, ?, ?, ?)"
             cursor.execute(sql_usuario, (nombre, email, password_dummy, 'Cliente'))
             
-            id_nuevo = cursor.fetchone()[0]
+            # Obtener ID en SQLite
+            id_nuevo = cursor.lastrowid
             
             # Insertar en Cliente
             cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (?)", (id_nuevo,))
@@ -105,9 +148,12 @@ def registro():
         if cursor.fetchone():
             return jsonify({'success': False, 'message': 'El correo ya existe'}), 400
 
-        sql_usuario = "INSERT INTO Usuario (nombre, correo, contrasena, rol) OUTPUT INSERTED.id_usuario VALUES (?, ?, ?, ?)"
+        sql_usuario = "INSERT INTO Usuario (nombre, correo, contrasena, rol) VALUES (?, ?, ?, ?)"
         cursor.execute(sql_usuario, (data['nombre'], data['email'], data['password'], 'Cliente'))
-        id_nuevo = cursor.fetchone()[0]
+        
+        # Obtener ID en SQLite
+        id_nuevo = cursor.lastrowid
+
         cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (?)", (id_nuevo,))
         conn.commit()
         return jsonify({'success': True, 'message': 'Registro exitoso'})
@@ -129,8 +175,9 @@ def login():
     try:
         cursor.execute("SELECT id_usuario, nombre, contrasena, rol FROM Usuario WHERE correo = ?", (data['email'],))
         row = cursor.fetchone()
-        if row and row[2] == data['password']:
-            return jsonify({'success': True, 'user': {'nombre': row[1], 'rol': row[3]}})
+        # Accedemos como diccionario gracias a row_factory
+        if row and row['contrasena'] == data['password']:
+            return jsonify({'success': True, 'user': {'nombre': row['nombre'], 'rol': row['rol']}})
         return jsonify({'success': False, 'message': 'Credenciales incorrectas'}), 401
     finally:
         conn.close()
@@ -150,10 +197,10 @@ def get_usuarios():
         usuarios = []
         for row in rows:
             usuarios.append({
-                'id_usuario': row[0],
-                'nombre': row[1],
-                'correo': row[2],
-                'rol': row[3]
+                'id_usuario': row['id_usuario'],
+                'nombre': row['nombre'],
+                'correo': row['correo'],
+                'rol': row['rol']
             })
         return jsonify(usuarios)
     except Exception as e:
@@ -196,8 +243,7 @@ def delete_usuario():
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         conn.close()
-    # --- CRUD DE PRODUCTOS 📦 ---
-# Obtener productos
+
 # ================== PRODUCTOS ==================
 
 # Obtener productos activos
@@ -211,12 +257,12 @@ def get_productos():
         productos = []
         for row in rows:
             productos.append({
-                'id_producto': row[0],
-                'nombre': row[1],
-                'descripcion': row[2],
-                'precio': float(row[3]),
-                'stock': row[4],
-                'imagen': row[5]
+                'id_producto': row['id_producto'],
+                'nombre': row['nombre'],
+                'descripcion': row['descripcion'],
+                'precio': float(row['precio']),
+                'stock': row['stock'],
+                'imagen': row['imagen']
             })
         return jsonify(productos)
     except Exception as e:
@@ -275,9 +321,22 @@ def update_producto(id_producto):
     finally:
         conn.close()
 
+# ==========================================
+# 5. SERVIR PÁGINAS WEB (Frontend)
+# ==========================================
 
+# Ruta para la página de inicio (Raíz)
+@app.route('/')
+def serve_index():
+    return send_from_directory('.', 'Inicio.html')
 
-# --- FIN DEL CRUD DE PRODUCTOS 📦 ---
+# Ruta mágica para servir cualquier otro archivo (CSS, JS, Imágenes, otros HTML)
+@app.route('/<path:path>')
+def serve_static_files(path):
+    return send_from_directory('.', path)
+
+# --- ARRANQUE DEL SERVIDOR ---
 if __name__ == '__main__':
-    print("🚀 Servidor Python corriendo en http://localhost:5000")
-    app.run(debug=True, port=5000)
+    # host='0.0.0.0' ES MUY IMPORTANTE EN AWS
+    print("🚀 Servidor Python corriendo en http://0.0.0.0:5000")
+    app.run(debug=True, host='0.0.0.0', port=5000)
