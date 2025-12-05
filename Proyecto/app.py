@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app)  # Permite que tu HTML se conecte a este servidor
 
 # --- 1. CONFIGURACIÓN DE BASE DE DATOS (Tus datos) ---
-server = r'LAPTOP-VMHJ4L8R\SQLEXPRESS01'
+server = r'DESKTOP-9LUBVQE'
 database = 'SensaReposteria'
 username = 'Gerente'
 password = 'Gerente123'

@@ -1,7 +1,7 @@
 import pyodbc
 
 # --- 1. CONFIGURACIÓN ---
-server = r'LAPTOP-VMHJ4L8R\SQLEXPRESS01' 
+server = r'DESKTOP-9LUBVQE' 
 database = 'SensaReposteria' 
 username = 'Gerente' 
 password = 'Gerente123' 
