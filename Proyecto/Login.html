@@ -172,7 +172,7 @@
                     const password = form.querySelector('input[name="password"]').value;
 
                     try {
-                        const response = await fetch('http://localhost:5000/login', {
+                        const response = await fetch('/login', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ email, password })
@@ -191,7 +191,7 @@
         async function handleCredentialResponse(response) {
             try {
                 // Enviamos el token de Google a Python
-                const res = await fetch('http://localhost:5000/google-login', {
+                const res = await fetch('/google-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: response.credential })

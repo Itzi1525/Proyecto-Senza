@@ -988,7 +988,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <script src="buscador.js"></script>
 <script>
 function cargarProductos() {
-    fetch("http://localhost:5000/productos")
+    fetch("/productos")
         .then(res => res.json())
         .then(data => {
             const contenedor = document.querySelector(".productos-grid");
