@@ -137,6 +137,7 @@ BEGIN
     FROM Producto p
     JOIN inserted i ON p.id_producto = i.id_producto;
 END;
+GO
 
 CREATE TRIGGER trg_TotalPedido
 ON DetallePedido
@@ -150,6 +151,7 @@ BEGIN
         WHERE id_pedido = Pedido.id_pedido
     );
 END;
+GO
 
 CREATE PROCEDURE sp_CambiarEstadoPedido
     @id_pedido INT,
@@ -160,10 +162,11 @@ BEGIN
     SET estado = @estado
     WHERE id_pedido = @id_pedido;
 END;
-select * from Producto;
-select * from Usuario;
+GO
+
 ALTER TABLE Producto
 ADD categoria NVARCHAR(100);
+GO
 
 -- --- INSERTAR ADMINISTRADORES ---
 INSERT INTO Usuario (nombre, correo, contrasena, rol)
@@ -177,56 +180,56 @@ VALUES
 ('Operador Matutino', 'operador1@senza.mx', 'opera123', 'Operador'),
 ('Operador Vespertino', 'operador2@senza.mx', 'opera123', 'Operador');
 
--- --- VERIFICACIÓN ---
--- Esto te mostrará la lista para confirmar que se guardaron
+-- --- VERIFICACIï¿½N ---
+-- Esto te mostrarï¿½ la lista para confirmar que se guardaron
 SELECT id_usuario, nombre, correo, rol, contrasena FROM Usuario;
 
 INSERT INTO Producto (nombre, descripcion, precio, stock, activo, imagen, categoria) VALUES
-('Pan de Masa Madre', 'Pan artesanal de fermentación lenta, corteza crujiente y miga con sabor profundo.', 30.00, 10, 1, 'Imagenes/pan_masa_madre.jpg', 'panaderia'),
-('Baguette Francesa', 'Barra clásica francesa: corteza dorada y miga ligera y aireada.', 35.00, 10, 1, 'Imagenes/baguette.jpeg', 'panaderia'),
+('Pan de Masa Madre', 'Pan artesanal de fermentaciï¿½n lenta, corteza crujiente y miga con sabor profundo.', 30.00, 10, 1, 'Imagenes/pan_masa_madre.jpg', 'panaderia'),
+('Baguette Francesa', 'Barra clï¿½sica francesa: corteza dorada y miga ligera y aireada.', 35.00, 10, 1, 'Imagenes/baguette.jpeg', 'panaderia'),
 ('Tarta de Bayas', 'Base de mantequilla con crema pastelera y mezcla de bayas frescas.', 450.00, 10, 1, 'Imagenes/tarta_bayas.jpeg', 'pasteles'),
-('Cheesecake de Fresa', 'Tradicional y cremoso, con baño de fresas naturales.', 100.00, 10, 1, 'Imagenes/cheesecakefresa.jpeg', 'pasteles'),
-('Galleta con Chispas', 'Galleta de mantequilla con chispas de chocolate belga, recién horneada.', 20.00, 10, 1, 'Imagenes/galleta_chispas.jpeg', 'galletas'),
+('Cheesecake de Fresa', 'Tradicional y cremoso, con baï¿½o de fresas naturales.', 100.00, 10, 1, 'Imagenes/cheesecakefresa.jpeg', 'pasteles'),
+('Galleta con Chispas', 'Galleta de mantequilla con chispas de chocolate belga, reciï¿½n horneada.', 20.00, 10, 1, 'Imagenes/galleta_chispas.jpeg', 'galletas'),
 ('Galleta de Avena', 'Suave y crujiente, con avena integral y un toque de canela.', 20.00, 10, 1, 'Imagenes/galleta_avena.jpg', 'galletas'),
-('Café Americano', 'Café 100% mexicano, recién molido y preparado al momento.', 30.00, 10, 1, 'Imagenes/cafe_americano.jpeg', 'bebidas'),
-('Té Chai Latte', 'Mezcla aromática de especias con leche espumosa, ligeramente endulzado.', 55.00, 10, 1, 'Imagenes/te_chai_latte.jpeg', 'bebidas'),
-('Matcha', 'Bebida de té verde matcha de alta calidad, preparada con leche o agua.', 80.00, 10, 1, 'Imagenes/matcha.jpeg', 'bebidas'),
+('Cafï¿½ Americano', 'Cafï¿½ 100% mexicano, reciï¿½n molido y preparado al momento.', 30.00, 10, 1, 'Imagenes/cafe_americano.jpeg', 'bebidas'),
+('Tï¿½ Chai Latte', 'Mezcla aromï¿½tica de especias con leche espumosa, ligeramente endulzado.', 55.00, 10, 1, 'Imagenes/te_chai_latte.jpeg', 'bebidas'),
+('Matcha', 'Bebida de tï¿½ verde matcha de alta calidad, preparada con leche o agua.', 80.00, 10, 1, 'Imagenes/matcha.jpeg', 'bebidas'),
 ('Taro', 'Bebida cremosa con sabor a taro, ligeramente dulce y suave.', 80.00, 10, 1, 'Imagenes/taro.jpeg', 'bebidas'),
 ('Dona de Chocolate con Chispas', 'Dona esponjosa cubierta con chocolate y chispas de colores.', 25.00, 10, 1, 'Imagenes/dona_chocolate_chispas.jpeg', 'panaderia'),
-('Dona de Azúcar', 'Dona clásica espolvoreada con azúcar fina para un toque dulce.', 25.00, 10, 1, 'Imagenes/dona_azucar.jpeg', 'panaderia'),
-('Cuernito', 'Croissant estilo ligero y mantecoso, perfecto para acompañar café.', 20.00, 10, 1, 'Imagenes/cuerno.jpg', 'panaderia'),
+('Dona de Azï¿½car', 'Dona clï¿½sica espolvoreada con azï¿½car fina para un toque dulce.', 25.00, 10, 1, 'Imagenes/dona_azucar.jpeg', 'panaderia'),
+('Cuernito', 'Croissant estilo ligero y mantecoso, perfecto para acompaï¿½ar cafï¿½.', 20.00, 10, 1, 'Imagenes/cuerno.jpg', 'panaderia'),
 ('Agua de Horchata', 'Bebida tradicional de arroz con canela, fresca y ligeramente dulce.', 30.00, 10, 1, 'Imagenes/horchata.jpeg', 'bebidas'),
-('Beignets', 'Pasta frita francesa, esponjosa y espolvoreada con azúcar glass.', 60.00, 10, 1, 'Imagenes/beignets.jpeg', 'panaderia'),
+('Beignets', 'Pasta frita francesa, esponjosa y espolvoreada con azï¿½car glass.', 60.00, 10, 1, 'Imagenes/beignets.jpeg', 'panaderia'),
 ('Rol de Canela', 'Roll suave con relleno de canela y glaseado ligero.', 30.00, 10, 1, 'Imagenes/rol_canela.jpeg', 'panaderia'),
-('Café Moka', 'Delicioso café con chocolate y leche espumosa.', 45.00, 10, 1, 'Imagenes/cafe_moka.jpeg', 'bebidas'),
+('Cafï¿½ Moka', 'Delicioso cafï¿½ con chocolate y leche espumosa.', 45.00, 10, 1, 'Imagenes/cafe_moka.jpeg', 'bebidas'),
 ('Pastel de Fresa con Crema', 'Bizcocho delicado relleno y cubierto con crema y fresas naturales.', 480.00, 10, 1, 'Imagenes/pastel_fresa.jpeg', 'pasteles'),
-('Tiramisú de Matcha', 'Versión cremosa del clásico tiramisú con té matcha.', 150.00, 10, 1, 'Imagenes/tiramisu_matcha.jpeg', 'pasteles'),
+('Tiramisï¿½ de Matcha', 'Versiï¿½n cremosa del clï¿½sico tiramisï¿½ con tï¿½ matcha.', 150.00, 10, 1, 'Imagenes/tiramisu_matcha.jpeg', 'pasteles'),
 ('Tarta de Cerezas', 'Tarta con cerezas jugosas y masa quebrada crujiente.', 150.00, 10, 1, 'Imagenes/tarta_cerezas.jpeg', 'pasteles'),
-('Bolillo Mexicano', 'Clásico bolillo, ideal para tortas o acompañar comidas.', 4.00, 10, 1, 'Imagenes/bolillo.jpeg', 'panaderia'),
+('Bolillo Mexicano', 'Clï¿½sico bolillo, ideal para tortas o acompaï¿½ar comidas.', 4.00, 10, 1, 'Imagenes/bolillo.jpeg', 'panaderia'),
 ('Torta Balcarce', 'Pastel tradicional con capas esponjosas y crema suave.', 480.00, 10, 1, 'Imagenes/torta_balcarce.jpeg', 'pasteles'),
-('Cheesecake de Arándanos', 'Queso cremoso con base de galleta y cobertura de arándanos.', 145.00, 10, 1, 'Imagenes/cheescake_arandanos.jpeg', 'pasteles'),
+('Cheesecake de Arï¿½ndanos', 'Queso cremoso con base de galleta y cobertura de arï¿½ndanos.', 145.00, 10, 1, 'Imagenes/cheescake_arandanos.jpeg', 'pasteles'),
 ('Chocolate Caliente', 'Bebida espesa y reconfortante preparada con chocolate real.', 45.00, 10, 1, 'Imagenes/chocolate.jpeg', 'bebidas'),
-('Frapuccino de Galleta', 'Bebida fría cremosa con sabor a galleta y topping crujiente.', 45.00, 10, 1, 'Imagenes/frapuccino_galleta.jpeg', 'bebidas'),
+('Frapuccino de Galleta', 'Bebida frï¿½a cremosa con sabor a galleta y topping crujiente.', 45.00, 10, 1, 'Imagenes/frapuccino_galleta.jpeg', 'bebidas'),
 ('Pay de Fresa', 'Pay con relleno de fresa natural y base crujiente.', 100.00, 10, 1, 'Imagenes/pay_fresa.jpeg', 'pasteles'),
-('Pastel de Ángel', 'Bizcocho ligero y esponjoso, perfecto para ocasiones especiales.', 450.00, 10, 1, 'Imagenes/pastel_angel.jpeg', 'pasteles'),
+('Pastel de ï¿½ngel', 'Bizcocho ligero y esponjoso, perfecto para ocasiones especiales.', 450.00, 10, 1, 'Imagenes/pastel_angel.jpeg', 'pasteles'),
 ('Flan', 'Flan casero con textura suave y caramelo dorado.', 90.00, 10, 1, 'Imagenes/flan.jpeg', 'pasteles'),
 ('Donas Rellenas de Crema Pastelera', 'Donas suaves rellenas con crema pastelera y glaseado ligero.', 35.00, 10, 1, 'Imagenes/donas_crema_pastelera.jpeg', 'panaderia'),
 ('Chamoyada de Mango', 'Refrescante con mango natural y chamoy, toque dulce-picante.', 40.00, 10, 1, 'Imagenes/chamoyada.jpeg', 'bebidas'),
-('Cold Brew', 'Café de extracción en frío: suave, menos ácido y con gran cuerpo.', 55.00, 10, 1, 'Imagenes/cold_brew.jpeg', 'bebidas'),
-('Tiramisú de Chocolate', 'Capas de bizcocho empapadas y crema de mascarpone con chocolate.', 100.00, 10, 1, 'Imagenes/tiramisu_chocolate.jpeg', 'pasteles'),
+('Cold Brew', 'Cafï¿½ de extracciï¿½n en frï¿½o: suave, menos ï¿½cido y con gran cuerpo.', 55.00, 10, 1, 'Imagenes/cold_brew.jpeg', 'bebidas'),
+('Tiramisï¿½ de Chocolate', 'Capas de bizcocho empapadas y crema de mascarpone con chocolate.', 100.00, 10, 1, 'Imagenes/tiramisu_chocolate.jpeg', 'pasteles'),
 ('Pastel de Mil Hojas', 'Hojas hojaldradas con crema pastelera entre capas, textura crujiente.', 480.00, 10, 1, 'Imagenes/pastel_mil_hojas.jpg', 'pasteles'),
-('Bigote', 'Pieza de pan tradicional con toque dulce, ideal para acompañar café.', 25.00, 10, 1, 'Imagenes/bigote.jpeg', 'panaderia'),
+('Bigote', 'Pieza de pan tradicional con toque dulce, ideal para acompaï¿½ar cafï¿½.', 25.00, 10, 1, 'Imagenes/bigote.jpeg', 'panaderia'),
 ('Gelatina', 'Gelatina casera con textura firme y sabor refrescante.', 100.00, 10, 1, 'Imagenes/gelatina.jpg', 'pasteles'),
-('Galleta de Mantequilla', 'Clásica galleta casera con textura impecable y sabor a mantequilla.', 25.00, 10, 1, 'Imagenes/galleta_matequilla.jpg', 'galletas'),
-('Galleta de Azúcar', 'Galleta dulce y delicada, perfecta con una bebida caliente.', 20.00, 10, 1, 'Imagenes/galleta_azcar.jpg', 'galletas'),
-('Galleta Integral', 'Galleta con harina integral y semillas, opción más saludable.', 30.00, 10, 1, 'Imagenes/galleta_integral.jpg', 'galletas'),
-('Concha de Vainilla', 'Pan dulce con su clásica cubierta de sabor a vainilla.', 30.00, 10, 1, 'Imagenes/concha_vanilla.jpg', 'panaderia'),
+('Galleta de Mantequilla', 'Clï¿½sica galleta casera con textura impecable y sabor a mantequilla.', 25.00, 10, 1, 'Imagenes/galleta_matequilla.jpg', 'galletas'),
+('Galleta de Azï¿½car', 'Galleta dulce y delicada, perfecta con una bebida caliente.', 20.00, 10, 1, 'Imagenes/galleta_azcar.jpg', 'galletas'),
+('Galleta Integral', 'Galleta con harina integral y semillas, opciï¿½n mï¿½s saludable.', 30.00, 10, 1, 'Imagenes/galleta_integral.jpg', 'galletas'),
+('Concha de Vainilla', 'Pan dulce con su clï¿½sica cubierta de sabor a vainilla.', 30.00, 10, 1, 'Imagenes/concha_vanilla.jpg', 'panaderia'),
 ('Concha de Chocolate', 'Deliciosa concha cubierta de chocolate, ideal para los amantes del cacao.', 30.00, 10, 1, 'Imagenes/concha_chocolate.jpg', 'panaderia'),
-('Bisquet', 'Pan tierno y hojaldrado, perfecto para acompañar desayunos.', 30.00, 10, 1, 'Imagenes/bisquet.jpg', 'panaderia'),
+('Bisquet', 'Pan tierno y hojaldrado, perfecto para acompaï¿½ar desayunos.', 30.00, 10, 1, 'Imagenes/bisquet.jpg', 'panaderia'),
 ('Polvorones', 'Galletas tradicionales, mantecosas y delicadas al paladar.', 25.00, 10, 1, 'Imagenes/polvorones.jpg', 'galletas'),
-('Galleta de Canela', 'Galleta aromática con canela, perfecta para la temporada fría.', 25.00, 10, 1, 'Imagenes/galletas_canela.jpg', 'galletas'),
+('Galleta de Canela', 'Galleta aromï¿½tica con canela, perfecta para la temporada frï¿½a.', 25.00, 10, 1, 'Imagenes/galletas_canela.jpg', 'galletas'),
 ('Macarrones', 'Delicados macarons con relleno cremoso, textura ligera.', 40.00, 10, 1, 'Imagenes/macarrones.jpg', 'galletas'),
-('Espresso', 'Shot concentrado de café, aroma intenso y crema natural.', 35.00, 10, 1, 'Imagenes/espresso.jpg', 'bebidas'),
+('Espresso', 'Shot concentrado de cafï¿½, aroma intenso y crema natural.', 35.00, 10, 1, 'Imagenes/espresso.jpg', 'bebidas'),
 ('Galleta de la Suerte', 'Galleta crujiente con mensaje sorpresa en su interior.', 15.00, 10, 1, 'Imagenes/galleta_suerte.jpg', 'galletas'),
 ('Malteada de Chocolate', 'Malteada cremosa con helado de chocolate y topping de virutas.', 55.00, 10, 1, 'Imagenes/malteada_chocolate.jpg', 'bebidas'),
 ('Galleta de Coco', 'Galleta con textura crujiente y sabor natural a coco.', 25.00, 10, 1, 'Imagenes/galleta_coco.jpg', 'galletas'),
