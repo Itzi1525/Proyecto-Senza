@@ -165,3 +165,18 @@ select * from Usuario;
 ALTER TABLE Producto
 ADD categoria NVARCHAR(100);
 
+-- --- INSERTAR ADMINISTRADORES ---
+INSERT INTO Usuario (nombre, correo, contrasena, rol)
+VALUES 
+('Nestor Hernandez', 'admin1@senza.mx', 'admin123', 'Administrador'),
+('Itzel Arteaga', 'admin2@senza.mx', 'admin123', 'Administrador');
+
+-- --- INSERTAR OPERADORES ---
+INSERT INTO Usuario (nombre, correo, contrasena, rol)
+VALUES 
+('Operador Matutino', 'operador1@senza.mx', 'opera123', 'Operador'),
+('Operador Vespertino', 'operador2@senza.mx', 'opera123', 'Operador');
+
+-- --- VERIFICACIÓN ---
+-- Esto te mostrará la lista para confirmar que se guardaron
+SELECT id_usuario, nombre, correo, rol, contrasena FROM Usuario;

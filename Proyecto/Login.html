@@ -191,11 +191,11 @@
                             alert("¡Hola de nuevo, " + data.user.nombre + "!");
 
                             // Redirigimos según el rol
-                            if (data.user.rol === 'Administrador') {
-                                window.location.href = '02-dashboard.html';
-                            } else {
-                                window.location.href = 'Inicio.html';
-                            }
+                            if (data.user.rol === 'Administrador' || data.user.rol === 'Operador') {
+    window.location.href = 'AdminOpera.html'; // <--- ESTO ES IMPORTANTE
+} else {
+    window.location.href = 'Inicio.html';
+}
                         } else {
                             alert("Error: " + data.message);
                         }
