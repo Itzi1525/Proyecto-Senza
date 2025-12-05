@@ -119,8 +119,6 @@ function agregarProducto() {
     })
     .catch(err => console.error(err));
 }
-
-// --- Abrir modal de modificación ---
 function modificarProducto(id) {
     productoActualId = id;
     fetch(`${apiUrl}`)
@@ -129,15 +127,40 @@ function modificarProducto(id) {
             const prod = data.find(p => p.id_producto === id);
             if (!prod) return alert("Producto no encontrado.");
 
-            document.getElementById("modalNombre").value = prod.nombre;
-            document.getElementById("modalPrecio").value = prod.precio;
-            document.getElementById("modalStock").value = prod.stock;
-            document.getElementById("modalImagen").value = prod.imagen;
-            document.getElementById("modalDescripcion").value = prod.descripcion || "";
-            document.getElementById("modalCategoria").value = prod.categoria || "";
+            // CORRECCIÓN: Usar los IDs que definiste en el HTML (mod...)
+            document.getElementById("modNombre").value = prod.nombre;
+            document.getElementById("modPrecio").value = prod.precio;
+            document.getElementById("modStock").value = prod.stock;
+            document.getElementById("modImagen").value = prod.imagen;
+            document.getElementById("modDescripcion").value = prod.descripcion || "";
+            document.getElementById("modCategoria").value = prod.categoria || "";
 
-            document.getElementById("modalProducto").style.display = "block";
+            // CORRECCIÓN VISUAL: Usar 'flex' en lugar de 'block' para que el centrado funcione
+        document.getElementById("modalProducto").style.display = "flex";
         });
+}
+
+// --- Guardar cambios del modal ---
+function guardarModificacion() {
+    // CORRECCIÓN: Usar los IDs correctos aquí también
+    const nombre = document.getElementById("modNombre").value.trim();
+    const precio = parseFloat(document.getElementById("modPrecio").value);
+    const stock = parseInt(document.getElementById("modStock").value);
+    const imagen = document.getElementById("modImagen").value.trim();
+    const descripcion = document.getElementById("modDescripcion").value.trim();
+    const categoria = document.getElementById("modCategoria").value.trim();
+
+    fetch(`${apiUrl}/${productoActualId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, precio, stock, imagen, descripcion, categoria })
+    })
+    .then(res => res.json())
+    .then(() => {
+        cerrarModal();
+        cargarProductos();
+    })
+    .catch(err => console.error(err));
 }
 
 // --- Guardar cambios del modal ---
