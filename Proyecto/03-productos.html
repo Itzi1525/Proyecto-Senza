@@ -986,6 +986,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
   <script src="buscador.js"></script>
+<script>
+function cargarProductos() {
+    fetch("http://localhost:5000/productos")
+        .then(res => res.json())
+        .then(data => {
+            const contenedor = document.querySelector(".productos-grid");
+            contenedor.innerHTML = ""; // Limpiar estáticos
+
+            data.forEach(prod => {
+                const item = `
+                <div class="producto">
+                    <img src="${prod.imagen}" alt="${prod.nombre}">
+                    <h3>${prod.nombre}</h3>
+                    <p class="precio">$${prod.precio}</p>
+                    <button onclick="agregarCarrito(${prod.id_producto})">
+                        Agregar al carrito
+                    </button>
+                </div>`;
+                
+                contenedor.innerHTML += item;
+            });
+        })
+        .catch(error => console.log("Error cargando productos:", error));
+}
+
+cargarProductos();
+</script>
 
 </body>
 </html>

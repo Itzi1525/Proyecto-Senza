@@ -1,36 +1,191 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario - Administración</title>
-    <link rel="stylesheet" href="inventario.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario - Senza Repostería</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    h1 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    th { background-color: #d2b48c; color: #fff; }
+    input[type="text"], input[type="number"] { width: 80%; padding: 5px; }
+    button { padding: 5px 10px; margin: 2px; cursor: pointer; }
+    #addForm { background: #fff; padding: 20px; margin-top: 20px; border: 1px solid #ccc; }
+</style>
 </head>
 <body>
 
-    <header>
-        <h1>Inventario de Productos</h1>
-        <button class="btn-add">+ Agregar Producto</button>
-    </header>
+<h1>Inventario de Productos</h1>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Buscar producto...">
+<!-- Tabla de Productos -->
+<table id="tablaProductos">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Imagen</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Se llenará dinámicamente -->
+    </tbody>
+</table>
+
+<!-- Formulario para agregar productos -->
+<div id="addForm">
+    <h2>Agregar Nuevo Producto</h2>
+    <input type="text" id="nuevoNombre" placeholder="Nombre"><br><br>
+    <input type="text" id="nuevaDescripcion" placeholder="Descripción"><br><br>
+    <input type="number" id="nuevoPrecio" placeholder="Precio"><br><br>
+    <input type="number" id="nuevoStock" placeholder="Stock"><br><br>
+    <input type="text" id="nuevaImagen" placeholder="URL de Imagen"><br><br>
+    <button onclick="agregarProducto()">Agregar Producto</button>
+</div>
+
+<script>
+const apiUrl = "http://localhost:5000/productos";
+
+let productoActualId = null;
+
+// --- Cargar productos ---
+function cargarProductos() {
+    fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector("#tablaProductos tbody");
+            tbody.innerHTML = "";
+
+            data.forEach(prod => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${prod.id_producto}</td>
+                    <td>${prod.nombre}</td>
+                    <td>${prod.precio}</td>
+                    <td>${prod.stock}</td>
+                    <td>${prod.imagen}</td>
+                    <td>${prod.descripcion || ""}</td>
+                    <td>${prod.categoria || ""}</td>
+                    <td>
+                        <button onclick="modificarProducto(${prod.id_producto})">Modificar</button>
+                        <button onclick="eliminarProducto(${prod.id_producto})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => console.error("Error cargando productos:", err));
+}
+
+// --- Eliminar producto ---
+function eliminarProducto(id) {
+    if(!confirm("¿Eliminar este producto?")) return;
+
+    fetch(`${apiUrl}/${id}`, { method: "DELETE" })
+        .then(res => res.json())
+        .then(() => cargarProductos())
+        .catch(err => console.error(err));
+}
+
+// --- Agregar producto ---
+function agregarProducto() {
+    const nombre = document.getElementById("nuevoNombre").value.trim();
+    const precio = parseFloat(document.getElementById("nuevoPrecio").value);
+    const stock = parseInt(document.getElementById("nuevoStock").value);
+    const imagen = document.getElementById("nuevaImagen").value.trim();
+
+    if(!nombre || isNaN(precio) || isNaN(stock)) {
+        alert("Por favor completa todos los campos correctamente.");
+        return;
+    }
+
+    fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, precio, stock, imagen })
+    })
+    .then(res => res.json())
+    .then(() => {
+        document.getElementById("nuevoNombre").value = "";
+        document.getElementById("nuevoPrecio").value = "";
+        document.getElementById("nuevoStock").value = "";
+        document.getElementById("nuevaImagen").value = "";
+        cargarProductos();
+    })
+    .catch(err => console.error(err));
+}
+
+// --- Abrir modal de modificación ---
+function modificarProducto(id) {
+    productoActualId = id;
+    fetch(`${apiUrl}`)
+        .then(res => res.json())
+        .then(data => {
+            const prod = data.find(p => p.id_producto === id);
+            if (!prod) return alert("Producto no encontrado.");
+
+            document.getElementById("modalNombre").value = prod.nombre;
+            document.getElementById("modalPrecio").value = prod.precio;
+            document.getElementById("modalStock").value = prod.stock;
+            document.getElementById("modalImagen").value = prod.imagen;
+            document.getElementById("modalDescripcion").value = prod.descripcion || "";
+            document.getElementById("modalCategoria").value = prod.categoria || "";
+
+            document.getElementById("modalProducto").style.display = "block";
+        });
+}
+
+// --- Guardar cambios del modal ---
+function guardarModificacion() {
+    const nombre = document.getElementById("modalNombre").value.trim();
+    const precio = parseFloat(document.getElementById("modalPrecio").value);
+    const stock = parseInt(document.getElementById("modalStock").value);
+    const imagen = document.getElementById("modalImagen").value.trim();
+    const descripcion = document.getElementById("modalDescripcion").value.trim();
+    const categoria = document.getElementById("modalCategoria").value.trim();
+
+    fetch(`${apiUrl}/${productoActualId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, precio, stock, imagen, descripcion, categoria })
+    })
+    .then(res => res.json())
+    .then(() => {
+        cerrarModal();
+        cargarProductos();
+    })
+    .catch(err => console.error(err));
+}
+
+// --- Cerrar modal ---
+function cerrarModal() {
+    document.getElementById("modalProducto").style.display = "none";
+}
+
+// --- Inicializar tabla al cargar ---
+document.addEventListener("DOMContentLoaded", cargarProductos);
+</script>
+
+<!-- Modal para modificar producto -->
+<div id="modalProducto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+    <div style="background:#fff; padding:20px; border-radius:10px; width:400px; position:relative;">
+        <h2>Modificar Producto</h2>
+        <input type="text" id="modNombre" placeholder="Nombre"><br><br>
+        <input type="number" id="modPrecio" placeholder="Precio"><br><br>
+        <input type="number" id="modStock" placeholder="Stock"><br><br>
+        <input type="text" id="modImagen" placeholder="URL de Imagen"><br><br>
+        <input type="text" id="modDescripcion" placeholder="Descripción"><br><br>
+        <input type="text" id="modCategoria" placeholder="Categoría"><br><br>
+        <button onclick="guardarModificacion()">Guardar Cambios</button>
+        <button onclick="cerrarModal()">Cancelar</button>
     </div>
-
-    <table id="tablaProductos">
-        <thead>
-            <tr>
-                <th>Imagen</th>
-                <th>Nombre</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Opciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Aquí se insertarán los productos con JS -->
-        </tbody>
-    </table>
+</div>
 
 </body>
 </html>
+
