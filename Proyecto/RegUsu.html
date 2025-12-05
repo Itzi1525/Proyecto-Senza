@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse - Senza</title>
-    <link rel="icon" type="image/png" href="Imagenes\Senza.png">
+    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
         :root {
             --color-primary: #D2B48C;
             --color-secondary: #4B3832;
-            --color-background: #F5F5DC;
+            --color-background: #F8F8F8;
             --color-light-bg: #FFF7EB;
         }
 
@@ -26,51 +29,26 @@
             min-height: 100vh;
         }
 
-        /* Estilos del Header */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 20px 40px;
-            transition: background-color 0.4s ease;
+            background-color: #FFFFFF;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo h1 { font-size: 1.5em; margin: 0; }
+        .nav-menu ul { display: flex; list-style: none; gap: 20px; padding: 0; margin: 0; }
+        .nav-menu a { text-decoration: none; color: var(--color-secondary); font-weight: 600; }
 
-        .logo h1 {
-            font-size: 1.5em;
-            margin: 0;
-        }
-
-        .nav-menu ul {
-            display: flex;
-            list-style: none;
-            gap: 20px;
-            padding: 0;
-            margin: 0;
-        }
-
-        .nav-menu a {
-            text-decoration: none;
-            color: var(--color-secondary);
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-
-        .nav-menu a:hover {
-            color: #3B2B24;
-        }
-
-        /* Estilos para el formulario */
         .main-content {
             flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 40px 20px;
         }
 
         .register-container {
@@ -83,90 +61,51 @@
             text-align: center;
         }
 
-        .register-container h2 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            color: var(--color-secondary);
-        }
+        .register-container h2 { font-size: 2em; margin-bottom: 20px; color: var(--color-secondary); }
 
+        .input-container { position: relative; margin-bottom: 15px; }
+        
         .register-form input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
+            width: 100%; padding: 12px;
             border: 1px solid var(--color-secondary);
-            border-radius: 5px;
-            box-sizing: border-box;
-            background-color: transparent;
-            font-family: 'Poppins', sans-serif;
-            color: var(--color-secondary);
+            border-radius: 5px; box-sizing: border-box;
+            background-color: white; font-family: 'Poppins', sans-serif;
         }
 
         .register-form button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            background-color: var(--color-secondary);
-            color: var(--color-light-bg);
-            border-radius: 5px;
-            font-size: 1.1em;
-            cursor: pointer;
+            width: 100%; padding: 12px; border: none;
+            background-color: var(--color-secondary); color: white;
+            border-radius: 5px; font-size: 1.1em; cursor: pointer; font-weight: 600;
             transition: background-color 0.3s ease;
         }
-
-        .register-form button:hover {
-            background-color: #382D26;
-        }
-
-        .link-text {
-            margin-top: 20px;
-            font-size: 0.9em;
-        }
-
-        .link-text a {
-            color: var(--color-secondary);
-            text-decoration: underline;
-            font-weight: 600;
-        }
-
-        /* Estilos para las ventanas emergentes (tooltips) */
-        .input-container {
-            position: relative;
-            margin-bottom: 15px;
-        }
+        .register-form button:hover { background-color: #382D26; }
 
         .tooltip {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            padding: 10px;
-            background-color: var(--color-secondary);
-            color: var(--color-light-bg);
-            border-radius: 5px;
-            font-size: 0.8em;
-            z-index: 10;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            text-align: left;
+            display: none; position: absolute; top: 100%; left: 0; width: 100%;
+            padding: 5px; background-color: var(--color-secondary); color: white;
+            border-radius: 5px; font-size: 0.8em; z-index: 10; text-align: left;
         }
+        .tooltip.active { display: block; }
 
-        .tooltip.active {
-            display: block;
+        .separator {
+            display: flex; align-items: center; margin: 20px 0;
+            color: #666; font-size: 0.9em;
         }
+        .separator::before, .separator::after { content: ""; flex: 1; border-top: 1px solid #ccc; }
+        .separator span { padding: 0 10px; }
+
+        .link-text { margin-top: 20px; font-size: 0.9em; }
+        .link-text a { color: var(--color-secondary); text-decoration: underline; font-weight: 600; }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo">
-            <h1>Senza</h1>
-        </div>
+        <div class="logo"><h1>Senza</h1></div>
         <nav class="nav-menu">
             <ul>
                 <li><a href="Inicio.html">Inicio</a></li>
                 <li><a href="03-productos.html">Menú</a></li>
                 <li><a href="Login.html">Iniciar Sesión</a></li>
-                <li><a href="Inicio.html#historia">Nosotros</a></li>
-                <li><a href="Inicio.html#Contacto">Contacto</a></li>
             </ul>
         </nav>
     </header>
@@ -174,79 +113,124 @@
     <div class="main-content">
         <div class="register-container">
             <h2>Crear Cuenta</h2>
-        <form class="register-form" id="registerForm">
-    <div class="input-container">
-        <input type="text" name="name" placeholder="Nombre completo" required>
-    </div>
-    <div class="input-container">
-        <input type="email" name="email" placeholder="Correo electrónico" required>
-        <div class="tooltip">El correo debe tener un formato válido.</div>
-    </div>
-    <div class="input-container">
-        <input type="password" name="password" placeholder="Contraseña" required>
-        <div class="tooltip">Mínimo 8 caracteres, mayúscula, número y símbolo.</div>
-    </div>
-    <div class="input-container">
-        <input type="password" name="confirm-password" placeholder="Confirmar contraseña" required>
-    </div>
-    <button type="submit">Registrarse</button>
-</form>
-            <p class="link-text">¿Ya tienes una cuenta? <a href="Login.html">Inicia sesión aquí</a></p>
+            
+            <form class="register-form" id="registerForm">
+                <div class="input-container">
+                    <input type="text" name="name" placeholder="Nombre completo" required>
+                </div>
+                <div class="input-container">
+                    <input type="email" name="email" placeholder="Correo electrónico" required>
+                    <div class="tooltip">Debe ser un correo válido.</div>
+                </div>
+                <div class="input-container">
+                    <input type="password" name="password" placeholder="Contraseña" required>
+                    <div class="tooltip">Mínimo 8 caracteres, mayúscula, número y símbolo.</div>
+                </div>
+                <div class="input-container">
+                    <input type="password" name="confirm-password" placeholder="Confirmar contraseña" required>
+                </div>
+                <button type="submit">Registrarse</button>
+            </form>
+
+            <div class="separator"><span>O regístrate con</span></div>
+            <div style="display: flex; justify-content: center;">
+                <div id="g_id_onload"
+                     data-client_id="87366328254-63lo1bk93htqig3shql9ljsj0kbsm22q.apps.googleusercontent.com"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="outline"
+                     data-text="signup_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left"
+                     data-width="320">
+                </div>
+            </div>
+            <p class="link-text">¿Ya tienes cuenta? <a href="Login.html">Inicia sesión aquí</a></p>
         </div>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('registerForm');
-        
-        // Inputs
-        const nameInput = form.querySelector('input[name="name"]'); 
-        const emailInput = form.querySelector('input[name="email"]');
-        const passwordInput = form.querySelector('input[name="password"]');
-        const confirmInput = form.querySelector('input[name="confirm-password"]');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registerForm');
+            const nameInput = form.querySelector('input[name="name"]'); 
+            const emailInput = form.querySelector('input[name="email"]');
+            const passwordInput = form.querySelector('input[name="password"]');
+            const confirmInput = form.querySelector('input[name="confirm-password"]');
 
-        // (Aquí puedes dejar tu lógica de tooltips si quieres, la omito para ahorrar espacio)
+            // --- Tooltips ---
+            const emailTooltip = document.querySelector('.input-container:nth-child(2) .tooltip');
+            const passwordTooltip = document.querySelector('.input-container:nth-child(3) .tooltip');
 
-        form.addEventListener('submit', async function(event) {
-            event.preventDefault(); // Detener recarga
+            function showTooltip(el) { if(el) el.classList.add('active'); }
+            function hideTooltips() { document.querySelectorAll('.tooltip').forEach(t => t.classList.remove('active')); }
 
-            // 1. Validaciones básicas
-            if (passwordInput.value !== confirmInput.value) {
-                alert('Las contraseñas no coinciden.');
-                return;
-            }
-            if (passwordInput.value.length < 8) {
-                alert('La contraseña es muy corta.');
-                return;
-            }
+            emailInput.addEventListener('focus', () => showTooltip(emailTooltip));
+            passwordInput.addEventListener('focus', () => showTooltip(passwordTooltip));
+            document.addEventListener('click', (e) => { if (!e.target.closest('.input-container')) hideTooltips(); });
 
-            // 2. Enviar a Python (Flask)
+            // --- REGISTRO MANUAL ---
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                let isValid = true;
+                let errorMessage = '';
+
+                if (!emailInput.value.includes('@')) { isValid = false; errorMessage += 'Correo inválido.\n'; }
+                
+                const pwd = passwordInput.value;
+                if (pwd.length < 8 || !/[A-Z]/.test(pwd) || !/[0-9]/.test(pwd) || !/[!@#$%^&*]/.test(pwd)) {
+                    isValid = false; errorMessage += 'La contraseña no es segura.\n';
+                }
+                if (pwd !== confirmInput.value) { isValid = false; errorMessage += 'Las contraseñas no coinciden.\n'; }
+
+                if (!isValid) { alert(errorMessage); return; }
+
+                try {
+                    const response = await fetch('http://localhost:5000/registro', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre: nameInput.value, email: emailInput.value, password: pwd })
+                    });
+                    const data = await response.json();
+                    if(data.success) {
+                        alert("¡Registro Exitoso! Inicia sesión.");
+                        window.location.href = 'Login.html';
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Error de conexión.");
+                }
+            });
+        });
+
+        // --- REGISTRO CON GOOGLE (Misma lógica que Login) ---
+        async function handleCredentialResponse(response) {
             try {
-                const response = await fetch('http://localhost:5000/registro', {
+                const res = await fetch('http://localhost:5000/google-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        nombre: nameInput.value, 
-                        email: emailInput.value, 
-                        password: passwordInput.value 
-                    })
+                    body: JSON.stringify({ token: response.credential })
                 });
-
-                const data = await response.json();
-
-                if(data.success) {
-                    alert("¡Registro Exitoso! Bienvenido a Senza.");
-                    window.location.href = 'Login.html';
+                const data = await res.json();
+                
+                if (data.success) {
+                    localStorage.setItem('usuarioNombre', data.user.nombre);
+                    localStorage.setItem('usuarioRol', data.user.rol);
+                    alert("¡Cuenta creada con Google! Bienvenido " + data.user.nombre);
+                    window.location.href = 'Inicio.html';
                 } else {
                     alert("Error: " + data.message);
                 }
-
             } catch (error) {
                 console.error(error);
-                alert("No se pudo conectar al servidor. Revisa que 'app.py' esté corriendo.");
+                alert("Error al conectar con Google.");
             }
-        });
-    });
-</script>
+        }
+    </script>
 </body>
 </html>
