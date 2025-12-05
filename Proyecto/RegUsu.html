@@ -189,7 +189,7 @@
                 if (!isValid) { alert(errorMessage); return; }
 
                 try {
-                    const response = await fetch('http://localhost:5000/registro', {
+                    const response = await fetch('/registro', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ nombre: nameInput.value, email: emailInput.value, password: pwd })
@@ -211,7 +211,7 @@
         // --- REGISTRO CON GOOGLE (Misma lógica que Login) ---
         async function handleCredentialResponse(response) {
             try {
-                const res = await fetch('http://localhost:5000/google-login', {
+                const res = await fetch('/google-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: response.credential })
