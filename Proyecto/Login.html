@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -29,7 +29,6 @@
             min-height: 100vh;
         }
 
-        /* Header */
         header {
             display: flex;
             justify-content: space-between;
@@ -46,7 +45,6 @@
         .nav-menu a { text-decoration: none; color: var(--color-secondary); font-weight: 600; transition: color 0.3s ease; }
         .nav-menu a:hover { color: #3B2B24; }
 
-        /* Contenedor del Login */
         .main-content {
             flex-grow: 1;
             display: flex;
@@ -65,34 +63,19 @@
             text-align: center;
         }
         
-        .login-container h2 {
-            font-size: 2em;
-            margin-bottom: 20px;
-            color: var(--color-secondary);
-        }
+        .login-container h2 { font-size: 2em; margin-bottom: 20px; color: var(--color-secondary); }
 
         .login-form input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid var(--color-secondary);
-            border-radius: 5px;
-            box-sizing: border-box;
-            background-color: white;
-            font-family: 'Poppins', sans-serif;
+            width: 100%; padding: 12px; margin-bottom: 15px;
+            border: 1px solid var(--color-secondary); border-radius: 5px;
+            box-sizing: border-box; background-color: white; font-family: 'Poppins', sans-serif;
         }
 
         .login-form button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            background-color: var(--color-secondary);
-            color: white;
-            border-radius: 5px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-weight: 600;
+            width: 100%; padding: 12px; border: none;
+            background-color: var(--color-secondary); color: white;
+            border-radius: 5px; font-size: 1.1em; cursor: pointer;
+            transition: background-color 0.3s ease; font-weight: 600;
         }
 
         .login-form button:hover { background-color: #382D26; }
@@ -100,21 +83,11 @@
         .link-text { margin-top: 20px; font-size: 0.9em; }
         .link-text a { color: var(--color-secondary); text-decoration: underline; font-weight: 600; }
 
-        /* Estilo para el separador "O" */
         .separator {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-            color: #666;
-            font-size: 0.9em;
+            display: flex; align-items: center; margin: 20px 0; color: #666; font-size: 0.9em;
         }
-        .separator::before, .separator::after {
-            content: "";
-            flex: 1;
-            border-top: 1px solid #ccc;
-        }
+        .separator::before, .separator::after { content: ""; flex: 1; border-top: 1px solid #ccc; }
         .separator span { padding: 0 10px; }
-
     </style>
 </head>
 <body>
@@ -132,7 +105,6 @@
     <div class="main-content">
         <div class="login-container">
             <h2>Iniciar Sesión</h2>
-            
             <form class="login-form" id="loginForm">
                 <input type="email" name="email" placeholder="Correo electrónico" required>
                 <input type="password" name="password" placeholder="Contraseña" required>
@@ -147,22 +119,16 @@
                      data-callback="handleCredentialResponse"
                      data-auto_prompt="false">
                 </div>
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-size="large"
-                     data-theme="outline"
-                     data-text="sign_in_with"
-                     data-shape="rectangular"
-                     data-logo_alignment="left"
-                     data-width="320">
-                </div>
+                <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left" data-width="320"></div>
             </div>
             <p class="link-text">¿No tienes una cuenta? <a href="RegUsu.html">Regístrate aquí</a></p>
         </div>
     </div>
 
     <script>
-        // 1. LÓGICA DE LOGIN NORMAL (Correo/Pass)
+        const BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+            ? 'http://127.0.0.1:5000' : '';
+
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('loginForm');
             if (form) {
@@ -172,26 +138,24 @@
                     const password = form.querySelector('input[name="password"]').value;
 
                     try {
-                        const response = await fetch('/login', {
+                        const response = await fetch(`${BASE_URL}/login`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ email, password })
                         });
                         const data = await response.json();
-                        procesarLogin(data); // Usamos una función compartida
+                        procesarLogin(data);
                     } catch (error) {
                         console.error(error);
-                        alert("Error de conexión con el servidor.");
+                        alert("Error de conexión. Asegúrate de que app.py esté corriendo.");
                     }
                 });
             }
         });
 
-        // 2. LÓGICA DE LOGIN CON GOOGLE
         async function handleCredentialResponse(response) {
             try {
-                // Enviamos el token de Google a Python
-                const res = await fetch('/google-login', {
+                const res = await fetch(`${BASE_URL}/google-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: response.credential })
@@ -204,9 +168,10 @@
             }
         }
 
-        // 3. FUNCIÓN COMPARTIDA PARA REDIRIGIR
         function procesarLogin(data) {
             if (data.success) {
+                // --- ¡ESTO ES LO IMPORTANTE! GUARDAR EL ID ---
+                localStorage.setItem('usuarioId', data.user.id);
                 localStorage.setItem('usuarioNombre', data.user.nombre);
                 localStorage.setItem('usuarioRol', data.user.rol);
                 

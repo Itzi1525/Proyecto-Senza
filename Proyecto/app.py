@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
+import platform  # <--- IMPORTANTE: Para detectar si es Windows, Mac o Linux
 
 # --- IMPORTACIONES PARA GOOGLE ---
 from google.oauth2 import id_token
@@ -10,22 +11,36 @@ from google.auth.transport import requests as google_requests
 app = Flask(__name__)
 CORS(app)
 
-# --- CONFIGURACIÓN DE BASE DE DATOS (SQLite) ---
-DB_NAME = 'SensaReposteria.db'
+# ==========================================
+# CONFIGURACIÓN INTELIGENTE (LOCAL vs NUBE)
+# ==========================================
+SISTEMA = platform.system()
+
+if SISTEMA == 'Windows' or SISTEMA == 'Darwin':  # Darwin es Mac
+    print("💻 MODO DETECTADO: LOCAL (Desarrollo)")
+    DB_NAME = 'SensaReposteria.db'  # Base de datos local
+    HOST_IP = '127.0.0.1'           # Localhost
+    DEBUG_MODE = True
+else:
+    print("☁️  MODO DETECTADO: NUBE (AWS/Linux)")
+    # Ruta absoluta recomendada para evitar errores en AWS
+    DB_NAME = '/home/ec2-user/proyecto-senza/Proyecto/SensaReposteria.db' 
+    HOST_IP = '0.0.0.0'             # Necesario para que AWS sea visible
+    DEBUG_MODE = True               # Puedes ponerlo en False cuando termines
 
 def get_db_connection():
     try:
         conn = sqlite3.connect(DB_NAME)
-        # Esto permite acceder a las columnas por nombre (ej: row['email'])
         conn.row_factory = sqlite3.Row 
         return conn
     except Exception as e:
-        print("❌ Error de conexión:", e)
+        print(f"❌ Error conectando a {DB_NAME}: {e}")
         return None
 
-# --- INICIALIZAR TABLAS (Para que no de error si está vacía) ---
+# --- INICIALIZAR TABLAS ---
 def init_db():
     conn = get_db_connection()
+    if not conn: return
     cursor = conn.cursor()
     
     # Tabla Usuario
@@ -39,11 +54,12 @@ def init_db():
         )
     ''')
     
-    # Tabla Cliente
+    # Tabla Cliente (Actualizada con teléfono)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Cliente (
             id_cliente INTEGER PRIMARY KEY AUTOINCREMENT,
-            id_usuario INTEGER,
+            id_usuario INTEGER UNIQUE,
+            telefono TEXT,
             FOREIGN KEY(id_usuario) REFERENCES Usuario(id_usuario)
         )
     ''')
@@ -60,11 +76,25 @@ def init_db():
             activo INTEGER DEFAULT 1
         )
     ''')
+
+    # --- NUEVA TABLA: DIRECCION ---
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Direccion (
+            id_direccion INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_cliente INTEGER,
+            calle TEXT,
+            numero TEXT,
+            colonia TEXT,
+            ciudad TEXT,
+            codigo_postal TEXT,
+            principal INTEGER DEFAULT 0,
+            FOREIGN KEY(id_cliente) REFERENCES Cliente(id_cliente)
+        )
+    ''')
     
     conn.commit()
     conn.close()
 
-# Ejecutamos la creación de tablas al iniciar
 with app.app_context():
     init_db()
 
@@ -80,49 +110,38 @@ def google_login():
     CLIENT_ID = "87366328254-63lo1bk93htqig3shql9ljsj0kbsm22q.apps.googleusercontent.com"
 
     try:
-        # 1. Verificar el token con Google
         idinfo = id_token.verify_oauth2_token(token_google, google_requests.Request(), CLIENT_ID)
-
-        # 2. Obtener datos del usuario
         email = idinfo['email']
         nombre = idinfo['name']
         
         conn = get_db_connection()
-        if not conn:
-            return jsonify({'success': False, 'message': 'Error de conexión a BD'}), 500
-            
+        if not conn: return jsonify({'success': False, 'message': 'Error BD'}), 500 
         cursor = conn.cursor()
         
-        # 3. Buscar si el usuario ya existe
         cursor.execute("SELECT id_usuario, nombre, rol FROM Usuario WHERE correo = ?", (email,))
         row = cursor.fetchone()
 
         if row:
-            # A) YA EXISTE -> INICIAR SESIÓN
             return jsonify({
                 'success': True, 
                 'message': 'Bienvenido de nuevo',
-                'user': {'nombre': row['nombre'], 'rol': row['rol']}
+                # ¡OJO! AHORA DEVUELVE EL ID
+                'user': {'id': row['id_usuario'], 'nombre': row['nombre'], 'rol': row['rol']}
             })
         else:
-            # B) NO EXISTE -> REGISTRARLO AUTOMÁTICAMENTE
-            password_dummy = "GOOGLE_LOGIN_USER" # Contraseña interna
-            
-            # Insertar en Usuario
+            password_dummy = "GOOGLE_LOGIN_USER"
             sql_usuario = "INSERT INTO Usuario (nombre, correo, contrasena, rol) VALUES (?, ?, ?, ?)"
             cursor.execute(sql_usuario, (nombre, email, password_dummy, 'Cliente'))
-            
-            # Obtener ID en SQLite
             id_nuevo = cursor.lastrowid
             
-            # Insertar en Cliente
+            # Crear Cliente vacío
             cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (?)", (id_nuevo,))
             conn.commit()
             
             return jsonify({
                 'success': True, 
                 'message': 'Cuenta creada con Google',
-                'user': {'nombre': nombre, 'rol': 'Cliente'}
+                'user': {'id': id_nuevo, 'nombre': nombre, 'rol': 'Cliente'}
             })
 
     except ValueError:
@@ -133,9 +152,8 @@ def google_login():
     finally:
         if 'conn' in locals() and conn: conn.close()
 
-
 # ==========================================
-# 2. REGISTRO NORMAL (Correo y Contraseña)
+# 2. REGISTRO NORMAL
 # ==========================================
 @app.route('/registro', methods=['POST'])
 def registro():
@@ -150,10 +168,7 @@ def registro():
 
         sql_usuario = "INSERT INTO Usuario (nombre, correo, contrasena, rol) VALUES (?, ?, ?, ?)"
         cursor.execute(sql_usuario, (data['nombre'], data['email'], data['password'], 'Cliente'))
-        
-        # Obtener ID en SQLite
         id_nuevo = cursor.lastrowid
-
         cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (?)", (id_nuevo,))
         conn.commit()
         return jsonify({'success': True, 'message': 'Registro exitoso'})
@@ -175,9 +190,12 @@ def login():
     try:
         cursor.execute("SELECT id_usuario, nombre, contrasena, rol FROM Usuario WHERE correo = ?", (data['email'],))
         row = cursor.fetchone()
-        # Accedemos como diccionario gracias a row_factory
         if row and row['contrasena'] == data['password']:
-            return jsonify({'success': True, 'user': {'nombre': row['nombre'], 'rol': row['rol']}})
+            return jsonify({
+                'success': True, 
+                # ¡OJO! AHORA DEVUELVE EL ID
+                'user': {'id': row['id_usuario'], 'nombre': row['nombre'], 'rol': row['rol']}
+            })
         return jsonify({'success': False, 'message': 'Credenciales incorrectas'}), 401
     finally:
         conn.close()
@@ -185,41 +203,29 @@ def login():
 # ==========================================
 # 4. CRUD DE USUARIOS (Admin)
 # ==========================================
-
-# OBTENER TODOS
 @app.route('/usuarios', methods=['GET'])
 def get_usuarios():
     conn = get_db_connection()
+    if not conn: return jsonify([]), 500
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT id_usuario, nombre, correo, rol FROM Usuario")
         rows = cursor.fetchall()
-        usuarios = []
-        for row in rows:
-            usuarios.append({
-                'id_usuario': row['id_usuario'],
-                'nombre': row['nombre'],
-                'correo': row['correo'],
-                'rol': row['rol']
-            })
+        usuarios = [{'id_usuario': r['id_usuario'], 'nombre': r['nombre'], 'correo': r['correo'], 'rol': r['rol']} for r in rows]
         return jsonify(usuarios)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
 
-# EDITAR USUARIO
 @app.route('/usuarios', methods=['PUT'])
 def update_usuario():
     data = request.get_json()
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("""
-            UPDATE Usuario 
-            SET nombre = ?, correo = ?, rol = ? 
-            WHERE id_usuario = ?
-        """, (data['nombre'], data['correo'], data['rol'], data['id']))
+        cursor.execute("UPDATE Usuario SET nombre = ?, correo = ?, rol = ? WHERE id_usuario = ?", 
+                      (data['nombre'], data['correo'], data['rol'], data['id']))
         conn.commit()
         return jsonify({'success': True, 'message': 'Usuario actualizado'})
     except Exception as e:
@@ -228,7 +234,6 @@ def update_usuario():
     finally:
         conn.close()
 
-# ELIMINAR USUARIO
 @app.route('/usuarios/delete', methods=['POST'])
 def delete_usuario():
     data = request.get_json()
@@ -245,48 +250,32 @@ def delete_usuario():
         conn.close()
 
 # ================== PRODUCTOS ==================
-
-# Obtener productos activos
 @app.route('/productos', methods=['GET'])
 def get_productos():
     conn = get_db_connection()
+    if not conn: return jsonify([]), 500
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT id_producto, nombre, descripcion, precio, stock, imagen FROM Producto WHERE activo = 1")
         rows = cursor.fetchall()
-        productos = []
-        for row in rows:
-            productos.append({
-                'id_producto': row['id_producto'],
-                'nombre': row['nombre'],
-                'descripcion': row['descripcion'],
-                'precio': float(row['precio']),
-                'stock': row['stock'],
-                'imagen': row['imagen']
-            })
+        productos = [{
+            'id_producto': r['id_producto'], 'nombre': r['nombre'], 'descripcion': r['descripcion'],
+            'precio': float(r['precio']), 'stock': r['stock'], 'imagen': r['imagen']
+        } for r in rows]
         return jsonify(productos)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
 
-# Agregar producto
 @app.route('/productos', methods=['POST'])
 def agregar_producto():
     data = request.get_json()
-    nombre = data.get('nombre')
-    descripcion = data.get('descripcion')
-    precio = data.get('precio')
-    stock = data.get('stock')
-    imagen = data.get('imagen')
-
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute(
-            "INSERT INTO Producto (nombre, descripcion, precio, stock, imagen, activo) VALUES (?, ?, ?, ?, ?, 1)",
-            (nombre, descripcion, precio, stock, imagen)
-        )
+        cursor.execute("INSERT INTO Producto (nombre, descripcion, precio, stock, imagen, activo) VALUES (?, ?, ?, ?, ?, 1)",
+                       (data.get('nombre'), data.get('descripcion'), data.get('precio'), data.get('stock'), data.get('imagen')))
         conn.commit()
         return jsonify({'message': 'Producto agregado correctamente'})
     except Exception as e:
@@ -295,24 +284,14 @@ def agregar_producto():
     finally:
         conn.close()
 
-# Editar producto
 @app.route('/productos/<int:id_producto>', methods=['PUT'])
 def update_producto(id_producto):
     data = request.get_json()
-    nombre = data.get('nombre')
-    descripcion = data.get('descripcion')
-    precio = data.get('precio')
-    stock = data.get('stock')
-    imagen = data.get('imagen')
-
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("""
-            UPDATE Producto 
-            SET nombre = ?, descripcion = ?, precio = ?, stock = ?, imagen = ?
-            WHERE id_producto = ?
-        """, (nombre, descripcion, precio, stock, imagen, id_producto))
+        cursor.execute("UPDATE Producto SET nombre = ?, descripcion = ?, precio = ?, stock = ?, imagen = ? WHERE id_producto = ?",
+                       (data.get('nombre'), data.get('descripcion'), data.get('precio'), data.get('stock'), data.get('imagen'), id_producto))
         conn.commit()
         return jsonify({'message': 'Producto actualizado correctamente'})
     except Exception as e:
@@ -322,21 +301,115 @@ def update_producto(id_producto):
         conn.close()
 
 # ==========================================
-# 5. SERVIR PÁGINAS WEB (Frontend)
+# 6. PERFIL Y DIRECCIONES (NUEVO)
 # ==========================================
 
-# Ruta para la página de inicio (Raíz)
+# OBTENER DATOS DEL PERFIL
+@app.route('/perfil/<int:id_usuario>', methods=['GET'])
+def get_perfil(id_usuario):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # 1. Datos Generales
+        cursor.execute("""
+            SELECT u.nombre, u.correo, c.telefono, c.id_cliente 
+            FROM Usuario u 
+            LEFT JOIN Cliente c ON u.id_usuario = c.id_usuario 
+            WHERE u.id_usuario = ?
+        """, (id_usuario,))
+        user = cursor.fetchone()
+        
+        if not user: return jsonify({'success': False}), 404
+
+        # 2. Direcciones
+        direcciones = []
+        if user['id_cliente']:
+            cursor.execute("SELECT * FROM Direccion WHERE id_cliente = ?", (user['id_cliente'],))
+            direcciones = [dict(row) for row in cursor.fetchall()]
+
+        return jsonify({
+            'success': True,
+            'nombre': user['nombre'],
+            'correo': user['correo'],
+            'telefono': user['telefono'] or '',
+            'direcciones': direcciones
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+# ACTUALIZAR DATOS BASICOS
+@app.route('/perfil/update/<int:id_usuario>', methods=['PUT'])
+def update_perfil(id_usuario):
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Actualizar Usuario
+        cursor.execute("UPDATE Usuario SET nombre = ?, correo = ? WHERE id_usuario = ?", 
+                      (data['nombre'], data['correo'], id_usuario))
+        
+        # Verificar si existe Cliente, si no, crearlo
+        cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = ?", (id_usuario,))
+        cliente = cursor.fetchone()
+        
+        if cliente:
+            cursor.execute("UPDATE Cliente SET telefono = ? WHERE id_usuario = ?", (data['telefono'], id_usuario))
+        else:
+            cursor.execute("INSERT INTO Cliente (id_usuario, telefono) VALUES (?, ?)", (id_usuario, data['telefono']))
+            
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Datos actualizados'})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+# AGREGAR DIRECCIÓN
+@app.route('/direccion/add/<int:id_usuario>', methods=['POST'])
+def add_direccion(id_usuario):
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Obtener id_cliente
+        cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = ?", (id_usuario,))
+        row = cursor.fetchone()
+        if not row:
+            # Crear cliente si no existe
+            cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (?)", (id_usuario,))
+            id_cliente = cursor.lastrowid
+        else:
+            id_cliente = row['id_cliente']
+
+        cursor.execute("""
+            INSERT INTO Direccion (id_cliente, calle, numero, colonia, ciudad, codigo_postal)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (id_cliente, data['calle'], data['numero'], data['colonia'], data['ciudad'], data['cp']))
+        
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Dirección agregada'})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+# ==========================================
+# 5. SERVIR PÁGINAS WEB
+# ==========================================
 @app.route('/')
 def serve_index():
     return send_from_directory('.', 'Inicio.html')
 
-# Ruta mágica para servir cualquier otro archivo (CSS, JS, Imágenes, otros HTML)
 @app.route('/<path:path>')
 def serve_static_files(path):
     return send_from_directory('.', path)
 
 # --- ARRANQUE DEL SERVIDOR ---
 if __name__ == '__main__':
-    # host='0.0.0.0' ES MUY IMPORTANTE EN AWS
-    print("🚀 Servidor Python corriendo en http://0.0.0.0:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print(f"🚀 Iniciando servidor en entorno: {SISTEMA}")
+    print(f"📂 Usando base de datos: {DB_NAME}")
+    app.run(debug=DEBUG_MODE, host=HOST_IP, port=5000)

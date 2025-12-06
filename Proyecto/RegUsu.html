@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse - Senza</title>
     <link rel="icon" type="image/png" href="Imagenes/Senza.png">
-    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
@@ -61,6 +60,9 @@
     </div>
 
     <script>
+        const BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+            ? 'http://127.0.0.1:5000' : '';
+
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('registerForm');
             const submitBtn = document.getElementById('submitBtn');
@@ -73,18 +75,16 @@
                 const passwordInput = form.querySelector('input[name="password"]');
                 const confirmInput = form.querySelector('input[name="confirm-password"]');
 
-                // --- VALIDACIÓN MÍNIMA (SOLO QUE NO ESTÉN VACÍOS) ---
                 if (passwordInput.value !== confirmInput.value) {
                     alert("Las contraseñas no coinciden.");
                     return;
                 }
 
-                // Deshabilitar botón
                 submitBtn.disabled = true;
                 submitBtn.textContent = "Procesando...";
 
                 try {
-                    const response = await fetch('/registro', {
+                    const response = await fetch(`${BASE_URL}/registro`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
@@ -106,7 +106,7 @@
                     }
                 } catch (error) {
                     console.error(error);
-                    alert("Error de conexión.");
+                    alert("Error de conexión. Revisa que app.py esté corriendo.");
                     submitBtn.disabled = false;
                     submitBtn.textContent = "Registrarse";
                 }
@@ -116,13 +116,15 @@
         // Google Login
         window.handleCredentialResponse = async function(response) {
             try {
-                const res = await fetch('/google-login', {
+                const res = await fetch(`${BASE_URL}/google-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: response.credential })
                 });
                 const data = await res.json();
                 if (data.success) {
+                    // GUARDAR EL ID
+                    localStorage.setItem('usuarioId', data.user.id);
                     localStorage.setItem('usuarioNombre', data.user.nombre);
                     localStorage.setItem('usuarioRol', data.user.rol);
                     window.location.href = 'Inicio.html';
