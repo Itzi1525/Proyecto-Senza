@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
-import platform  # <--- IMPORTANTE: Para detectar si es Windows, Mac o Linux
+import platform 
 
 # --- IMPORTACIONES PARA GOOGLE ---
 from google.oauth2 import id_token
@@ -12,21 +12,24 @@ app = Flask(__name__)
 CORS(app)
 
 # ==========================================
-# CONFIGURACIÓN INTELIGENTE (LOCAL vs NUBE)
+# CONFIGURACIÓN INTELIGENTE (Solución Definitiva de Rutas)
 # ==========================================
 SISTEMA = platform.system()
 
-if SISTEMA == 'Windows' or SISTEMA == 'Darwin':  # Darwin es Mac
-    print("💻 MODO DETECTADO: LOCAL (Desarrollo)")
-    DB_NAME = 'SensaReposteria.db'  # Base de datos local
-    HOST_IP = '127.0.0.1'           # Localhost
+# 1. Detectar la ruta EXACTA donde está este archivo app.py
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+DB_NAME = os.path.join(BASE_DIR, 'SensaReposteria.db')
+
+if SISTEMA == 'Windows' or SISTEMA == 'Darwin':
+    print("💻 MODO DETECTADO: LOCAL")
+    HOST_IP = '127.0.0.1'
     DEBUG_MODE = True
 else:
     print("☁️  MODO DETECTADO: NUBE (AWS/Linux)")
-    # Ruta absoluta recomendada para evitar errores en AWS
-    DB_NAME = '/home/ec2-user/proyecto-senza/Proyecto/SensaReposteria.db' 
-    HOST_IP = '0.0.0.0'             # Necesario para que AWS sea visible
-    DEBUG_MODE = True               # Puedes ponerlo en False cuando termines
+    HOST_IP = '0.0.0.0'
+    DEBUG_MODE = True
+
+print(f"📂 Base de datos en: {DB_NAME}")
 
 def get_db_connection():
     try:
@@ -54,7 +57,7 @@ def init_db():
         )
     ''')
     
-    # Tabla Cliente (Actualizada con teléfono)
+    # Tabla Cliente
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Cliente (
             id_cliente INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,7 +80,7 @@ def init_db():
         )
     ''')
 
-    # --- NUEVA TABLA: DIRECCION ---
+    # Tabla Direccion
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Direccion (
             id_direccion INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,7 +109,6 @@ def google_login():
     data = request.get_json()
     token_google = data.get('token')
     
-    # TU CLIENT ID REAL
     CLIENT_ID = "87366328254-63lo1bk93htqig3shql9ljsj0kbsm22q.apps.googleusercontent.com"
 
     try:
@@ -125,7 +127,6 @@ def google_login():
             return jsonify({
                 'success': True, 
                 'message': 'Bienvenido de nuevo',
-                # ¡OJO! AHORA DEVUELVE EL ID
                 'user': {'id': row['id_usuario'], 'nombre': row['nombre'], 'rol': row['rol']}
             })
         else:
@@ -134,7 +135,6 @@ def google_login():
             cursor.execute(sql_usuario, (nombre, email, password_dummy, 'Cliente'))
             id_nuevo = cursor.lastrowid
             
-            # Crear Cliente vacío
             cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (?)", (id_nuevo,))
             conn.commit()
             
@@ -193,7 +193,6 @@ def login():
         if row and row['contrasena'] == data['password']:
             return jsonify({
                 'success': True, 
-                # ¡OJO! AHORA DEVUELVE EL ID
                 'user': {'id': row['id_usuario'], 'nombre': row['nombre'], 'rol': row['rol']}
             })
         return jsonify({'success': False, 'message': 'Credenciales incorrectas'}), 401
@@ -201,7 +200,7 @@ def login():
         conn.close()
 
 # ==========================================
-# 4. CRUD DE USUARIOS (Admin)
+# 4. CRUD DE USUARIOS
 # ==========================================
 @app.route('/usuarios', methods=['GET'])
 def get_usuarios():
@@ -301,16 +300,14 @@ def update_producto(id_producto):
         conn.close()
 
 # ==========================================
-# 6. PERFIL Y DIRECCIONES (NUEVO)
+# 6. PERFIL Y DIRECCIONES
 # ==========================================
 
-# OBTENER DATOS DEL PERFIL
 @app.route('/perfil/<int:id_usuario>', methods=['GET'])
 def get_perfil(id_usuario):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # 1. Datos Generales
         cursor.execute("""
             SELECT u.nombre, u.correo, c.telefono, c.id_cliente 
             FROM Usuario u 
@@ -321,7 +318,6 @@ def get_perfil(id_usuario):
         
         if not user: return jsonify({'success': False}), 404
 
-        # 2. Direcciones
         direcciones = []
         if user['id_cliente']:
             cursor.execute("SELECT * FROM Direccion WHERE id_cliente = ?", (user['id_cliente'],))
@@ -339,18 +335,15 @@ def get_perfil(id_usuario):
     finally:
         conn.close()
 
-# ACTUALIZAR DATOS BASICOS
 @app.route('/perfil/update/<int:id_usuario>', methods=['PUT'])
 def update_perfil(id_usuario):
     data = request.get_json()
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Actualizar Usuario
         cursor.execute("UPDATE Usuario SET nombre = ?, correo = ? WHERE id_usuario = ?", 
                       (data['nombre'], data['correo'], id_usuario))
         
-        # Verificar si existe Cliente, si no, crearlo
         cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = ?", (id_usuario,))
         cliente = cursor.fetchone()
         
@@ -367,18 +360,15 @@ def update_perfil(id_usuario):
     finally:
         conn.close()
 
-# AGREGAR DIRECCIÓN
 @app.route('/direccion/add/<int:id_usuario>', methods=['POST'])
 def add_direccion(id_usuario):
     data = request.get_json()
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Obtener id_cliente
         cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = ?", (id_usuario,))
         row = cursor.fetchone()
         if not row:
-            # Crear cliente si no existe
             cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (?)", (id_usuario,))
             id_cliente = cursor.lastrowid
         else:
@@ -408,7 +398,6 @@ def serve_index():
 def serve_static_files(path):
     return send_from_directory('.', path)
 
-# --- ARRANQUE DEL SERVIDOR ---
 if __name__ == '__main__':
     print(f"🚀 Iniciando servidor en entorno: {SISTEMA}")
     print(f"📂 Usando base de datos: {DB_NAME}")
