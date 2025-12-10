@@ -237,5 +237,9 @@ INSERT INTO Producto (nombre, descripcion, precio, stock, activo, imagen, catego
 ('Galleta de Nuez', 'Galleta con trozos de nuez y textura crujiente por fuera.', 25.00, 10, 1, 'Imagenes/galleta_nuez.jpg', 'galletas');
 
 SELECT * FROM Producto WHERE activo = 1;
+UPDATE Usuario
+SET correo = @nuevo_correo
+WHERE id_usuario = @id_usuario;
+
 
 

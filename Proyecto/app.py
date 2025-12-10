@@ -3,6 +3,9 @@ from flask_cors import CORS
 import sqlite3
 import os
 import platform 
+from flask import request, jsonify, session
+import pyodbc
+
 
 # --- IMPORTACIONES PARA GOOGLE ---
 from google.oauth2 import id_token
@@ -303,89 +306,75 @@ def update_producto(id_producto):
 # 6. PERFIL Y DIRECCIONES
 # ==========================================
 
-@app.route('/perfil/<int:id_usuario>', methods=['GET'])
-def get_perfil(id_usuario):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("""
-            SELECT u.nombre, u.correo, c.telefono, c.id_cliente 
-            FROM Usuario u 
-            LEFT JOIN Cliente c ON u.id_usuario = c.id_usuario 
-            WHERE u.id_usuario = ?
-        """, (id_usuario,))
-        user = cursor.fetchone()
-        
-        if not user: return jsonify({'success': False}), 404
+def get_db():
+    return pyodbc.connect(connection_string)
 
-        direcciones = []
-        if user['id_cliente']:
-            cursor.execute("SELECT * FROM Direccion WHERE id_cliente = ?", (user['id_cliente'],))
-            direcciones = [dict(row) for row in cursor.fetchall()]
+@app.route('/api/perfil')
+def perfil():
+    id_usuario = session.get("id_usuario")
 
-        return jsonify({
-            'success': True,
-            'nombre': user['nombre'],
-            'correo': user['correo'],
-            'telefono': user['telefono'] or '',
-            'direcciones': direcciones
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
-        conn.close()
+    con = get_db()
+    cur = con.cursor()
+    
+    cur.execute("""
+        SELECT U.nombre, U.correo, C.telefono,
+               D.calle, D.numero, D.colonia, D.ciudad, D.codigo_postal
+        FROM Usuario U
+        JOIN Cliente C ON U.id_usuario = C.id_usuario
+        LEFT JOIN Direccion D ON C.id_cliente = D.id_cliente AND D.principal = 1
+        WHERE U.id_usuario = ?
+    """, (id_usuario,))
 
-@app.route('/perfil/update/<int:id_usuario>', methods=['PUT'])
-def update_perfil(id_usuario):
-    data = request.get_json()
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("UPDATE Usuario SET nombre = ?, correo = ? WHERE id_usuario = ?", 
-                      (data['nombre'], data['correo'], id_usuario))
-        
-        cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = ?", (id_usuario,))
-        cliente = cursor.fetchone()
-        
-        if cliente:
-            cursor.execute("UPDATE Cliente SET telefono = ? WHERE id_usuario = ?", (data['telefono'], id_usuario))
-        else:
-            cursor.execute("INSERT INTO Cliente (id_usuario, telefono) VALUES (?, ?)", (id_usuario, data['telefono']))
-            
-        conn.commit()
-        return jsonify({'success': True, 'message': 'Datos actualizados'})
-    except Exception as e:
-        conn.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
-    finally:
-        conn.close()
+    row = cur.fetchone()
+    return jsonify({
+        "nombre": row[0],
+        "correo": row[1],
+        "telefono": row[2],
+        "calle": row[3],
+        "numero": row[4],
+        "colonia": row[5],
+        "ciudad": row[6],
+        "codigo_postal": row[7],
+    })
 
-@app.route('/direccion/add/<int:id_usuario>', methods=['POST'])
-def add_direccion(id_usuario):
-    data = request.get_json()
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = ?", (id_usuario,))
-        row = cursor.fetchone()
-        if not row:
-            cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (?)", (id_usuario,))
-            id_cliente = cursor.lastrowid
-        else:
-            id_cliente = row['id_cliente']
+@app.route('/api/actualizar_usuario', methods=['POST'])
+def actualizar_usuario():
+    id_usuario = session.get("id_usuario")
+    data = request.json
 
-        cursor.execute("""
-            INSERT INTO Direccion (id_cliente, calle, numero, colonia, ciudad, codigo_postal)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (id_cliente, data['calle'], data['numero'], data['colonia'], data['ciudad'], data['cp']))
-        
-        conn.commit()
-        return jsonify({'success': True, 'message': 'Dirección agregada'})
-    except Exception as e:
-        conn.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
-    finally:
-        conn.close()
+    con = get_db()
+    cur = con.cursor()
+    cur.execute("""
+        UPDATE Usuario SET nombre = ?, correo = ? WHERE id_usuario = ?
+    """, (data["nombre"], data["correo"], id_usuario))
+    
+    cur.execute("""
+        UPDATE Cliente SET telefono = ? WHERE id_usuario = ?
+    """, (data["telefono"], id_usuario))
+
+    con.commit()
+    return jsonify({"status": "ok"})
+
+@app.route('/api/actualizar_direccion', methods=['POST'])
+def actualizar_direccion():
+    id_usuario = session.get("id_usuario")
+    data = request.json
+
+    con = get_db()
+    cur = con.cursor()
+
+    cur.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = ?", (id_usuario,))
+    id_cliente = cur.fetchone()[0]
+
+    cur.execute("""
+        UPDATE Direccion 
+        SET calle=?, numero=?, colonia=?, ciudad=?, codigo_postal=?
+        WHERE id_cliente=? AND principal=1
+    """, (data["calle"], data["numero"], data["colonia"], data["ciudad"], data["codigo_postal"], id_cliente))
+
+    con.commit()
+    return jsonify({"status": "ok"})
+
 
 # ==========================================
 # 5. SERVIR PÁGINAS WEB
@@ -402,3 +391,5 @@ if __name__ == '__main__':
     print(f"🚀 Iniciando servidor en entorno: {SISTEMA}")
     print(f"📂 Usando base de datos: {DB_NAME}")
     app.run(debug=DEBUG_MODE, host=HOST_IP, port=5000)
+
+
