@@ -22,7 +22,7 @@ def get_db_connection():
         conn = pymysql.connect(
             host='localhost',
             user='root',
-            password='TU_CONTRASEÑA_AQUI',  # <--- ¡PON TU CONTRASEÑA!
+            password='reposteria123',  # <--- ¡PON TU CONTRASEÑA!
             database='SenzaReposteria',
             cursorclass=pymysql.cursors.DictCursor # Para acceder como diccionario row['email']
         )
