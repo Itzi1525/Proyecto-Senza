@@ -147,35 +147,27 @@ def login():
 
 # ==========================================
 # 2. PERFIL Y DIRECCIONES
-# ==========================================
-@app.route('/actualizar_perfil', methods=['POST'])
-def actualizar_perfil():
-    if 'user_id' not in session:
-        return redirect('/Inicio.html')
-
-    id_usuario = session['user_id']
-
-    nombre = request.form.get('nombre')
-    correo = request.form.get('correo')
-    telefono = request.form.get('telefono')
-
-    print("DEBUG FORM:", nombre, correo, telefono)
+@app.route('/perfil/update/<int:id_usuario>', methods=['PUT'])
+def update_perfil_put(id_usuario):
+    data = request.get_json()
+    nombre = data.get('nombre')
+    correo = data.get('correo')
+    telefono = data.get('telefono')
 
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
                 UPDATE Usuario
-                SET nombre=%s,
-                    correo=%s,
-                    telefono=%s
-                WHERE id_usuario=%s
+                SET nombre = %s, correo = %s, telefono = %s
+                WHERE id_usuario = %s
             """, (nombre, correo, telefono, id_usuario))
             conn.commit()
     finally:
         conn.close()
 
-    return redirect('/perfil')
+    return jsonify({'success': True})
+
 
 
 

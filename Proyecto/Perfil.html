@@ -58,20 +58,18 @@
         <div class="logo"><h1>Senza | Mi Perfil</h1></div>
         <a href="Inicio.html" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al Inicio</a>
     </header>
-<form method="POST" action="/actualizar_perfil">
-
+<form id="perfilForm">
     <label>Nombre</label>
-    <input type="text" name="nombre" value="{{ usuario.nombre }}" required>
+    <input type="text" id="nombre" name="nombre" value="{{ usuario.nombre }}">
 
     <label>Correo</label>
-    <input type="email" name="correo" value="{{ usuario.correo }}" required>
+    <input type="email" id="correo" name="correo" value="{{ usuario.correo }}">
 
     <label>Teléfono</label>
-    <input type="text" name="telefono" value="{{ usuario.telefono or '' }}" required>
+    <input type="text" id="telefono" name="telefono" value="{{ usuario.telefono }}">
 
     <button type="submit">Guardar cambios</button>
 </form>
-
 
 
 
@@ -111,7 +109,23 @@
     </div>
 
 <script>
+document.getElementById('perfilForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
+    fetch('/perfil/update/{{ session["user_id"] }}', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            nombre: document.getElementById('nombre').value,
+            correo: document.getElementById('correo').value,
+            telefono: document.getElementById('telefono').value
+        })
+    })
+    .then(res => res.json())
+    .then(() => alert('Perfil actualizado correctamente'));
+});
 </script>
 
 
