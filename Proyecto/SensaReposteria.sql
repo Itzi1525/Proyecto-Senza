@@ -241,5 +241,10 @@ UPDATE Usuario
 SET correo = @nuevo_correo
 WHERE id_usuario = @id_usuario;
 
+select * from Usuario;
+select * from Cliente;
+select * from Direccion;
 
-
+ALTER TABLE Usuario
+ADD telefono NVARCHAR(100);
+GO

@@ -3,9 +3,6 @@ from flask_cors import CORS
 import sqlite3
 import os
 import platform 
-from flask import request, jsonify, session
-import pyodbc
-
 
 # --- IMPORTACIONES PARA GOOGLE ---
 from google.oauth2 import id_token
@@ -305,75 +302,6 @@ def update_producto(id_producto):
 # ==========================================
 # 6. PERFIL Y DIRECCIONES
 # ==========================================
-
-def get_db():
-    return pyodbc.connect(connection_string)
-
-@app.route('/api/perfil')
-def perfil():
-    id_usuario = session.get("id_usuario")
-
-    con = get_db()
-    cur = con.cursor()
-    
-    cur.execute("""
-        SELECT U.nombre, U.correo, C.telefono,
-               D.calle, D.numero, D.colonia, D.ciudad, D.codigo_postal
-        FROM Usuario U
-        JOIN Cliente C ON U.id_usuario = C.id_usuario
-        LEFT JOIN Direccion D ON C.id_cliente = D.id_cliente AND D.principal = 1
-        WHERE U.id_usuario = ?
-    """, (id_usuario,))
-
-    row = cur.fetchone()
-    return jsonify({
-        "nombre": row[0],
-        "correo": row[1],
-        "telefono": row[2],
-        "calle": row[3],
-        "numero": row[4],
-        "colonia": row[5],
-        "ciudad": row[6],
-        "codigo_postal": row[7],
-    })
-
-@app.route('/api/actualizar_usuario', methods=['POST'])
-def actualizar_usuario():
-    id_usuario = session.get("id_usuario")
-    data = request.json
-
-    con = get_db()
-    cur = con.cursor()
-    cur.execute("""
-        UPDATE Usuario SET nombre = ?, correo = ? WHERE id_usuario = ?
-    """, (data["nombre"], data["correo"], id_usuario))
-    
-    cur.execute("""
-        UPDATE Cliente SET telefono = ? WHERE id_usuario = ?
-    """, (data["telefono"], id_usuario))
-
-    con.commit()
-    return jsonify({"status": "ok"})
-
-@app.route('/api/actualizar_direccion', methods=['POST'])
-def actualizar_direccion():
-    id_usuario = session.get("id_usuario")
-    data = request.json
-
-    con = get_db()
-    cur = con.cursor()
-
-    cur.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = ?", (id_usuario,))
-    id_cliente = cur.fetchone()[0]
-
-    cur.execute("""
-        UPDATE Direccion 
-        SET calle=?, numero=?, colonia=?, ciudad=?, codigo_postal=?
-        WHERE id_cliente=? AND principal=1
-    """, (data["calle"], data["numero"], data["colonia"], data["ciudad"], data["codigo_postal"], id_cliente))
-
-    con.commit()
-    return jsonify({"status": "ok"})
 
 
 # ==========================================
