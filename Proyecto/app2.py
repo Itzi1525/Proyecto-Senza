@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import session
+from flask import Flask, request, jsonify, send_from_directory, redirect, render_template
 from flask_cors import CORS
 import pymysql # Cambiamos sqlite3 por pymysql
 import os
@@ -9,6 +10,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
 app = Flask(__name__)
+app.secret_key = 'senza_secreta_123'
+
 CORS(app)
 
 # ==========================================
@@ -109,107 +112,77 @@ def registro():
 def login():
     data = request.get_json()
     conn = get_db_connection()
-    if not conn: return jsonify({'success': False, 'message': 'Error BD'}), 500
-    
+    if not conn:
+        return jsonify({'success': False, 'message': 'Error BD'}), 500
+
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id_usuario, nombre, contrasena, rol FROM Usuario WHERE correo = %s", (data['email'],))
+            cursor.execute(
+                "SELECT id_usuario, nombre, contrasena, rol FROM Usuario WHERE correo = %s",
+                (data['email'],)
+            )
             row = cursor.fetchone()
+
             if row and row['contrasena'] == data['password']:
+                session['user_id'] = row['id_usuario']
+                session['nombre'] = row['nombre']
+                session['rol'] = row['rol']
+
                 return jsonify({
-                    'success': True, 
-                    'user': {'id': row['id_usuario'], 'nombre': row['nombre'], 'rol': row['rol']}
+                    'success': True,
+                    'user': {
+                        'id': row['id_usuario'],
+                        'nombre': row['nombre'],
+                        'rol': row['rol']
+                    }
                 })
-            return jsonify({'success': False, 'message': 'Credenciales incorrectas'}), 401
+
+            return jsonify({
+                'success': False,
+                'message': 'Credenciales incorrectas'
+            }), 401
+
     finally:
         conn.close()
 
 # ==========================================
 # 2. PERFIL Y DIRECCIONES
 # ==========================================
-@app.route('/perfil/<int:id_usuario>', methods=['GET'])
-def get_perfil(id_usuario):
+@app.route('/actualizar_perfil', methods=['POST'])
+def actualizar_perfil():
+    if 'user_id' not in session:
+        return redirect('/Inicio.html')
+
+    id_usuario = session['user_id']
+
+    nombre = request.form.get('nombre')
+    correo = request.form.get('correo')
+    telefono = request.form.get('telefono')
+
+    print("DEBUG FORM:", nombre, correo, telefono)
+
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                SELECT u.nombre, u.correo, c.telefono, c.id_cliente 
-                FROM Usuario u 
-                LEFT JOIN Cliente c ON u.id_usuario = c.id_usuario 
-                WHERE u.id_usuario = %s
-            """, (id_usuario,))
-            user = cursor.fetchone()
-            
-            if not user: return jsonify({'success': False}), 404
-
-            direcciones = []
-            if user['id_cliente']:
-                cursor.execute("SELECT * FROM Direccion WHERE id_cliente = %s", (user['id_cliente'],))
-                direcciones = cursor.fetchall()
-
-            return jsonify({
-                'success': True,
-                'nombre': user['nombre'],
-                'correo': user['correo'],
-                'telefono': user['telefono'] or '',
-                'direcciones': direcciones
-            })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
-        conn.close()
-
-@app.route('/perfil/update/<int:id_usuario>', methods=['PUT'])
-def update_perfil(id_usuario):
-    data = request.get_json()
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("UPDATE Usuario SET nombre = %s, correo = %s WHERE id_usuario = %s", 
-                          (data['nombre'], data['correo'], id_usuario))
-            
-            cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = %s", (id_usuario,))
-            cliente = cursor.fetchone()
-            
-            if cliente:
-                cursor.execute("UPDATE Cliente SET telefono = %s WHERE id_usuario = %s", (data['telefono'], id_usuario))
-            else:
-                cursor.execute("INSERT INTO Cliente (id_usuario, telefono) VALUES (%s, %s)", (id_usuario, data['telefono']))
-                
+                UPDATE Usuario
+                SET nombre=%s,
+                    correo=%s,
+                    telefono=%s
+                WHERE id_usuario=%s
+            """, (nombre, correo, telefono, id_usuario))
             conn.commit()
-            return jsonify({'success': True, 'message': 'Datos actualizados'})
-    except Exception as e:
-        conn.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         conn.close()
 
-@app.route('/direccion/add/<int:id_usuario>', methods=['POST'])
-def add_direccion(id_usuario):
-    data = request.get_json()
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = %s", (id_usuario,))
-            row = cursor.fetchone()
-            if not row:
-                cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (%s)", (id_usuario,))
-                id_cliente = cursor.lastrowid
-            else:
-                id_cliente = row['id_cliente']
+    return redirect('/perfil')
 
-            cursor.execute("""
-                INSERT INTO Direccion (id_cliente, calle, numero, colonia, ciudad, codigo_postal)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (id_cliente, data['calle'], data['numero'], data['colonia'], data['ciudad'], data['cp']))
-            
-            conn.commit()
-            return jsonify({'success': True, 'message': 'Dirección agregada'})
-    except Exception as e:
-        conn.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
-    finally:
-        conn.close()
+
+
+
+
+
+
 
 # ==========================================
 # 3. PRODUCTOS Y ADMIN

@@ -58,26 +58,22 @@
         <div class="logo"><h1>Senza | Mi Perfil</h1></div>
         <a href="Inicio.html" class="btn-back"><i class="fas fa-arrow-left"></i> Volver al Inicio</a>
     </header>
+<form method="POST" action="/actualizar_perfil">
 
-    <div class="container">
-        <div class="profile-section">
-            <h2>Mis Datos</h2>
-            <form id="profileForm">
-                <div class="form-group">
-                    <label>Nombre Completo</label>
-                    <input type="text" id="nombre" required>
-                </div>
-                <div class="form-group">
-                    <label>Correo Electrónico</label>
-                    <input type="email" id="correo" required>
-                </div>
-                <div class="form-group">
-                    <label>Teléfono</label>
-                    <input type="tel" id="telefono" placeholder="55 1234 5678">
-                </div>
-                <button type="submit" class="btn-save">Actualizar Datos</button>
-            </form>
-        </div>
+    <label>Nombre</label>
+    <input type="text" name="nombre" value="{{ usuario.nombre }}" required>
+
+    <label>Correo</label>
+    <input type="email" name="correo" value="{{ usuario.correo }}" required>
+
+    <label>Teléfono</label>
+    <input type="text" name="telefono" value="{{ usuario.telefono or '' }}" required>
+
+    <button type="submit">Guardar cambios</button>
+</form>
+
+
+
 
         <div class="profile-section">
             <h2>Mis Direcciones de Entrega</h2>
@@ -114,116 +110,11 @@
         </div>
     </div>
 
-  <script>
-    const BASE_URL = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
-        ? "http://127.0.0.1:5000" : "";
-
-    const userId = localStorage.getItem("usuarioId");
-
-    if (!userId) {
-        alert("Debes iniciar sesión primero.");
-        window.location.href = "Login.html";
-    }
-
-    document.addEventListener("DOMContentLoaded", cargarPerfil);
-
-    // 1️⃣ CARGAR DATOS DEL PERFIL
-    async function cargarPerfil() {
-        try {
-            const res = await fetch(`${BASE_URL}/perfil/${userId}`);
-            const data = await res.json();
-
-            document.getElementById("nombre").value = data.nombre || "";
-            document.getElementById("correo").value = data.correo || "";
-            document.getElementById("telefono").value = data.telefono || "";
-
-            const list = document.getElementById("addressList");
-            list.innerHTML = "";
-
-            if (!data.direcciones || data.direcciones.length === 0) {
-                list.innerHTML = `<p>No tienes direcciones guardadas.</p>`;
-                return;
-            }
-
-            data.direcciones.forEach(dir => {
-                list.innerHTML += `
-                    <div class="address-card">
-                        <div>
-                            <strong>${dir.calle} #${dir.numero}</strong><br>
-                            ${dir.colonia}, ${dir.ciudad}, CP: ${dir.codigo_postal}
-                        </div>
-                        <i class="fas fa-map-marker-alt" style="color: var(--color-secondary);"></i>
-                    </div>
-                `;
-            });
-
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    // 2️⃣ ACTUALIZAR PERFIL
-    document.getElementById("profileForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const body = {
-            nombre: document.getElementById("nombre").value,
-            correo: document.getElementById("correo").value,
-            telefono: document.getElementById("telefono").value
-        };
-
-        try {
-            const res = await fetch(`${BASE_URL}/perfil/update/${userId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                alert("Datos actualizados correctamente.");
-                localStorage.setItem("usuarioNombre", body.nombre);
-            } else {
-                alert("Error: " + data.message);
-            }
-        } catch (err) {
-            alert("Error de conexión");
-        }
-    });
-
-    // 3️⃣ AGREGAR DIRECCIÓN
-    document.getElementById("addressForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const body = {
-            calle: document.getElementById("calle").value,
-            numero: document.getElementById("numero").value,
-            cp: document.getElementById("cp").value,
-            colonia: document.getElementById("colonia").value,
-            ciudad: document.getElementById("ciudad").value
-        };
-
-        try {
-            const res = await fetch(`${BASE_URL}/direccion/add/${userId}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                alert("Dirección agregada.");
-                cargarPerfil();
-                document.getElementById("addressForm").reset();
-            } else {
-                alert("Error: " + data.message);
-            }
-        } catch {
-            alert("Error de conexión");
-        }
-    });
+<script>
 
 </script>
+
+
 
 </body>
 </html>
