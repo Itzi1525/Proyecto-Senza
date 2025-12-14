@@ -152,34 +152,31 @@ def login():
 # 2. PERFIL Y DIRECCIONES
 @app.route('/actualizar_perfil', methods=['POST'])
 def actualizar_perfil():
+    id_usuario = session.get('id_usuario')
+
+    if not id_usuario:
+        return redirect(url_for('login'))
+
+    nombre = request.form['nombre']
+    correo = request.form['correo']
+    telefono = request.form['telefono']
+
+    conn = get_db_connection()
+    if not conn:
+        return "Error de base de datos", 500
+
     try:
-        id_usuario = session.get('id_usuario')
-
-        if not id_usuario:
-            return "Usuario no autenticado", 401
-
-        nombre = request.form['nombre']
-        correo = request.form['correo']
-        telefono = request.form['telefono']
-
-        conn = pyodbc.connect(connection_string)
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            UPDATE Usuario
-            SET nombre = ?, correo = ?, telefono = ?
-            WHERE id_usuario = ?
-        """, (nombre, correo, telefono, id_usuario))
-
-        conn.commit()
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                UPDATE Usuario
+                SET nombre = %s, correo = %s, telefono = %s
+                WHERE id_usuario = %s
+            """, (nombre, correo, telefono, id_usuario))
+            conn.commit()
+    finally:
         conn.close()
 
-        return redirect(url_for('perfil'))
-
-    except Exception as e:
-        return f"Error al actualizar perfil: {e}"
-    
-
+    return redirect(url_for('perfil'))
 @app.route('/perfil')
 def perfil():
     id_usuario = session.get('id_usuario')
@@ -187,33 +184,34 @@ def perfil():
     if not id_usuario:
         return redirect(url_for('login'))
 
-    conn = pymysql.connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME
-    )
+    conn = get_db_connection()
+    if not conn:
+        return "Error BD", 500
 
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT nombre, correo, telefono
-        FROM Usuario
-        WHERE id_usuario = %s
-    """, (id_usuario,))
-
-    row = cursor.fetchone()
-    conn.close()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT nombre, correo, telefono
+                FROM Usuario
+                WHERE id_usuario = %s
+            """, (id_usuario,))
+            row = cursor.fetchone()
+    finally:
+        conn.close()
 
     if not row:
         return "Usuario no encontrado", 404
 
     usuario = {
-        'nombre': row[0],
-        'correo': row[1],
-        'telefono': row[2]
+        'nombre': row['nombre'],
+        'correo': row['correo'],
+        'telefono': row['telefono']
     }
 
     return render_template('Perfil.html', usuario=usuario)
+
+    
+
 
 
 
