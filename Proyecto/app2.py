@@ -115,6 +115,10 @@ def registro():
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         conn.close()
+        #Cambio real para GIT
+@app.route('/login', methods=['GET'])
+def login_page():
+    return render_template('Login.html')
 
 @app.route('/login', methods=['POST'])
 def login():
