@@ -154,27 +154,25 @@ def inicio():
 # ===========================
 # STATIC FALLBACK
 # ===========================
-@app.route('/<path:path>')
-def static_files(path):
-    return send_from_directory('.', path)
-
-
 # ===============================
-# SERVIR ARCHIVOS COMO ANTES
+# SERVIR IMÁGENES (PRIMERO)
 # ===============================
-
 @app.route('/Imagenes/<path:filename>')
 def imagenes(filename):
-    return send_from_directory('Imagenes', filename)
+    return send_from_directory('static/Imagenes', filename)
 
+
+# ===============================
+# SERVIR HTML, JS, CSS COMO ANTES
+# ===============================
 @app.route('/<path:filename>')
 def archivos(filename):
     return send_from_directory('.', filename)
+
+
 # ===========================
 # RUN
 # ===========================
 if __name__ == '__main__':
     print("🚀 Servidor iniciado en puerto 5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
-
- 
