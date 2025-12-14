@@ -46,12 +46,39 @@
         }
     </style>
 </head>
+<header class="main-header">
+    <div class="logo">
+        <img src="Imagenes/Senza.png" alt="Senza">
+        <h1>Senza</h1>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" placeholder="Buscar productos...">
+    </div>
+
+    <nav class="main-nav">
+        <ul>
+            <li><a href="Inicio.html">Inicio</a></li>
+            <li><a href="03-productos.html">Menú</a></li>
+
+            <li id="adminPanelLi" style="display:none;">
+                <a href="AdminOpera.html">Panel de Gestión</a>
+            </li>
+
+            <li><a href="Perfil.html" id="accountLink">Cuenta</a></li>
+            <li id="logoutItem" style="display:none;">
+                <a href="#" id="logoutLink">Salir</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
 <body>
 
 <div class="container">
-    <h2>Mi Perfil</h2>
+    <div class="card">
+        <h2>Mi Perfil</h2>
 
-    <form id="perfilForm">
         <label>Nombre</label>
         <input type="text" id="nombre">
 
@@ -61,40 +88,51 @@
         <label>Teléfono</label>
         <input type="text" id="telefono">
 
-        <button type="submit">Guardar cambios</button>
-    </form>
+        <button id="btnGuardar">Guardar cambios</button>
+    </div>
 </div>
 
+
 <script>
-    const usuarioId = localStorage.getItem('usuarioId');
+const usuarioId = localStorage.getItem('usuarioId');
 
-    if (!usuarioId) {
-        window.location.href = 'Login.html';
+if (!usuarioId) {
+    window.location.href = 'Login.html';
+}
+
+// ---------- CARGAR DATOS ----------
+fetch(`/api/perfil/${usuarioId}`)
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('nombre').value = data.nombre || '';
+        document.getElementById('correo').value = data.correo || '';
+        document.getElementById('telefono').value = data.telefono || '';
+    });
+
+// ---------- GUARDAR CAMBIOS ----------
+document.getElementById('btnGuardar').addEventListener('click', async () => {
+    const body = {
+        id: usuarioId,
+        nombre: document.getElementById('nombre').value,
+        correo: document.getElementById('correo').value,
+        telefono: document.getElementById('telefono').value
+    };
+
+    const res = await fetch('/api/perfil', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        alert('Perfil actualizado correctamente');
+        localStorage.setItem('usuarioNombre', body.nombre);
+    } else {
+        alert('Error al guardar');
     }
-
-    // Cargar datos del perfil
-    fetch(`/api/perfil/${usuarioId}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('nombre').value = data.nombre;
-            document.getElementById('correo').value = data.correo;
-            document.getElementById('telefono').value = data.telefono || '';
-        });
-
-    // Guardar cambios
-    document.getElementById('perfilForm').addEventListener('submit', e => {
-        e.preventDefault();
-
-        fetch('/api/perfil', {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                id: usuarioId,
-                nombre: nombre.value,
-                correo: correo.value,
-                telefono: telefono.value
-            })
-        }).then(() => alert('Perfil actualizado'));
+});
 </script>
 
 </body>
