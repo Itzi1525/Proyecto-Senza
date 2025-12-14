@@ -41,10 +41,6 @@ def get_db_connection():
 # LOGIN
 
 # ===========================
-@app.route('/login', methods=['GET'])
-def login_page():
-    return send_from_directory('.', 'Login.html')
-
 @app.route('/login', methods=['POST'])
 def login():
     correo = request.form.get('email')
@@ -67,9 +63,10 @@ def login():
     if user and user['contrasena'] == password:
         session['user_id'] = user['id_usuario']
         session['nombre'] = user['nombre']
-        return redirect('/perfil')
+        return redirect('/perfil')   # 👈 AQUÍ ESTÁ LA CLAVE
 
-    return redirect('/login')
+    return redirect('/Login.html')   # 👈 si falla, regresa al login
+
 
 
 # ===========================
