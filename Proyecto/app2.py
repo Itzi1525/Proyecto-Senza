@@ -1,15 +1,16 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template, redirect, session
-from flask import Flask, render_template, request, redirect, url_for, session
-from flask import session
-from flask import Flask, request, jsonify, send_from_directory, redirect, render_template
-from flask_cors import CORS
-import pymysql # Cambiamos sqlite3 por pymysql
-import os
-import platform 
+print("🔥 app2.py CORRECTO cargado")
 
-# --- IMPORTACIONES PARA GOOGLE ---
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    send_from_directory,
+    render_template,
+    redirect,
+    url_for,
+    session
+)
+
 
 app = Flask(__name__)
 app.secret_key = 'senza_secreta_123'
