@@ -1,3 +1,5 @@
+# CAMBIO DIRECTO DESDE NOTEPAD
+
 print("🔥 app2.py CORRECTO cargado")
 
 from flask import (
@@ -317,4 +319,6 @@ def serve_static_files(path):
 if __name__ == '__main__':
     print("🚀 Iniciando servidor MySQL en puerto 5000")
     # host='0.0.0.0' es crucial para AWS
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)#   C A M B I O   R E A L   P A R A   G I T 
+ 
+ 
