@@ -41,20 +41,25 @@ def get_db_connection():
 # LOGIN
 
 # ===========================
+@app.route('/login', methods=['GET'])
+def login_page():
+    return send_from_directory('.', 'Login.html')
+
 @app.route('/login', methods=['POST'])
 def login():
-    correo = request.form.get('email')
-    password = request.form.get('password')
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
 
     conn = get_db_connection()
     if not conn:
-        return "Error BD", 500
+        return jsonify({'success': False, 'message': 'Error BD'}), 500
 
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "SELECT id_usuario, nombre, contrasena FROM Usuario WHERE correo = %s",
-                (correo,)
+                "SELECT id_usuario, nombre, contrasena, rol FROM Usuario WHERE correo = %s",
+                (email,)
             )
             user = cursor.fetchone()
     finally:
@@ -63,9 +68,22 @@ def login():
     if user and user['contrasena'] == password:
         session['user_id'] = user['id_usuario']
         session['nombre'] = user['nombre']
-        return redirect('/perfil')   # 👈 AQUÍ ESTÁ LA CLAVE
+        session['rol'] = user['rol']
 
-    return redirect('/Login.html')   # 👈 si falla, regresa al login
+        return jsonify({
+            'success': True,
+            'user': {
+                'id': user['id_usuario'],
+                'nombre': user['nombre'],
+                'rol': user['rol']
+            }
+        })
+
+    return jsonify({
+        'success': False,
+        'message': 'Correo o contraseña incorrectos'
+    }), 401
+
 
 
 
