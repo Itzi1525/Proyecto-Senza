@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template, redirect, session
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask import session
 from flask import Flask, request, jsonify, send_from_directory, redirect, render_template
 from flask_cors import CORS
@@ -179,14 +180,17 @@ def actualizar_perfil():
     
 @app.route('/perfil')
 def perfil():
+    # 1. Verificar sesión
     id_usuario = session.get('id_usuario')
 
     if not id_usuario:
         return redirect(url_for('login'))
 
+    # 2. Conectar a la base de datos
     conn = pyodbc.connect(connection_string)
     cursor = conn.cursor()
 
+    # 3. Obtener datos del usuario
     cursor.execute("""
         SELECT nombre, correo, telefono
         FROM Usuario
@@ -196,13 +200,20 @@ def perfil():
     row = cursor.fetchone()
     conn.close()
 
+    # 4. Validar que exista el usuario
+    if not row:
+        return "Usuario no encontrado", 404
+
+    # 5. Crear diccionario para el template
     usuario = {
         'nombre': row[0],
         'correo': row[1],
         'telefono': row[2]
     }
 
+    # 6. Renderizar la vista
     return render_template('Perfil.html', usuario=usuario)
+
 
 
 
