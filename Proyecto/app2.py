@@ -164,7 +164,7 @@ def actualizar_perfil():
     id_usuario = session.get('id_usuario')
 
     if not id_usuario:
-        return redirect(url_for('login'))
+        return render_template(url_for('login'))
 
     nombre = request.form['nombre']
     correo = request.form['correo']
@@ -191,7 +191,9 @@ def perfil():
     id_usuario = session.get('id_usuario')
 
     if not id_usuario:
-        return redirect(url_for('login'))
+
+
+        return render_template(url_for('login'))
 
     conn = get_db_connection()
     if not conn:
