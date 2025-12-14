@@ -179,43 +179,41 @@ def actualizar_perfil():
     except Exception as e:
         return f"Error al actualizar perfil: {e}"
     
+    
 @app.route('/perfil')
 def perfil():
-    # 1. Verificar sesión
     id_usuario = session.get('id_usuario')
 
     if not id_usuario:
         return redirect(url_for('login'))
 
-    # 2. Conectar a la base de datos
-    conn = pyodbc.connect(connection_string)
-    cursor = conn.cursor()
+    conn = pymysql.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME
+    )
 
-    # 3. Obtener datos del usuario
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT nombre, correo, telefono
         FROM Usuario
-        WHERE id_usuario = ?
+        WHERE id_usuario = %s
     """, (id_usuario,))
 
     row = cursor.fetchone()
     conn.close()
 
-    # 4. Validar que exista el usuario
     if not row:
         return "Usuario no encontrado", 404
 
-    # 5. Crear diccionario para el template
     usuario = {
         'nombre': row[0],
         'correo': row[1],
         'telefono': row[2]
     }
 
-    # 6. Renderizar la vista
     return render_template('Perfil.html', usuario=usuario)
-
-
 
 
 # ==========================================
