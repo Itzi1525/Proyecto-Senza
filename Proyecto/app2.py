@@ -1,29 +1,19 @@
 print("🔥 app2.py CORRECTO cargado")
 
-from flask import (
-    Flask,
-    request,
-    jsonify,
-    send_from_directory,
-    render_template,
-    redirect,
-    url_for,
-    session
-)
-
+from flask import Flask, request, jsonify, send_from_directory, session
 from flask_cors import CORS
 import pymysql
 
-# ---------------------------
+# ===========================
 # APP
-# ---------------------------
+# ===========================
 app = Flask(__name__)
 app.secret_key = 'senza_secreta_123'
 CORS(app)
 
-# ---------------------------
+# ===========================
 # DATABASE
-# ---------------------------
+# ===========================
 def get_db_connection():
     try:
         return pymysql.connect(
@@ -37,14 +27,10 @@ def get_db_connection():
         print("❌ Error BD:", e)
         return None
 
-# ===========================
-# LOGIN
 
 # ===========================
-@app.route('/login', methods=['GET'])
-def login_page():
-    return send_from_directory('.', 'Login.html')
-
+# LOGIN (API)
+# ===========================
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -67,8 +53,6 @@ def login():
 
     if user and user['contrasena'] == password:
         session['user_id'] = user['id_usuario']
-        session['nombre'] = user['nombre']
-        session['rol'] = user['rol']
 
         return jsonify({
             'success': True,
@@ -85,23 +69,26 @@ def login():
     }), 401
 
 
-
-
 # ===========================
-# PERFIL
+# PERFIL (API, COMO LOGIN)
 # ===========================
-@app.route('/api/perfil/<int:id_usuario>')
+@app.route('/api/perfil/<int:id_usuario>', methods=['GET'])
 def obtener_perfil(id_usuario):
     conn = get_db_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("""
-            SELECT nombre, correo, telefono
-            FROM Usuario
-            WHERE id_usuario = %s
-        """, (id_usuario,))
-        usuario = cursor.fetchone()
-    conn.close()
-    return jsonify(usuario)
+    if not conn:
+        return jsonify({'error': 'BD'}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT nombre, correo, telefono
+                FROM Usuario
+                WHERE id_usuario = %s
+            """, (id_usuario,))
+            usuario = cursor.fetchone()
+            return jsonify(usuario)
+    finally:
+        conn.close()
 
 
 @app.route('/api/perfil', methods=['PUT'])
@@ -109,14 +96,24 @@ def actualizar_perfil():
     data = request.get_json()
 
     conn = get_db_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("""
-            UPDATE Usuario
-            SET nombre=%s, correo=%s, telefono=%s
-            WHERE id_usuario=%s
-        """, (data['nombre'], data['correo'], data['telefono'], data['id']))
-        conn.commit()
-    conn.close()
+    if not conn:
+        return jsonify({'success': False}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                UPDATE Usuario
+                SET nombre=%s, correo=%s, telefono=%s
+                WHERE id_usuario=%s
+            """, (
+                data['nombre'],
+                data['correo'],
+                data['telefono'],
+                data['id']
+            ))
+            conn.commit()
+    finally:
+        conn.close()
 
     return jsonify({'success': True})
 
@@ -140,31 +137,25 @@ def productos():
     finally:
         conn.close()
 
-# ===========================
-# PAGINA INICIO
-# ===========================
-@app.route('/')
-def inicio():
-    return send_from_directory('.', 'Inicio.html')
-
 
 # ===========================
-# STATIC FALLBACK
+# ARCHIVOS ESTÁTICOS
 # ===========================
-# ===============================
-# SERVIR IMÁGENES (PRIMERO)
-# ===============================
+
+# IMÁGENES
 @app.route('/Imagenes/<path:filename>')
 def imagenes(filename):
     return send_from_directory('static/Imagenes', filename)
 
-
-# ===============================
-# SERVIR HTML, JS, CSS COMO ANTES
-# ===============================
+# HTML, JS, CSS
 @app.route('/<path:filename>')
 def archivos(filename):
-    return send_from_directory('templates', filename)
+    return send_from_directory('.', filename)
+
+# RAÍZ
+@app.route('/')
+def inicio():
+    return send_from_directory('.', 'Inicio.html')
 
 
 # ===========================
