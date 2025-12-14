@@ -6,7 +6,7 @@ from flask import (
     Flask,
     request,
     jsonify,
-    send_from_directory,
+    send_from_directory,# agrega una línea de comentario
     render_template,
     redirect,
     url_for,
