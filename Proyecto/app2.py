@@ -40,9 +40,10 @@ def get_db_connection():
 # ===========================
 # LOGIN
 # ===========================
-@app.route('/login', methods=['GET'])
+@app.route('/login')
 def login_page():
-    return render_template('Login.html')
+    return send_from_directory('.', 'Login.html')
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -74,7 +75,8 @@ def login():
 @app.route('/perfil')
 def perfil():
     if 'user_id' not in session:
-        return redirect(url_for('login_page'))
+        return redirect('/login')
+
 
     conn = get_db_connection()
     if not conn:
@@ -102,7 +104,8 @@ def perfil():
 @app.route('/actualizar_perfil', methods=['POST'])
 def actualizar_perfil():
     if 'user_id' not in session:
-        return redirect(url_for('login_page'))
+        return redirect('/login')
+
 
     nombre = request.form['nombre']
     correo = request.form['correo']
@@ -149,7 +152,8 @@ def productos():
 # ===========================
 @app.route('/')
 def inicio():
-    return render_template('Inicio.html')
+    return send_from_directory('.', 'Inicio.html')
+
 
 # ===========================
 # STATIC FALLBACK
