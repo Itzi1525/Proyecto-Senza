@@ -6,12 +6,15 @@ from flask import (
     Flask,
     request,
     jsonify,
-    send_from_directory,# agrega una línea de comentario
+    send_from_directory,
     render_template,
     redirect,
     url_for,
     session
 )
+
+from flask_cors import CORS
+
 
 
 app = Flask(__name__)
