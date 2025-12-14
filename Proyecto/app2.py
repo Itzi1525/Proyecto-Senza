@@ -39,7 +39,12 @@ def get_db_connection():
 
 # ===========================
 # LOGIN
+
 # ===========================
+@app.route('/login', methods=['GET'])
+def login_page():
+    return send_from_directory('.', 'Login.html')
+
 @app.route('/login', methods=['POST'])
 def login():
     correo = request.form.get('email')
@@ -169,7 +174,7 @@ def imagenes(filename):
 # ===============================
 @app.route('/<path:filename>')
 def archivos(filename):
-    return send_from_directory('.', filename)
+    return send_from_directory('templates', filename)
 
 
 # ===========================
