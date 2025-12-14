@@ -40,34 +40,32 @@ def get_db_connection():
 # ===========================
 # LOGIN
 # ===========================
-@app.route('/login')
-def login_page():
-    return send_from_directory('.', 'Login.html')
-
-
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
+    correo = request.form.get('email')
+    password = request.form.get('password')
+
     conn = get_db_connection()
     if not conn:
-        return jsonify({'success': False}), 500
+        return "Error BD", 500
 
     try:
         with conn.cursor() as cursor:
             cursor.execute(
                 "SELECT id_usuario, nombre, contrasena FROM Usuario WHERE correo = %s",
-                (data['email'],)
+                (correo,)
             )
             user = cursor.fetchone()
-
-        if user and user['contrasena'] == data['password']:
-            session['user_id'] = user['id_usuario']
-            session['nombre'] = user['nombre']
-            return jsonify({'success': True})
-
-        return jsonify({'success': False}), 401
     finally:
         conn.close()
+
+    if user and user['contrasena'] == password:
+        session['user_id'] = user['id_usuario']
+        session['nombre'] = user['nombre']
+        return redirect('/perfil')
+
+    return redirect('/login')
+
 
 # ===========================
 # PERFIL
