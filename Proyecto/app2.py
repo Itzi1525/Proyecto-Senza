@@ -1,3 +1,4 @@
+from flask import Flask, request, jsonify, send_from_directory, render_template, redirect, session
 from flask import session
 from flask import Flask, request, jsonify, send_from_directory, redirect, render_template
 from flask_cors import CORS
@@ -147,32 +148,61 @@ def login():
 
 # ==========================================
 # 2. PERFIL Y DIRECCIONES
-@app.route('/perfil/update/<int:id_usuario>', methods=['PUT'])
-def update_perfil_put(id_usuario):
-    data = request.get_json()
-    nombre = data.get('nombre')
-    correo = data.get('correo')
-    telefono = data.get('telefono')
-
-    conn = get_db_connection()
+@app.route('/actualizar_perfil', methods=['POST'])
+def actualizar_perfil():
     try:
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                UPDATE Usuario
-                SET nombre = %s, correo = %s, telefono = %s
-                WHERE id_usuario = %s
-            """, (nombre, correo, telefono, id_usuario))
-            conn.commit()
-    finally:
+        id_usuario = session.get('id_usuario')
+
+        if not id_usuario:
+            return "Usuario no autenticado", 401
+
+        nombre = request.form['nombre']
+        correo = request.form['correo']
+        telefono = request.form['telefono']
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE Usuario
+            SET nombre = ?, correo = ?, telefono = ?
+            WHERE id_usuario = ?
+        """, (nombre, correo, telefono, id_usuario))
+
+        conn.commit()
         conn.close()
 
-    return jsonify({'success': True})
+        return redirect(url_for('perfil'))
 
+    except Exception as e:
+        return f"Error al actualizar perfil: {e}"
+    
+@app.route('/perfil')
+def perfil():
+    id_usuario = session.get('id_usuario')
 
+    if not id_usuario:
+        return redirect(url_for('login'))
 
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
 
+    cursor.execute("""
+        SELECT nombre, correo, telefono
+        FROM Usuario
+        WHERE id_usuario = ?
+    """, (id_usuario,))
 
+    row = cursor.fetchone()
+    conn.close()
 
+    usuario = {
+        'nombre': row[0],
+        'correo': row[1],
+        'telefono': row[2]
+    }
+
+    return render_template('Perfil.html', usuario=usuario)
 
 
 
