@@ -179,7 +179,7 @@ def actualizar_perfil():
     except Exception as e:
         return f"Error al actualizar perfil: {e}"
     
-    
+
 @app.route('/perfil')
 def perfil():
     id_usuario = session.get('id_usuario')
@@ -214,6 +214,7 @@ def perfil():
     }
 
     return render_template('Perfil.html', usuario=usuario)
+
 
 
 # ==========================================
