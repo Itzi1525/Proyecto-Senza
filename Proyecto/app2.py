@@ -90,61 +90,36 @@ def login():
 # ===========================
 # PERFIL
 # ===========================
-@app.route('/perfil')
-def perfil():
-    if 'user_id' not in session:
-        return redirect('/login')
-
-
+@app.route('/api/perfil/<int:id_usuario>')
+def obtener_perfil(id_usuario):
     conn = get_db_connection()
-    if not conn:
-        return "Error BD", 500
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT nombre, correo, telefono
+            FROM Usuario
+            WHERE id_usuario = %s
+        """, (id_usuario,))
+        usuario = cursor.fetchone()
+    conn.close()
+    return jsonify(usuario)
 
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT nombre, correo, telefono
-                FROM Usuario
-                WHERE id_usuario = %s
-            """, (session['user_id'],))
-            usuario = cursor.fetchone()
-    finally:
-        conn.close()
 
-    if not usuario:
-        return "Usuario no encontrado", 404
-
-    return render_template('Perfil.html', usuario=usuario)
-
-# ===========================
-# ACTUALIZAR PERFIL
-# ===========================
-@app.route('/actualizar_perfil', methods=['POST'])
+@app.route('/api/perfil', methods=['PUT'])
 def actualizar_perfil():
-    if 'user_id' not in session:
-        return redirect('/login')
-
-
-    nombre = request.form['nombre']
-    correo = request.form['correo']
-    telefono = request.form['telefono']
+    data = request.get_json()
 
     conn = get_db_connection()
-    if not conn:
-        return "Error BD", 500
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            UPDATE Usuario
+            SET nombre=%s, correo=%s, telefono=%s
+            WHERE id_usuario=%s
+        """, (data['nombre'], data['correo'], data['telefono'], data['id']))
+        conn.commit()
+    conn.close()
 
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                UPDATE Usuario
-                SET nombre=%s, correo=%s, telefono=%s
-                WHERE id_usuario=%s
-            """, (nombre, correo, telefono, session['user_id']))
-            conn.commit()
-    finally:
-        conn.close()
+    return jsonify({'success': True})
 
-    return redirect(url_for('perfil'))
 
 # ===========================
 # PRODUCTOS API
