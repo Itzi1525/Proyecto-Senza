@@ -158,6 +158,18 @@ def inicio():
 def static_files(path):
     return send_from_directory('.', path)
 
+
+# ===============================
+# SERVIR ARCHIVOS COMO ANTES
+# ===============================
+
+@app.route('/Imagenes/<path:filename>')
+def imagenes(filename):
+    return send_from_directory('Imagenes', filename)
+
+@app.route('/<path:filename>')
+def archivos(filename):
+    return send_from_directory('.', filename)
 # ===========================
 # RUN
 # ===========================
