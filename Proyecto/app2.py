@@ -227,22 +227,46 @@ def agregar_direccion():
 
     return jsonify({'success': True})
 
-@app.route('/api/direcciones/<int:id_direccion>', methods=['DELETE'])
-def eliminar_direccion(id_direccion):
+@app.route('/api/direcciones/<int:id_usuario>')
+def obtener_direcciones(id_usuario):
     conn = get_db_connection()
     if not conn:
-        return jsonify({'success': False}), 500
+        return jsonify([])
 
     try:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                "DELETE FROM Direccion WHERE id_direccion = %s",
-                (id_direccion,)
-            )
-            conn.commit()
-        return jsonify({'success': True})
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT
+                id_direccion,
+                calle,
+                numero,
+                colonia,
+                ciudad,
+                codigo_postal,
+                principal
+            FROM Direccion
+            WHERE id_cliente = %s
+        """, (id_usuario,))
+
+        rows = cursor.fetchall()
+
+        direcciones = []
+        for row in rows:
+            direcciones.append({
+                "id_direccion": row[0],   # 👈 ESTE ERA EL FALTANTE
+                "calle": row[1],
+                "numero": row[2],
+                "colonia": row[3],
+                "ciudad": row[4],
+                "codigo_postal": row[5],
+                "principal": bool(row[6])
+            })
+
+        return jsonify(direcciones)
+
     finally:
         conn.close()
+
 
 
 # ===========================
