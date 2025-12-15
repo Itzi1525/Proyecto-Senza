@@ -174,47 +174,109 @@
 <footer>
     © 2025 Senza — Todos los derechos reservados
 </footer>
-<script> 
-function addToCart(id, name, price) {
+<script>
+/* =========================
+   CARRITO DESDE LOCALSTORAGE
+========================= */
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+const cartContainer = document.getElementById("cartContainer");
+const subtotalEl = document.getElementById("subtotal");
+const totalEl = document.getElementById("total");
+const summary = document.getElementById("summary");
 
-    const index = cart.findIndex(item => item.id === id);
+/* =========================
+   RENDERIZAR CARRITO
+========================= */
+function renderCart() {
 
-    if (index !== -1) {
-        cart[index].qty += 1;
-    } else {
-        cart.push({
-            id: id,
-            name: name,
-            price: Number(price),
-            qty: 1
-        });
+    if (cart.length === 0) {
+        cartContainer.innerHTML = "<p class='empty'>Tu carrito está vacío 🧁</p>";
+        summary.style.display = "none";
+        localStorage.setItem("cart", JSON.stringify(cart));
+        return;
     }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
+    let html = `
+        <table class="cart-table">
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+    `;
 
-    alert('🛒 Producto agregado al carrito');
+    let subtotal = 0;
+
+    cart.forEach((item, index) => {
+        const itemTotal = item.price * item.qty;
+        subtotal += itemTotal;
+
+        html += `
+            <tr>
+                <td>${item.name}</td>
+                <td>$${item.price}</td>
+                <td>
+                    <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
+                    ${item.qty}
+                    <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                </td>
+                <td>$${itemTotal}</td>
+                <td>
+                    <button class="delete-btn" onclick="removeItem(${index})">✕</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += "</table>";
+    cartContainer.innerHTML = html;
+
+    subtotalEl.textContent = `$${subtotal}`;
+    totalEl.textContent = `$${subtotal + 50}`;
+    summary.style.display = "block";
+
+    /* 🔐 GUARDAR CARRITO */
+    localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-document.getElementById('btnPagar').addEventListener('click', async () => {
+/* =========================
+   MODIFICAR CANTIDAD
+========================= */
+function changeQty(index, delta) {
+    cart[index].qty += delta;
+
+    if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+    }
+
+    renderCart();
+}
+
+/* =========================
+   ELIMINAR PRODUCTO
+========================= */
+function removeItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+
+/* =========================
+   PROCEDER AL PAGO
+========================= */
+document.querySelector('.checkout-btn')?.addEventListener('click', async () => {
 
     const usuarioId = localStorage.getItem('usuarioId');
+
     if (!usuarioId) {
         alert('Debes iniciar sesión');
         return;
     }
 
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    if (cart.length === 0) {
-        alert('Tu carrito está vacío');
-        return;
-    }
-
     let subtotal = 0;
-    cart.forEach(item => {
-        subtotal += Number(item.price) * Number(item.qty);
-    });
+    cart.forEach(item => subtotal += item.price * item.qty);
 
     const res = await fetch('/api/pedido', {
         method: 'POST',
@@ -233,6 +295,12 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
         alert('Error al crear pedido');
     }
 });
+
+/* =========================
+   INICIAR
+========================= */
+renderCart();
 </script>
+
 </body>
 </html>
