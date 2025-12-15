@@ -90,6 +90,55 @@ def obtener_perfil(id_usuario):
     finally:
         conn.close()
 
+# ==========================================
+# 4. CRUD DE USUARIOS
+# ==========================================
+@app.route('/usuarios', methods=['GET'])
+def get_usuarios():
+    conn = get_db_connection()
+    if not conn: return jsonify([]), 500
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT id_usuario, nombre, correo, rol FROM Usuario")
+        rows = cursor.fetchall()
+        usuarios = [{'id_usuario': r['id_usuario'], 'nombre': r['nombre'], 'correo': r['correo'], 'rol': r['rol']} for r in rows]
+        return jsonify(usuarios)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/usuarios', methods=['PUT'])
+def update_usuario():
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE Usuario SET nombre = ?, correo = ?, rol = ? WHERE id_usuario = ?", 
+                      (data['nombre'], data['correo'], data['rol'], data['id']))
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Usuario actualizado'})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/usuarios/delete', methods=['POST'])
+def delete_usuario():
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM Usuario WHERE id_usuario = ?", (data['id'],))
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Usuario eliminado'})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
 
 @app.route('/api/perfil', methods=['PUT'])
 def actualizar_perfil():
