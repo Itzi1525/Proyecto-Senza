@@ -175,6 +175,28 @@
     © 2025 Senza — Todos los derechos reservados
 </footer>
 <script> 
+function addToCart(id, name, price) {
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const index = cart.findIndex(item => item.id === id);
+
+    if (index !== -1) {
+        cart[index].qty += 1;
+    } else {
+        cart.push({
+            id: id,
+            name: name,
+            price: Number(price),
+            qty: 1
+        });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    alert('🛒 Producto agregado al carrito');
+}
+
 document.getElementById('btnPagar').addEventListener('click', async () => {
 
     const usuarioId = localStorage.getItem('usuarioId');
