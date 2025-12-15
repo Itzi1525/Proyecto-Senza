@@ -171,42 +171,72 @@ def actualizar_perfil():
 # DIRECCIÓNES API
 # ===========================
 
-@app.route('/api/direcciones/<int:id_usuario>')
+@app.route('/api/direcciones/<int:id_usuario>', methods=['GET'])
 def obtener_direcciones(id_usuario):
     conn = get_db_connection()
     if not conn:
         return jsonify([])
 
     try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT
-                id_direccion,
-                calle,
-                numero,
-                colonia,
-                ciudad,
-                codigo_postal,
-                principal
-            FROM Direccion
-            WHERE id_cliente = %s
-        """, (id_usuario,))
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    id_direccion,
+                    calle,
+                    numero,
+                    colonia,
+                    ciudad,
+                    codigo_postal,
+                    principal
+                FROM Direccion
+                WHERE id_cliente = %s
+            """, (id_usuario,))
 
-        rows = cursor.fetchall()
+            rows = cursor.fetchall()
 
-        direcciones = []
-        for row in rows:
-            direcciones.append({
-                "id_direccion": row[0],   # 👈 ESTE ERA EL FALTANTE
-                "calle": row[1],
-                "numero": row[2],
-                "colonia": row[3],
-                "ciudad": row[4],
-                "codigo_postal": row[5],
-                "principal": bool(row[6])
-            })
+            direcciones = []
+            for row in rows:
+                direcciones.append({
+                    "id_direccion": row["id_direccion"],
+                    "calle": row["calle"],
+                    "numero": row["numero"],
+                    "colonia": row["colonia"],
+                    "ciudad": row["ciudad"],
+                    "codigo_postal": row["codigo_postal"],
+                    "principal": bool(row["principal"])
+                })
 
-        return jsonify(direcciones)
+            return jsonify(direcciones)
+
+    finally:
+        conn.close()
+
+
+@app.route('/api/direcciones', methods=['POST'])
+def agregar_direccion():
+    data = request.get_json()
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO Direccion
+                (id_cliente, calle, numero, colonia, ciudad, codigo_postal, principal)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data['id_usuario'],
+                data['calle'],
+                data.get('numero'),
+                data.get('colonia'),
+                data['ciudad'],
+                data['codigo_postal'],
+                data.get('principal', False)
+            ))
+            conn.commit()
+
+        return jsonify({'success': True})
 
     finally:
         conn.close()
@@ -223,9 +253,12 @@ def eliminar_direccion(id_direccion):
                 (id_direccion,)
             )
             conn.commit()
+
         return jsonify({'success': True})
+
     finally:
         conn.close()
+
 
 
 # ===========================
