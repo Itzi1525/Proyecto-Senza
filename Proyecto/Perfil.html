@@ -247,6 +247,11 @@ input {
 
     <label>Código Postal</label>
     <input type="text" id="codigo_postal" placeholder="Ej. 06000">
+    <label style="margin-top:15px; display:flex; align-items:center; gap:8px;">
+    <input type="checkbox" id="principal">
+    Marcar como dirección principal
+</label>
+
 
     <button 
     id="btnAgregarDireccion" 
@@ -375,6 +380,7 @@ document.getElementById('btnAgregarDireccion')?.addEventListener('click', async 
     const colonia = document.getElementById('colonia').value;
     const ciudad = document.getElementById('ciudad').value;
     const codigo_postal = document.getElementById('codigo_postal').value;
+    const principal = document.getElementById('principal').checked;
 
     if (!calle || !ciudad || !codigo_postal) {
         alert('Completa los campos obligatorios');
@@ -391,6 +397,7 @@ document.getElementById('btnAgregarDireccion')?.addEventListener('click', async 
             colonia,
             ciudad,
             codigo_postal,
+            principal
         })
     });
 
