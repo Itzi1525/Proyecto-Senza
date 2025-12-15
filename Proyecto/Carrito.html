@@ -181,10 +181,7 @@
         <p><span>Envío</span><span>$50</span></p>
         <hr>
         <p><span>Total</span><span id="total">$0</span></p>
-<button id="btnPagar">Proceder al pago</button>
-
-
-
+<button class="checkout-btn">Proceder al pago</button>
     </div>
 </div>
 
@@ -317,7 +314,14 @@ document.addEventListener('click', async (e) => {
 });
 
 
-document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
+    console.log('🟢 JS del carrito cargado');
+
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    console.log('Botón encontrado:', checkoutBtn);
+
+    checkoutBtn.addEventListener('click', async () => {
+        console.log('🟢 CLICK en proceder al pago');
 
     renderCart(); // 👈 IMPORTANTE
 
