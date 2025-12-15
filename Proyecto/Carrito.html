@@ -250,6 +250,7 @@ function renderCart() {
 
     subtotalEl.textContent = `$${subtotal}`;
     totalEl.textContent = `$${subtotal + 50}`;
+    localStorage.setItem('cartTotal', subtotal + 50);
     summary.style.display = "block";
 
     localStorage.setItem("cart", JSON.stringify(cart));
