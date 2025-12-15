@@ -284,7 +284,6 @@ input {
     onmouseout="this.style.opacity=0.7"
 />
 
-
 </div>
 
 
@@ -361,39 +360,7 @@ document.getElementById('btnGuardar')?.addEventListener('click', async () => {
 /* ==============================
    DIRECCIONES
 ============================== */
-function cargarDirecciones() {
-    fetch(`/api/direcciones/${usuarioId}`)
-        .then(res => res.json())
-        .then(direcciones => {
-            const cont = document.getElementById('listaDirecciones');
-            cont.innerHTML = '';
 
-            if (!direcciones || direcciones.length === 0) {
-                cont.innerHTML = '<p>No tienes direcciones registradas.</p>';
-                return;
-            }
-
-            direcciones.forEach(d => {
-                cont.innerHTML += `
-                    <div style="
-                        border:1px solid #ddd;
-                        padding:15px;
-                        border-radius:8px;
-                        margin-bottom:12px;
-                        background:#fff;
-                    ">
-                        <strong>${d.calle} ${d.numero || ''}</strong>
-                        ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
-                        <br>
-                        ${d.colonia}, ${d.ciudad}<br>
-                        CP: ${d.codigo_postal}
-                    </div>
-                `;
-            });
-        });
-}
-
-cargarDirecciones();
 
 /* ==============================
    AGREGAR DIRECCIÓN (EL BOTÓN)
@@ -440,6 +407,11 @@ document.getElementById('btnAgregarDireccion')?.addEventListener('click', async 
 });
 
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+const usuarioId = localStorage.getItem('usuarioId');
+
 function cargarDirecciones() {
     fetch(`/api/direcciones/${usuarioId}`)
         .then(res => res.json())
@@ -478,36 +450,37 @@ function cargarDirecciones() {
                                 background:none;
                                 border:none;
                                 cursor:pointer;
-                                padding:5px;
+                                font-size:22px;
+                                color:#e74c3c;
                             "
                             title="Eliminar dirección"
                         >
-                            <img 
-                                src="Imagenes/trash.png"
-                                alt="Eliminar"
-                                style="width:24px; height:24px;"
-                            >
+                            🗑️
                         </button>
                     </div>
                 `;
             });
         });
 }
-async function eliminarDireccion(id) {
+
+window.eliminarDireccion = async function(id) {
     if (!confirm('¿Eliminar esta dirección?')) return;
 
-    const res = await fetch(`/api/direcciones/${id}`, {
-        method: 'DELETE'
-    });
-
+    const res = await fetch(`/api/direcciones/${id}`, { method: 'DELETE' });
     const data = await res.json();
 
     if (data.success) {
         cargarDirecciones();
     } else {
-        alert('Error al eliminar la dirección');
+        alert('Error al eliminar');
     }
 }
+
+cargarDirecciones();
+
+});
+
+
 </script>
 
 
