@@ -288,9 +288,7 @@ input {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-/* ==============================
-   VALIDAR SESIÓN
-============================== */
+/* ================= VALIDAR SESIÓN ================= */
 const usuarioId = localStorage.getItem('usuarioId');
 const nombreUsuario = localStorage.getItem('usuarioNombre');
 const rolUsuario = localStorage.getItem('usuarioRol');
@@ -299,15 +297,13 @@ if (!usuarioId) {
     window.location.href = 'Login.html';
 }
 
-/* ==============================
-   HEADER DINÁMICO
-============================== */
+/* ================= HEADER ================= */
 const accountLink = document.getElementById('accountLink');
 const adminPanelLi = document.getElementById('adminPanelLi');
 const logoutItem = document.getElementById('logoutItem');
 const logoutLink = document.getElementById('logoutLink');
 
-if (nombreUsuario && accountLink) {
+if (nombreUsuario) {
     accountLink.textContent = nombreUsuario.split(" ")[0];
     accountLink.href = "Perfil.html";
     logoutItem.style.display = 'block';
@@ -317,95 +313,37 @@ if (nombreUsuario && accountLink) {
     }
 }
 
-logoutLink?.addEventListener('click', () => {
+logoutLink.addEventListener('click', () => {
     localStorage.clear();
     window.location.href = 'Login.html';
 });
 
-/* ==============================
-   PERFIL
-============================== */
+/* ================= PERFIL ================= */
 fetch(`/api/perfil/${usuarioId}`)
     .then(res => res.json())
     .then(data => {
-        document.getElementById('nombre').value = data.nombre || '';
-        document.getElementById('correo').value = data.correo || '';
-        document.getElementById('telefono').value = data.telefono || '';
+        nombre.value = data.nombre || '';
+        correo.value = data.correo || '';
+        telefono.value = data.telefono || '';
     });
 
-document.getElementById('btnGuardar')?.addEventListener('click', async () => {
-    const body = {
-        id: usuarioId,
-        nombre: nombre.value,
-        correo: correo.value,
-        telefono: telefono.value
-    };
-
+btnGuardar.addEventListener('click', async () => {
     const res = await fetch('/api/perfil', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+            id: usuarioId,
+            nombre: nombre.value,
+            correo: correo.value,
+            telefono: telefono.value
+        })
     });
 
     const data = await res.json();
     alert(data.success ? 'Perfil actualizado' : 'Error al actualizar');
 });
 
-/* ==============================
-   DIRECCIONES
-============================== */
-
-
-/* ==============================
-   AGREGAR DIRECCIÓN (EL BOTÓN)
-============================== */
-document.getElementById('btnAgregarDireccion')?.addEventListener('click', async () => {
-
-    const calle = document.getElementById('calle').value;
-    const numero = document.getElementById('numero').value;
-    const colonia = document.getElementById('colonia').value;
-    const ciudad = document.getElementById('ciudad').value;
-    const codigo_postal = document.getElementById('codigo_postal').value;
-    const principal = document.querySelector('input[name="principal"]:checked').value === "1";
-
-    if (!calle || !ciudad || !codigo_postal) {
-        alert('Completa los campos obligatorios');
-        return;
-    }
-
-    const res = await fetch('/api/direcciones', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            id_usuario: usuarioId,
-            calle,
-            numero,
-            colonia,
-            ciudad,
-            codigo_postal,
-            principal
-        })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-        alert('Dirección guardada');
-        cargarDirecciones();
-
-        calle.value = numero.value = colonia.value = ciudad.value = codigo_postal.value = '';
-        document.getElementById('principal').checked = false;
-    } else {
-        alert('Error al guardar dirección');
-    }
-});
-
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-
-const usuarioId = localStorage.getItem('usuarioId');
-
+/* ================= DIRECCIONES ================= */
 function cargarDirecciones() {
     fetch(`/api/direcciones/${usuarioId}`)
         .then(res => res.json())
@@ -438,15 +376,8 @@ function cargarDirecciones() {
                             CP: ${d.codigo_postal}
                         </div>
 
-                        <button
-                            onclick="eliminarDireccion(${d.id})"
-                            style="
-                                background:none;
-                                border:none;
-                                cursor:pointer;
-                            "
-                            title="Eliminar dirección"
-                        >
+                        <button onclick="eliminarDireccion(${d.id})"
+                            style="background:none;border:none;cursor:pointer;">
                             <img src="Imagenes/trash.png" width="22">
                         </button>
                     </div>
@@ -455,26 +386,55 @@ function cargarDirecciones() {
         });
 }
 
-
-async function eliminarDireccion(id) {
+/* 👉 HACER GLOBAL LA FUNCIÓN */
+window.eliminarDireccion = async function(id) {
     if (!confirm('¿Eliminar esta dirección?')) return;
 
-    const res = await fetch(`/api/direcciones/${id}`, {
-        method: 'DELETE'
-    });
-
+    const res = await fetch(`/api/direcciones/${id}`, { method: 'DELETE' });
     const data = await res.json();
 
     if (data.success) {
         cargarDirecciones();
     } else {
-        alert('Error al eliminar la dirección');
+        alert('Error al eliminar');
     }
-}
+};
 
+/* ================= AGREGAR ================= */
+btnAgregarDireccion.addEventListener('click', async () => {
 
+    const principal =
+        document.querySelector('input[name="principal"]:checked').value === "1";
 
+    const res = await fetch('/api/direcciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id_usuario: usuarioId,
+            calle: calle.value,
+            numero: numero.value,
+            colonia: colonia.value,
+            ciudad: ciudad.value,
+            codigo_postal: codigo_postal.value,
+            principal
+        })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        alert('Dirección guardada');
+        cargarDirecciones();
+        calle.value = numero.value = colonia.value = ciudad.value = codigo_postal.value = '';
+    }
+});
+
+/* 👉 CARGAR AL INICIO */
+cargarDirecciones();
+
+});
 </script>
+
 
 
 </body>
