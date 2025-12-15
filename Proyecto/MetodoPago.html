@@ -198,12 +198,20 @@
 </footer>
 
 <script>
-    const nombreTarjeta = document.getElementById('nombreTarjeta');
+/* ===== REFERENCIAS ===== */
+const metodoRadios = document.querySelectorAll('input[name="metodo"]');
+const tarjetaForm = document.getElementById('tarjetaForm');
+const transferenciaForm = document.getElementById('transferenciaForm');
+const efectivoForm = document.getElementById('efectivoForm');
+
+const nombreTarjeta = document.getElementById('nombreTarjeta');
 const numeroTarjeta = document.getElementById('numeroTarjeta');
 const cvv = document.getElementById('cvv');
 const folioTransferencia = document.getElementById('folioTransferencia');
 
-/* MOSTRAR / OCULTAR FORMULARIOS */
+/* ===============================
+   MOSTRAR / OCULTAR FORMULARIOS
+=============================== */
 metodoRadios.forEach(radio => {
     radio.addEventListener('change', () => {
         tarjetaForm.style.display = 'none';
@@ -216,7 +224,9 @@ metodoRadios.forEach(radio => {
     });
 });
 
-/* CARGAR TOTAL */
+/* ===============================
+   CARGAR TOTAL DESDE CARRITO
+=============================== */
 document.addEventListener('DOMContentLoaded', () => {
     const total = localStorage.getItem('cartTotal');
 
@@ -229,32 +239,54 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('total').textContent = `$${total}`;
     document.getElementById('subtotal').textContent = `$${total - 50}`;
 
+    // método por defecto
     tarjetaForm.style.display = 'block';
+    transferenciaForm.style.display = 'none';
+    efectivoForm.style.display = 'none';
 });
 
-/* CONFIRMAR PAGO */
+/* ===============================
+   CONFIRMAR PAGO
+=============================== */
 document.getElementById('btnPagar').addEventListener('click', async () => {
 
     const idPedido = new URLSearchParams(window.location.search).get('id');
-    if (!idPedido) return alert('No hay pedido activo');
-
-    const metodoSeleccionado = document.querySelector('input[name="metodo"]:checked').value;
-
-    if (metodoSeleccionado === 'tarjeta' &&
-        (!nombreTarjeta.value || !numeroTarjeta.value || !cvv.value)) {
-        return alert('Completa los datos de la tarjeta');
+    if (!idPedido) {
+        alert('No hay pedido activo');
+        return;
     }
 
-    if (metodoSeleccionado === 'transferencia' && !folioTransferencia.value) {
-        return alert('Ingresa el folio de transferencia');
+    const metodoSeleccionado =
+        document.querySelector('input[name="metodo"]:checked').value;
+
+    /* VALIDACIONES */
+    if (metodoSeleccionado === 'tarjeta') {
+        if (!nombreTarjeta.value || !numeroTarjeta.value || !cvv.value) {
+            alert('Completa los datos de la tarjeta');
+            return;
+        }
     }
 
-    const metodo = metodoSeleccionado === 'tarjeta' ? 'Tarjeta'
-                  : metodoSeleccionado === 'transferencia' ? 'Transferencia'
-                  : 'Efectivo';
+    if (metodoSeleccionado === 'transferencia') {
+        if (!folioTransferencia.value) {
+            alert('Ingresa el folio de transferencia');
+            return;
+        }
+    }
 
-    const monto = parseFloat(document.getElementById('total').textContent.replace('$',''));
-    if (!monto || monto <= 0) return alert('❌ No hay productos en el carrito');
+    const metodo =
+        metodoSeleccionado === 'tarjeta' ? 'Tarjeta' :
+        metodoSeleccionado === 'transferencia' ? 'Transferencia' :
+        'Efectivo';
+
+    const monto = parseFloat(
+        document.getElementById('total').textContent.replace('$','')
+    );
+
+    if (!monto || monto <= 0) {
+        alert('❌ No hay productos en el carrito');
+        return;
+    }
 
     const res = await fetch('/api/pago', {
         method: 'POST',
@@ -273,7 +305,7 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
         alert('❌ Error al registrar el pago');
     }
 });
-
 </script>
+
 </body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 </html>
