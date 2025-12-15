@@ -138,6 +138,23 @@
             padding: 30px;
             margin-top: 60px;
         }
+        .checkout-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #4B3832;
+    color: #fff;
+    border: none;
+    font-size: 1.1em;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.checkout-btn:hover {
+    background-color: #2f241f;
+}
     </style>
 </head>
 
@@ -267,41 +284,38 @@ function removeItem(index) {
    PROCEDER AL PAGO
 ========================= */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('click', async (e) => {
 
-    const checkoutBtn = document.querySelector('.checkout-btn');
+    if (!e.target.classList.contains('checkout-btn')) return;
 
-    checkoutBtn.addEventListener('click', async () => {
+    const usuarioId = localStorage.getItem('usuarioId');
 
-        const usuarioId = localStorage.getItem('usuarioId');
+    if (!usuarioId) {
+        alert('Debes iniciar sesión');
+        return;
+    }
 
-        if (!usuarioId) {
-            alert('Debes iniciar sesión');
-            return;
-        }
+    let subtotal = 0;
+    cart.forEach(item => subtotal += item.price * item.qty);
 
-        let subtotal = 0;
-        cart.forEach(item => subtotal += item.price * item.qty);
-
-        const res = await fetch('/api/pedido', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id_usuario: usuarioId,
-                total: subtotal + 50
-            })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
-        } else {
-            alert('Error al crear pedido');
-        }
+    const res = await fetch('/api/pedido', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id_usuario: usuarioId,
+            total: subtotal + 50
+        })
     });
 
+    const data = await res.json();
+
+    if (data.success) {
+        window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
+    } else {
+        alert('Error al crear pedido');
+    }
 });
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
