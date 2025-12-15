@@ -164,9 +164,9 @@
         <p><span>Envío</span><span>$50</span></p>
         <hr>
         <p><span>Total</span><span id="total">$0</span></p>
-<button id="btnProcederPago" class="checkout-btn">
-    Proceder al pago
-</button>
+<button id="btnPagar">Proceder al pago</button>
+
+
 
     </div>
 </div>
@@ -174,82 +174,43 @@
 <footer>
     © 2025 Senza — Todos los derechos reservados
 </footer>
+<script> 
+document.getElementById('btnPagar').addEventListener('click', async () => {
 
-<script>
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    const cartContainer = document.getElementById("cartContainer");
-    const subtotalEl = document.getElementById("subtotal");
-    const totalEl = document.getElementById("total");
-    const summary = document.getElementById("summary");
-
-    function renderCart() {
-        if (cart.length === 0) {
-            cartContainer.innerHTML = "<p class='empty'>Tu carrito está vacío 🧁</p>";
-            summary.style.display = "none";
-            return;
-        }
-
-        let html = `
-        <table class="cart-table">
-            <tr>
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Total</th>
-                <th></th>
-            </tr>
-        `;
-
-        let subtotal = 0;
-
-        cart.forEach((item, index) => {
-            let itemTotal = item.price * item.qty;
-            subtotal += itemTotal;
-
-            html += `
-            <tr>
-                <td>${item.name}</td>
-                <td>$${item.price}</td>
-                <td>
-                    <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
-                    ${item.qty}
-                    <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
-                </td>
-                <td>$${itemTotal}</td>
-                <td><button class="delete-btn" onclick="removeItem(${index})">✕</button></td>
-            </tr>
-            `;
-        });
-
-        html += "</table>";
-        cartContainer.innerHTML = html;
-
-        subtotalEl.textContent = `$${subtotal}`;
-        totalEl.textContent = `$${subtotal + 50}`;
-
-        summary.style.display = "block";
-        localStorage.setItem("cart", JSON.stringify(cart));
+    const usuarioId = localStorage.getItem('usuarioId');
+    if (!usuarioId) {
+        alert('Debes iniciar sesión');
+        return;
     }
 
-    function changeQty(index, delta) {
-        cart[index].qty += delta;
-        if (cart[index].qty <= 0) cart.splice(index, 1);
-        renderCart();
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if (cart.length === 0) {
+        alert('Tu carrito está vacío');
+        return;
     }
 
-    function removeItem(index) {
-        cart.splice(index, 1);
-        renderCart();
+    let subtotal = 0;
+    cart.forEach(item => {
+        subtotal += Number(item.price) * Number(item.qty);
+    });
+
+    const res = await fetch('/api/pedido', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id_usuario: usuarioId,
+            total: subtotal + 50
+        })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
+    } else {
+        alert('Error al crear pedido');
     }
-
-    renderCart();
-
-document.getElementById('btnProcederPago').addEventListener('click', () => {
-    window.location.href = 'MetodoPago.html';
 });
-
 </script>
-
 </body>
 </html>
