@@ -377,12 +377,13 @@ function cargarDirecciones() {
                 CP: ${d.codigo_postal}
             </div>
 
-            <button
-                onclick="eliminarDireccion(${d.id_direccion})"
-                style="background:none;border:none;cursor:pointer;color:#e74c3c;font-size:18px;"
-                title="Eliminar dirección">
-                <i class="fa-solid fa-trash"></i>
-            </button>
+          <button
+    onclick="eliminarDireccion(${d.id_direccion})"
+    style="background:none;border:none;cursor:pointer;"
+    title="Eliminar dirección"
+>
+    <i class="fa-solid fa-trash"></i>
+</button>
         </div>
     `;
 });
@@ -391,19 +392,22 @@ function cargarDirecciones() {
 }
 
 /* 👉 HACER GLOBAL LA FUNCIÓN */
-window.eliminarDireccion = async function(id) {
-
+window.eliminarDireccion = async function(id_direccion) {
     if (!confirm('¿Eliminar esta dirección?')) return;
 
-    const res = await fetch(`/api/direcciones/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/direcciones/${id_direccion}`, {
+        method: 'DELETE'
+    });
+
     const data = await res.json();
 
     if (data.success) {
         cargarDirecciones();
     } else {
-        alert('Error al eliminar');
+        alert('Error al eliminar la dirección');
     }
 };
+
 
 /* ================= AGREGAR ================= */
 btnAgregarDireccion.addEventListener('click', async () => {
