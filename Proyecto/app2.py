@@ -343,6 +343,9 @@ def obtener_pedido(id_pedido):
     finally:
         conn.close()
 
+# ===========================
+# CREAR PEDIDO
+# ===========================
 @app.route('/api/pedido', methods=['POST'])
 def crear_pedido():
     data = request.get_json()
@@ -354,21 +357,26 @@ def crear_pedido():
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO Pedido (id_cliente, total, estado)
-                VALUES (%s, %s, 'Pendiente')
+                INSERT INTO Pedido (id_cliente, total)
+                VALUES (%s, %s)
             """, (
-                data['id_usuario'],
+                data['id_cliente'],
                 data['total']
             ))
-            conn.commit()
 
             id_pedido = cursor.lastrowid
-            return jsonify({'success': True, 'id_pedido': id_pedido})
+            conn.commit()
+
+        return jsonify({
+            'success': True,
+            'id_pedido': id_pedido
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
     finally:
         conn.close()
-
-
 
 # ===========================
 # ARCHIVOS ESTÁTICOS

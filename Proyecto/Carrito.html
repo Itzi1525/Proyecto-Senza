@@ -301,10 +301,10 @@ document.addEventListener('click', async (e) => {
     const res = await fetch('/api/pedido', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            id_usuario: usuarioId,
-            total: subtotal + 50
-        })
+     body: JSON.stringify({
+    id_cliente: usuarioId,
+    total: subtotal + 50
+    })
     });
 
     const data = await res.json();
