@@ -182,46 +182,51 @@
 </footer>
 
 <script>
-/* =====================
-   CARGAR TOTAL
-===================== */
-const cart = JSON.parse(localStorage.getItem("cart")) || [];
+document.getElementById('btnPagar').addEventListener('click', async () => {
 
-let subtotal = 0;
-cart.forEach(item => {
-    subtotal += item.price * item.qty;
-});
+    const metodo = document.querySelector('input[name="metodo"]:checked').value;
 
-document.getElementById('subtotal').textContent = `$${subtotal}`;
-document.getElementById('total').textContent = `$${subtotal + 50}`;
+    // 🔴 EJEMPLO: aquí debes tener el id del pedido
+    const idPedido = localStorage.getItem('pedidoId');
 
-/* =====================
-   MÉTODO DE PAGO
-===================== */
-const radios = document.querySelectorAll('input[name="metodo"]');
-const tarjetaForm = document.getElementById('tarjetaForm');
-
-radios.forEach(radio => {
-    radio.addEventListener('change', () => {
-        tarjetaForm.style.display = radio.value === 'tarjeta' ? 'block' : 'none';
-    });
-});
-
-/* =====================
-   CONFIRMAR PAGO
-===================== */
-document.getElementById('btnPagar').addEventListener('click', () => {
-
-    if (cart.length === 0) {
-        alert('Tu carrito está vacío');
+    if (!idPedido) {
+        alert('No hay pedido activo');
         return;
     }
 
-    alert('✅ Pago realizado con éxito\nGracias por tu compra');
+    const montoTexto = document.getElementById('total').textContent;
+    const monto = parseFloat(montoTexto.replace('$',''));
 
-    localStorage.removeItem('cart');
-    window.location.href = 'Inicio.html';
+    const res = await fetch('/api/pago', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id_pedido: idPedido,
+            metodo: metodo === 'tarjeta' ? 'Tarjeta' : 'Efectivo',
+            monto: monto
+        })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        alert('✅ Pago registrado con éxito');
+        localStorage.removeItem('cart');
+        localStorage.removeItem('pedidoId');
+        window.location.href = 'Inicio.html';
+    } else {
+        alert('❌ Error al registrar el pago');
+    }
 });
+if (data.success) {
+    alert('✅ Compra exitosa');
+
+    // limpiar carrito
+    localStorage.removeItem('cart');
+
+    // redirigir al detalle del pedido
+    window.location.href = `DetallePedido.html?id=${idPedido}`;
+}
 </script>
 
 </body>

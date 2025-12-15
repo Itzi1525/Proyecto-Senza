@@ -279,6 +279,69 @@ def productos():
             return jsonify(productos)
     finally:
         conn.close()
+        # ===========================
+# METODO PAGO API
+# ===========================
+@app.route('/api/pago', methods=['POST'])
+def registrar_pago():
+    data = request.get_json()
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Error BD'}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO Pago (id_pedido, metodo, monto)
+                VALUES (%s, %s, %s)
+            """, (
+                data['id_pedido'],
+                data['metodo'],
+                data['monto']
+            ))
+            conn.commit()
+
+        return jsonify({'success': True})
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+    finally:
+        conn.close()
+
+# ===========================
+# PEDIDO
+# ===========================
+
+@app.route('/api/pedido/<int:id_pedido>', methods=['GET'])
+def obtener_pedido(id_pedido):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT p.id_pedido, p.total, pa.metodo, pa.fecha_pago
+                FROM Pedido p
+                JOIN Pago pa ON pa.id_pedido = p.id_pedido
+                WHERE p.id_pedido = %s
+            """, (id_pedido,))
+            pedido = cursor.fetchone()
+
+            if not pedido:
+                return jsonify({'success': False})
+
+            return jsonify({
+                'id_pedido': pedido['id_pedido'],
+                'total': float(pedido['total']),
+                'metodo': pedido['metodo'],
+                'fecha': str(pedido['fecha_pago'])
+            })
+    finally:
+        conn.close()
 
 
 # ===========================
