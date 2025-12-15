@@ -4,7 +4,57 @@
     <meta charset="UTF-8">
     <title>Mi Perfil - Senza</title>
 
-    <!-- CSS GLOBAL (el mismo que las demás páginas) -->
+ <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        :root { --color-primary: #D2B48C; --color-secondary: #4B3832; --color-background: #F8F8F8; --color-card-bg: #FFFFFF; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--color-background); color: var(--color-secondary); margin: 0; padding: 0; line-height: 1.6; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background-color: var(--color-card-bg); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); flex-wrap: wrap; gap: 15px; }
+        .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .logo img { height: 45px; width: auto; }
+        .logo h1 { font-size: 1.4em; margin: 0; font-weight: 600; }
+        .search-bar { flex-grow: 1; max-width: 400px; margin: 0 10px; }
+        .search-bar input { width: 100%; padding: 8px 15px; border-radius: 20px; border: 1px solid var(--color-primary); background-color: transparent; font-family: 'Poppins', sans-serif; color: var(--color-secondary); box-sizing: border-box; }
+        .main-nav ul { display: flex; list-style: none; gap: 15px; padding: 0; margin: 0; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+        .main-nav a { text-decoration: none; color: var(--color-secondary); font-weight: 600; font-size: 0.9em; white-space: nowrap; transition: color 0.3s ease; }
+        .main-nav a:hover { color: var(--color-primary); }
+        .admin-btn { background-color: var(--color-secondary); color: white !important; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center; gap: 5px; }
+        .admin-btn:hover { background-color: var(--color-primary); }
+        .hero-section { position: relative; display: flex; align-items: center; justify-content: center; min-height: 80vh; text-align: center; background-image: url('Imagenes/portada.jpg'); background-color: var(--color-secondary); background-size: cover; background-position: center; background-repeat: no-repeat; color: var(--color-card-bg); padding: 40px 20px; margin: 20px; border-radius: 15px; overflow: hidden; }
+        .hero-image-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); z-index: 1; }
+        .hero-content { position: relative; z-index: 2; max-width: 800px; padding: 20px; background-color: rgba(75, 56, 50, 0.6); border-radius: 10px; backdrop-filter: blur(5px); }
+        .hero-content h1 { font-size: 3.5em; margin-bottom: 0.5em; color: var(--color-card-bg); }
+        .hero-content p { font-size: 1.2em; max-width: 600px; margin: 0 auto; color: var(--color-card-bg); }
+        .section-title { text-align: center; font-size: 2.5em; margin: 50px 0 30px; color: var(--color-secondary); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .carousel-container { position: relative; overflow: hidden; padding: 20px 0; }
+        .carousel { display: flex; transition: transform 0.5s ease-in-out; }
+        .product-card { min-width: 300px; margin: 0 15px; background-color: var(--color-card-bg); border-radius: 10px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05); overflow: hidden; text-align: center; padding-bottom: 20px; transition: transform 0.3s ease; }
+        .product-card:hover { transform: translateY(-5px); }
+        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; border: none; padding: 10px; cursor: pointer; z-index: 10; border-radius: 50%; width: 40px; height: 40px; }
+        .carousel-btn.prev { left: 10px; }
+        .carousel-btn.next { right: 10px; }
+        .product-image { width: 100%; height: 250px; background-color: var(--color-primary); overflow: hidden; }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .product-card:hover .product-image img { transform: scale(1.1); }
+        .product-content h3 { margin: 15px 0 5px; font-size: 1.2em; padding: 0 10px; }
+        .product-content .price { font-weight: 700; font-size: 1.2em; color: var(--color-primary); }
+        .about-section { display: flex; flex-wrap: wrap; align-items: center; gap: 40px; padding: 50px 0; }
+        .about-image { flex: 1; min-width: 300px; }
+        .about-image img { width: 100%; height: 350px; object-fit: cover; border-radius: 10px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1); }
+        .about-content { flex: 2; min-width: 300px; }
+        .about-content h3 { font-size: 2em; margin-top: 0; }
+        footer { background-color: var(--color-secondary); color: var(--color-card-bg); padding: 40px 20px; text-align: center; }
+        .footer-content { display: flex; justify-content: space-around; flex-wrap: wrap; max-width: 1000px; margin: 0 auto 20px; gap: 20px; }
+        .footer-section { flex: 1; min-width: 200px; text-align: left; }
+        .footer-section h4 { font-size: 1.2em; margin-bottom: 15px; font-weight: 600; }
+        .social-icons a { color: var(--color-card-bg); font-size: 1.5em; margin: 0 10px; transition: color 0.3s ease; }
+        .social-icons a:hover { color: var(--color-primary); }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--color-card-bg); padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; text-align: center; position: relative; }
+        .modal-content h2 { font-size: 2em; margin-bottom: 20px; }
+        .modal-content a { text-decoration: none; color: var(--color-secondary); font-weight: 600; }
+        .modal-icon { font-size: 3em; margin-bottom: 15px; color: var(--color-secondary); }
+    </style>
     <link rel="stylesheet" href="inventario.css">
 
     <!-- FUENTE -->
