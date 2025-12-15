@@ -331,6 +331,10 @@ document.getElementById('btnGuardar').addEventListener('click', async () => {
 <script>
 const usuarioId = localStorage.getItem('usuarioId');
 
+if (!usuarioId) {
+    window.location.href = 'Login.html';
+}
+
 // -------- CARGAR DIRECCIONES --------
 function cargarDirecciones() {
     fetch(`/api/direcciones/${usuarioId}`)
@@ -339,7 +343,7 @@ function cargarDirecciones() {
             const cont = document.getElementById('listaDirecciones');
             cont.innerHTML = '';
 
-            if (direcciones.length === 0) {
+            if (!direcciones || direcciones.length === 0) {
                 cont.innerHTML = '<p>No tienes direcciones registradas.</p>';
                 return;
             }
@@ -351,7 +355,7 @@ function cargarDirecciones() {
                         padding:15px;
                         border-radius:8px;
                         margin-bottom:12px;
-                        background:#fafafa;
+                        background:#fff;
                     ">
                         <strong>${d.calle} ${d.numero || ''}</strong>
                         ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
@@ -369,14 +373,26 @@ cargarDirecciones();
 // -------- AGREGAR DIRECCIÓN --------
 document.getElementById('btnAgregarDireccion').addEventListener('click', async () => {
 
+    const calle = document.getElementById('calle').value;
+    const numero = document.getElementById('numero').value;
+    const colonia = document.getElementById('colonia').value;
+    const ciudad = document.getElementById('ciudad').value;
+    const codigo_postal = document.getElementById('codigo_postal').value;
+    const principal = document.getElementById('principal').checked;
+
+    if (!calle || !ciudad || !codigo_postal) {
+        alert('Completa los campos obligatorios');
+        return;
+    }
+
     const body = {
         id_usuario: usuarioId,
-        calle: calle.value,
-        numero: numero.value,
-        colonia: colonia.value,
-        ciudad: ciudad.value,
-        codigo_postal: codigo_postal.value
-        // principal se define en backend
+        calle,
+        numero,
+        colonia,
+        ciudad,
+        codigo_postal,
+        principal
     };
 
     const res = await fetch('/api/direcciones', {
@@ -391,7 +407,12 @@ document.getElementById('btnAgregarDireccion').addEventListener('click', async (
         alert('Dirección guardada correctamente');
         cargarDirecciones();
 
-        calle.value = numero.value = colonia.value = ciudad.value = codigo_postal.value = '';
+        document.getElementById('calle').value = '';
+        document.getElementById('numero').value = '';
+        document.getElementById('colonia').value = '';
+        document.getElementById('ciudad').value = '';
+        document.getElementById('codigo_postal').value = '';
+        document.getElementById('principal').checked = false;
     } else {
         alert('Error al guardar la dirección');
     }
