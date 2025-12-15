@@ -488,6 +488,24 @@ function eliminarDireccion(id_direccion) {
     });
 }
 
+async function eliminarDireccion(id) {
+    if (!confirm('¿Eliminar esta dirección?')) return;
+
+    const res = await fetch(`/api/direcciones/${id}`, {
+        method: 'DELETE'
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        cargarDirecciones();
+    } else {
+        alert('Error al eliminar');
+    }
+}
+
+
+
 </script>
 
 
