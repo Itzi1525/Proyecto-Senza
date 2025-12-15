@@ -357,6 +357,8 @@ function cargarDirecciones() {
             }
 
             direcciones.forEach(d => {
+                console.log(d);
+
                 cont.innerHTML += `
                     <div style="
                         border:1px solid #ddd;
@@ -376,10 +378,10 @@ function cargarDirecciones() {
                             CP: ${d.codigo_postal}
                         </div>
 
-                        <button onclick="eliminarDireccion(${d.id_direccion})"
-                            style="background:none;border:none;cursor:pointer;">
-                            <img src="Imagenes/trash.jpg" width="22">
-                        </button>
+                      <button onclick="eliminarDireccion(${d.id_direccion})"
+    style="background:none;border:none;cursor:pointer;color:#e74c3c;font-size:18px;">
+    <i class="fa-solid fa-trash"></i>
+</button>
                     </div>
                 `;
             });
@@ -388,6 +390,7 @@ function cargarDirecciones() {
 
 /* 👉 HACER GLOBAL LA FUNCIÓN */
 window.eliminarDireccion = async function(id) {
+
     if (!confirm('¿Eliminar esta dirección?')) return;
 
     const res = await fetch(`/api/direcciones/${id}`, { method: 'DELETE' });
