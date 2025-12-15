@@ -178,6 +178,30 @@
 
         <button id="btnGuardar">Guardar cambios</button>
     </div>
+<div class="card" style="margin-top:40px;">
+    <h2>Mis Direcciones</h2>
+
+    <div id="listaDirecciones"></div>
+
+    <hr style="margin:30px 0;">
+
+    <h3>Agregar dirección</h3>
+
+    <input type="text" id="calle" placeholder="Calle" required>
+    <input type="text" id="numero" placeholder="Número">
+    <input type="text" id="colonia" placeholder="Colonia">
+    <input type="text" id="ciudad" placeholder="Ciudad">
+    <input type="text" id="codigo_postal" placeholder="Código Postal">
+
+    <label style="margin-top:10px;">
+        <input type="checkbox" id="principal">
+        Dirección principal
+    </label>
+
+    <button id="btnAgregarDireccion">Agregar dirección</button>
+</div>
+
+
 </main>
 
 <!-- ================= JS PERFIL ================= -->
@@ -243,6 +267,66 @@ document.getElementById('btnGuardar').addEventListener('click', async () => {
         localStorage.setItem('usuarioNombre', body.nombre);
     } else {
         alert('Error al actualizar perfil');
+    }
+});
+
+</script>
+<script>
+const usuarioId = localStorage.getItem('usuarioId');
+
+function cargarDirecciones() {
+    fetch(`/api/direcciones/${usuarioId}`)
+        .then(res => res.json())
+        .then(direcciones => {
+            const cont = document.getElementById('listaDirecciones');
+            cont.innerHTML = '';
+
+            if (direcciones.length === 0) {
+                cont.innerHTML = '<p>No tienes direcciones registradas.</p>';
+                return;
+            }
+
+            direcciones.forEach(d => {
+                cont.innerHTML += `
+                    <div style="border:1px solid #ccc; padding:15px; margin-bottom:12px; border-radius:8px;">
+                        <strong>${d.calle} ${d.numero || ''}</strong>
+                        ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
+                        <br>
+                        ${d.colonia}, ${d.ciudad}<br>
+                        CP: ${d.codigo_postal}
+                    </div>
+                `;
+            });
+        });
+}
+
+cargarDirecciones();
+
+document.getElementById('btnAgregarDireccion').addEventListener('click', async () => {
+    const body = {
+        id_usuario: usuarioId,
+        calle: calle.value,
+        numero: numero.value,
+        colonia: colonia.value,
+        ciudad: ciudad.value,
+        codigo_postal: codigo_postal.value,
+        principal: principal.checked ? 1 : 0
+    };
+
+    const res = await fetch('/api/direcciones', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        alert('Dirección guardada');
+        cargarDirecciones();
+
+        calle.value = numero.value = colonia.value = ciudad.value = codigo_postal.value = '';
+        principal.checked = false;
     }
 });
 </script>

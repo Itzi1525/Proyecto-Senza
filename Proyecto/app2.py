@@ -139,7 +139,9 @@ def delete_usuario():
     finally:
         conn.close()
 
-
+# ===========================
+# MODIFICACION PERFIL 
+# ===========================
 @app.route('/api/perfil', methods=['PUT'])
 def actualizar_perfil():
     data = request.get_json()
@@ -165,7 +167,54 @@ def actualizar_perfil():
         conn.close()
 
     return jsonify({'success': True})
+# ===========================
+# DIRECCIÓNES API
+# ===========================
+@app.route('/api/direcciones/<int:id_usuario>')
+def obtener_direcciones(id_usuario):
+    id_cliente = obtener_id_cliente(id_usuario)
+    if not id_cliente:
+        return jsonify([])
 
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT id_direccion, calle, numero, colonia, ciudad, codigo_postal, principal
+            FROM Direccion
+            WHERE id_cliente = %s
+            ORDER BY principal DESC
+        """, (id_cliente,))
+        direcciones = cursor.fetchall()
+    conn.close()
+
+    return jsonify(direcciones)
+@app.route('/api/direcciones', methods=['POST'])
+def agregar_direccion():
+    data = request.get_json()
+    id_cliente = obtener_id_cliente(data['id_usuario'])
+
+    if not id_cliente:
+        return jsonify({'success': False})
+
+    conn = get_db_connection()
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO Direccion
+            (id_cliente, calle, numero, colonia, ciudad, codigo_postal, principal)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (
+            id_cliente,
+            data['calle'],
+            data['numero'],
+            data['colonia'],
+            data['ciudad'],
+            data['codigo_postal'],
+            data.get('principal', 0)
+        ))
+        conn.commit()
+    conn.close()
+
+    return jsonify({'success': True})
 
 # ===========================
 # PRODUCTOS API
