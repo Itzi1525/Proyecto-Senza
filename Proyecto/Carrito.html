@@ -252,7 +252,6 @@ function renderCart() {
     totalEl.textContent = `$${subtotal + 50}`;
     summary.style.display = "block";
 
-    /* 🔐 GUARDAR CARRITO */
     localStorage.setItem("cart", JSON.stringify(cart));
 }
 
@@ -261,11 +260,7 @@ function renderCart() {
 ========================= */
 function changeQty(index, delta) {
     cart[index].qty += delta;
-
-    if (cart[index].qty <= 0) {
-        cart.splice(index, 1);
-    }
-
+    if (cart[index].qty <= 0) cart.splice(index, 1);
     renderCart();
 }
 
@@ -280,54 +275,17 @@ function removeItem(index) {
 /* =========================
    PROCEDER AL PAGO
 ========================= */
+document.addEventListener('DOMContentLoaded', () => {
 
-document.addEventListener('click', async (e) => {
-
-    if (!e.target.classList.contains('checkout-btn')) return;
-
-    const usuarioId = localStorage.getItem('usuarioId');
-
-    if (!usuarioId) {
-        alert('Debes iniciar sesión');
-        return;
-    }
-
-    let subtotal = 0;
-    cart.forEach(item => subtotal += item.price * item.qty);
-
-    const res = await fetch('/api/pedido', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify({
-    id_cliente: usuarioId,
-    total: subtotal + 50
-    })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-        window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
-    } else {
-        alert('Error al crear pedido');
-    }
-});
-
-
-    document.addEventListener('DOMContentLoaded', () => {
     console.log('🟢 JS del carrito cargado');
 
     const checkoutBtn = document.querySelector('.checkout-btn');
     console.log('Botón encontrado:', checkoutBtn);
 
+    if (!checkoutBtn) return;
+
     checkoutBtn.addEventListener('click', async () => {
         console.log('🟢 CLICK en proceder al pago');
-
-    renderCart(); // 👈 IMPORTANTE
-
-    const checkoutBtn = document.querySelector('.checkout-btn');
-
-    checkoutBtn.addEventListener('click', async () => {
 
         const usuarioId = localStorage.getItem('usuarioId');
         if (!usuarioId) {
@@ -342,7 +300,7 @@ document.addEventListener('click', async (e) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                id_usuario: usuarioId,
+                id_cliente: usuarioId,
                 total: subtotal + 50
             })
         });
@@ -357,7 +315,10 @@ document.addEventListener('click', async (e) => {
     });
 });
 
-//renderCart();
+/* =========================
+   INICIAR
+========================= */
+renderCart();
 </script>
 
 </body>
