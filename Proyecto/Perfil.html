@@ -181,25 +181,33 @@
 <div class="card" style="margin-top:40px;">
     <h2>Mis Direcciones</h2>
 
-    <div id="listaDirecciones"></div>
+    <!-- LISTA -->
+    <div id="listaDirecciones" style="margin-bottom:30px;"></div>
 
     <hr style="margin:30px 0;">
 
     <h3>Agregar dirección</h3>
 
-    <input type="text" id="calle" placeholder="Calle" required>
-    <input type="text" id="numero" placeholder="Número">
-    <input type="text" id="colonia" placeholder="Colonia">
-    <input type="text" id="ciudad" placeholder="Ciudad">
-    <input type="text" id="codigo_postal" placeholder="Código Postal">
+    <label>Calle</label>
+    <input type="text" id="calle" placeholder="Ej. Av. Reforma" required>
 
-    <label style="margin-top:10px;">
-        <input type="checkbox" id="principal">
-        Dirección principal
-    </label>
+    <label>Número</label>
+    <input type="text" id="numero" placeholder="Ej. 123">
 
-    <button id="btnAgregarDireccion">Agregar dirección</button>
+    <label>Colonia</label>
+    <input type="text" id="colonia" placeholder="Ej. Centro">
+
+    <label>Ciudad</label>
+    <input type="text" id="ciudad" placeholder="Ej. Ciudad de México">
+
+    <label>Código Postal</label>
+    <input type="text" id="codigo_postal" placeholder="Ej. 06000">
+
+    <button id="btnAgregarDireccion" style="margin-top:25px;">
+        Agregar dirección
+    </button>
 </div>
+
 
 
 </main>
@@ -274,6 +282,7 @@ document.getElementById('btnGuardar').addEventListener('click', async () => {
 <script>
 const usuarioId = localStorage.getItem('usuarioId');
 
+// -------- CARGAR DIRECCIONES --------
 function cargarDirecciones() {
     fetch(`/api/direcciones/${usuarioId}`)
         .then(res => res.json())
@@ -288,7 +297,13 @@ function cargarDirecciones() {
 
             direcciones.forEach(d => {
                 cont.innerHTML += `
-                    <div style="border:1px solid #ccc; padding:15px; margin-bottom:12px; border-radius:8px;">
+                    <div style="
+                        border:1px solid #ddd;
+                        padding:15px;
+                        border-radius:8px;
+                        margin-bottom:12px;
+                        background:#fafafa;
+                    ">
                         <strong>${d.calle} ${d.numero || ''}</strong>
                         ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
                         <br>
@@ -302,34 +317,38 @@ function cargarDirecciones() {
 
 cargarDirecciones();
 
+// -------- AGREGAR DIRECCIÓN --------
 document.getElementById('btnAgregarDireccion').addEventListener('click', async () => {
+
     const body = {
         id_usuario: usuarioId,
         calle: calle.value,
         numero: numero.value,
         colonia: colonia.value,
         ciudad: ciudad.value,
-        codigo_postal: codigo_postal.value,
-        principal: principal.checked ? 1 : 0
+        codigo_postal: codigo_postal.value
+        // principal se define en backend
     };
 
     const res = await fetch('/api/direcciones', {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
     });
 
     const data = await res.json();
 
     if (data.success) {
-        alert('Dirección guardada');
+        alert('Dirección guardada correctamente');
         cargarDirecciones();
 
         calle.value = numero.value = colonia.value = ciudad.value = codigo_postal.value = '';
-        principal.checked = false;
+    } else {
+        alert('Error al guardar la dirección');
     }
 });
 </script>
+
 
 </body>
 </html>
