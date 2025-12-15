@@ -375,7 +375,6 @@ document.getElementById('btnAgregarDireccion')?.addEventListener('click', async 
     const colonia = document.getElementById('colonia').value;
     const ciudad = document.getElementById('ciudad').value;
     const codigo_postal = document.getElementById('codigo_postal').value;
-    const principal = document.getElementById('principal').checked;
 
     if (!calle || !ciudad || !codigo_postal) {
         alert('Completa los campos obligatorios');
@@ -392,7 +391,6 @@ document.getElementById('btnAgregarDireccion')?.addEventListener('click', async 
             colonia,
             ciudad,
             codigo_postal,
-            principal
         })
     });
 
