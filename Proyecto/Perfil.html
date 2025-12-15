@@ -356,35 +356,36 @@ function cargarDirecciones() {
                 return;
             }
 
-            direcciones.forEach(d => {
-                console.log(d);
+   direcciones.forEach(d => {
+    cont.innerHTML += `
+        <div style="
+            border:1px solid #ddd;
+            padding:15px;
+            border-radius:8px;
+            margin-bottom:12px;
+            background:#fff;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        ">
+            <div>
+                <strong>${d.calle} ${d.numero || ''}</strong>
+                ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
+                <br>
+                ${d.colonia}, ${d.ciudad}<br>
+                CP: ${d.codigo_postal}
+            </div>
 
-                cont.innerHTML += `
-                    <div style="
-                        border:1px solid #ddd;
-                        padding:15px;
-                        border-radius:8px;
-                        margin-bottom:12px;
-                        background:#fff;
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                    ">
-                        <div>
-                            <strong>${d.calle} ${d.numero || ''}</strong>
-                            ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
-                            <br>
-                            ${d.colonia}, ${d.ciudad}<br>
-                            CP: ${d.codigo_postal}
-                        </div>
+            <button
+                onclick="eliminarDireccion(${d.id_direccion})"
+                style="background:none;border:none;cursor:pointer;color:#e74c3c;font-size:18px;"
+                title="Eliminar dirección">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    `;
+});
 
-                      <button onclick="eliminarDireccion(${d.id_direccion})"
-    style="background:none;border:none;cursor:pointer;color:#e74c3c;font-size:18px;">
-    <i class="fa-solid fa-trash"></i>
-</button>
-                    </div>
-                `;
-            });
         });
 }
 
