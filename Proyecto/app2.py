@@ -288,7 +288,7 @@ def registrar_pago():
 
     conn = get_db_connection()
     if not conn:
-        return jsonify({'success': False, 'message': 'Error BD'}), 500
+        return jsonify({'success': False}), 500
 
     try:
         with conn.cursor() as cursor:
@@ -297,7 +297,7 @@ def registrar_pago():
                 VALUES (%s, %s, %s)
             """, (
                 data['id_pedido'],
-                data['metodo'],
+                data['metodo'],   # 👈 DEBE SER Tarjeta / Transferencia / Efectivo
                 data['monto']
             ))
             conn.commit()
@@ -305,11 +305,12 @@ def registrar_pago():
         return jsonify({'success': True})
 
     except Exception as e:
-        conn.rollback()
+        print("❌ ERROR PAGO:", e)
         return jsonify({'success': False, 'error': str(e)}), 500
 
     finally:
         conn.close()
+
 
 # ===========================
 # PEDIDO

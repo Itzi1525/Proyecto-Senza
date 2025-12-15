@@ -185,32 +185,25 @@
 /* ===============================
    OBTENER ID DEL PEDIDO
 =============================== */
-const params = new URLSearchParams(window.location.search);
-const idPedido = params.get('id');
-
-if (!idPedido) {
-    alert('No hay pedido activo');
-    window.location.href = 'Carrito.html';
-}
-
-
-/* ===============================
-   CONFIRMAR PAGO
-=============================== */
 document.getElementById('btnPagar').addEventListener('click', async () => {
 
-    const metodoInput = document.querySelector('input[name="metodo"]:checked');
-    if (!metodoInput) {
-        alert('Selecciona un método de pago');
+    const params = new URLSearchParams(window.location.search);
+    const idPedido = params.get('id');
+
+    if (!idPedido) {
+        alert('No hay pedido activo');
         return;
     }
 
-    const metodo = metodoInput.value === 'tarjeta'
-        ? 'Tarjeta'
-        : 'Efectivo';
+    const metodoSeleccionado = document.querySelector('input[name="metodo"]:checked').value;
 
-    const montoTexto = document.getElementById('total').textContent;
-    const monto = parseFloat(montoTexto.replace('$',''));
+    const metodo =
+        metodoSeleccionado === 'tarjeta' ? 'Tarjeta' :
+        metodoSeleccionado === 'transferencia' ? 'Transferencia' :
+        'Efectivo';
+
+    const totalTexto = document.getElementById('total').textContent;
+    const monto = parseFloat(totalTexto.replace('$',''));
 
     const res = await fetch('/api/pago', {
         method: 'POST',
@@ -226,14 +219,11 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
 
     if (data.success) {
         alert('✅ Compra exitosa');
-
-        // limpiar carrito
         localStorage.removeItem('cart');
-
-        // ir a detalle del pedido
         window.location.href = `DetallePedido.html?id=${idPedido}`;
     } else {
         alert('❌ Error al registrar el pago');
+        console.error(data.error);
     }
 });
 </script>
