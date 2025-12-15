@@ -172,32 +172,42 @@ def actualizar_perfil():
 # ===========================
 @app.route('/api/direcciones/<int:id_usuario>')
 def obtener_direcciones(id_usuario):
-    id_cliente = obtener_id_cliente(id_usuario)
-    if not id_cliente:
-        return jsonify([])
-
     conn = get_db_connection()
     with conn.cursor() as cursor:
         cursor.execute("""
-            SELECT id_direccion, calle, numero, colonia, ciudad, codigo_postal, principal
-            FROM Direccion
-            WHERE id_cliente = %s
-            ORDER BY principal DESC
-        """, (id_cliente,))
+            SELECT d.calle, d.numero, d.colonia, d.ciudad, d.codigo_postal, d.principal
+            FROM Direccion d
+            JOIN Cliente c ON d.id_cliente = c.id_cliente
+            WHERE c.id_usuario = %s
+        """, (id_usuario,))
         direcciones = cursor.fetchall()
     conn.close()
-
     return jsonify(direcciones)
 @app.route('/api/direcciones', methods=['POST'])
 def agregar_direccion():
     data = request.get_json()
-    id_cliente = obtener_id_cliente(data['id_usuario'])
-
-    if not id_cliente:
-        return jsonify({'success': False})
 
     conn = get_db_connection()
     with conn.cursor() as cursor:
+
+        # Obtener id_cliente desde id_usuario
+        cursor.execute("""
+            SELECT id_cliente FROM Cliente WHERE id_usuario = %s
+        """, (data['id_usuario'],))
+        cliente = cursor.fetchone()
+
+        if not cliente:
+            conn.close()
+            return jsonify({'success': False}), 400
+
+        id_cliente = cliente['id_cliente']
+
+        # Si es principal, quitar anteriores
+        if data.get('principal'):
+            cursor.execute("""
+                UPDATE Direccion SET principal = 0 WHERE id_cliente = %s
+            """, (id_cliente,))
+
         cursor.execute("""
             INSERT INTO Direccion
             (id_cliente, calle, numero, colonia, ciudad, codigo_postal, principal)
@@ -205,12 +215,13 @@ def agregar_direccion():
         """, (
             id_cliente,
             data['calle'],
-            data['numero'],
-            data['colonia'],
+            data.get('numero'),
+            data.get('colonia'),
             data['ciudad'],
             data['codigo_postal'],
-            data.get('principal', 0)
+            data.get('principal', False)
         ))
+
         conn.commit()
     conn.close()
 
