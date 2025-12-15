@@ -303,37 +303,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-    const usuarioId = localStorage.getItem('usuarioId');
+document.addEventListener('DOMContentLoaded', () => {
 
-    if (!usuarioId) {
-        alert('Debes iniciar sesión');
-        return;
-    }
+    renderCart(); // 👈 IMPORTANTE
 
-    let subtotal = 0;
-    cart.forEach(item => subtotal += item.price * item.qty);
+    const checkoutBtn = document.querySelector('.checkout-btn');
 
-    const res = await fetch('/api/pedido', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            id_usuario: usuarioId,
-            total: subtotal + 50
-        })
+    checkoutBtn.addEventListener('click', async () => {
+
+        const usuarioId = localStorage.getItem('usuarioId');
+        if (!usuarioId) {
+            alert('Debes iniciar sesión');
+            return;
+        }
+
+        let subtotal = 0;
+        cart.forEach(item => subtotal += item.price * item.qty);
+
+        const res = await fetch('/api/pedido', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id_usuario: usuarioId,
+                total: subtotal + 50
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
+        } else {
+            alert('Error al crear pedido');
+        }
     });
-
-    const data = await res.json();
-
-    if (data.success) {
-        window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
-    } else {
-        alert('Error al crear pedido');
-    }
 });
-/* =========================
-   INICIAR
-========================= */
-renderCart();
+
+//renderCart();
 </script>
 
 </body>
