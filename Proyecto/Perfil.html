@@ -440,61 +440,59 @@ document.getElementById('btnAgregarDireccion')?.addEventListener('click', async 
 });
 
 });
-cont.innerHTML += `
-    <div style="
-        border:1px solid #ddd;
-        padding:15px;
-        border-radius:8px;
-        margin-bottom:12px;
-        background:#fff;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-    ">
-        <div>
-            <strong>${d.calle} ${d.numero || ''}</strong>
-            ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
-            <br>
-            ${d.colonia}, ${d.ciudad}<br>
-            CP: ${d.codigo_postal}
-        </div>
+function cargarDirecciones() {
+    fetch(`/api/direcciones/${usuarioId}`)
+        .then(res => res.json())
+        .then(direcciones => {
+            const cont = document.getElementById('listaDirecciones');
+            cont.innerHTML = '';
 
-        <button
-            onclick="eliminarDireccion(${d.id_direccion})"
-            style="
-                background:none;
-                border:none;
-                cursor:pointer;
-                padding:5px;
-            "
-            title="Eliminar dirección"
-        >
-            <img 
-                src="Imagenes/trash.png"
-                alt="Eliminar"
-                style="width:24px; height:24px;"
-            >
-        </button>
-    </div>
-`;
+            if (!direcciones || direcciones.length === 0) {
+                cont.innerHTML = '<p>No tienes direcciones registradas.</p>';
+                return;
+            }
 
-function eliminarDireccion(id_direccion) {
-    if (!confirm('¿Seguro que deseas eliminar esta dirección?')) return;
+            direcciones.forEach(d => {
+                cont.innerHTML += `
+                    <div style="
+                        border:1px solid #ddd;
+                        padding:15px;
+                        border-radius:8px;
+                        margin-bottom:12px;
+                        background:#fff;
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                    ">
+                        <div>
+                            <strong>${d.calle} ${d.numero || ''}</strong>
+                            ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
+                            <br>
+                            ${d.colonia}, ${d.ciudad}<br>
+                            CP: ${d.codigo_postal}
+                        </div>
 
-    fetch(`/api/direcciones/${id_direccion}`, {
-        method: 'DELETE'
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert('Dirección eliminada');
-            cargarDirecciones();
-        } else {
-            alert('Error al eliminar la dirección');
-        }
-    });
+                        <button
+                            onclick="eliminarDireccion(${d.id_direccion})"
+                            style="
+                                background:none;
+                                border:none;
+                                cursor:pointer;
+                                padding:5px;
+                            "
+                            title="Eliminar dirección"
+                        >
+                            <img 
+                                src="Imagenes/trash.png"
+                                alt="Eliminar"
+                                style="width:24px; height:24px;"
+                            >
+                        </button>
+                    </div>
+                `;
+            });
+        });
 }
-
 async function eliminarDireccion(id) {
     if (!confirm('¿Eliminar esta dirección?')) return;
 
@@ -507,9 +505,11 @@ async function eliminarDireccion(id) {
     if (data.success) {
         cargarDirecciones();
     } else {
-        alert('Error al eliminar');
+        alert('Error al eliminar la dirección');
     }
 }
+
+
 
 
 
