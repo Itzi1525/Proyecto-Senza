@@ -439,17 +439,15 @@ function cargarDirecciones() {
                         </div>
 
                         <button
-                            onclick="eliminarDireccion(${d.id_direccion})"
+                            onclick="eliminarDireccion(${d.id})"
                             style="
                                 background:none;
                                 border:none;
                                 cursor:pointer;
-                                font-size:22px;
-                                color:#e74c3c;
                             "
                             title="Eliminar dirección"
                         >
-                            🗑️
+                            <img src="Imagenes/trash.png" width="22">
                         </button>
                     </div>
                 `;
@@ -457,22 +455,23 @@ function cargarDirecciones() {
         });
 }
 
-window.eliminarDireccion = async function(id) {
+
+async function eliminarDireccion(id) {
     if (!confirm('¿Eliminar esta dirección?')) return;
 
-    const res = await fetch(`/api/direcciones/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/direcciones/${id}`, {
+        method: 'DELETE'
+    });
+
     const data = await res.json();
 
     if (data.success) {
         cargarDirecciones();
     } else {
-        alert('Error al eliminar');
+        alert('Error al eliminar la dirección');
     }
 }
 
-cargarDirecciones();
-
-});
 
 
 </script>
