@@ -116,7 +116,7 @@
         // Google Login
         window.handleCredentialResponse = async function(response) {
             try {
-                const res = await fetch(`${BASE_URL}/google-login`, {
+                const res = await fetch(`/google-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: response.credential })
