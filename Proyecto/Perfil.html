@@ -263,6 +263,8 @@ input {
 
 <!-- ================= JS PERFIL ================= -->
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+
 /* ==============================
    VALIDAR SESIÓN
 ============================== */
@@ -282,7 +284,7 @@ const adminPanelLi = document.getElementById('adminPanelLi');
 const logoutItem = document.getElementById('logoutItem');
 const logoutLink = document.getElementById('logoutLink');
 
-if (nombreUsuario) {
+if (nombreUsuario && accountLink) {
     accountLink.textContent = nombreUsuario.split(" ")[0];
     accountLink.href = "Perfil.html";
     logoutItem.style.display = 'block';
@@ -292,13 +294,13 @@ if (nombreUsuario) {
     }
 }
 
-logoutLink.addEventListener('click', () => {
+logoutLink?.addEventListener('click', () => {
     localStorage.clear();
     window.location.href = 'Login.html';
 });
 
 /* ==============================
-   CARGAR PERFIL
+   PERFIL
 ============================== */
 fetch(`/api/perfil/${usuarioId}`)
     .then(res => res.json())
@@ -308,15 +310,12 @@ fetch(`/api/perfil/${usuarioId}`)
         document.getElementById('telefono').value = data.telefono || '';
     });
 
-/* ==============================
-   GUARDAR PERFIL
-============================== */
-document.getElementById('btnGuardar').addEventListener('click', async () => {
+document.getElementById('btnGuardar')?.addEventListener('click', async () => {
     const body = {
         id: usuarioId,
-        nombre: document.getElementById('nombre').value,
-        correo: document.getElementById('correo').value,
-        telefono: document.getElementById('telefono').value
+        nombre: nombre.value,
+        correo: correo.value,
+        telefono: telefono.value
     };
 
     const res = await fetch('/api/perfil', {
@@ -326,20 +325,12 @@ document.getElementById('btnGuardar').addEventListener('click', async () => {
     });
 
     const data = await res.json();
-
-    if (data.success) {
-        alert('Perfil actualizado correctamente');
-        localStorage.setItem('usuarioNombre', body.nombre);
-    } else {
-        alert('Error al actualizar perfil');
-    }
+    alert(data.success ? 'Perfil actualizado' : 'Error al actualizar');
 });
 
 /* ==============================
    DIRECCIONES
 ============================== */
-
-// Cargar direcciones
 function cargarDirecciones() {
     fetch(`/api/direcciones/${usuarioId}`)
         .then(res => res.json())
@@ -374,8 +365,10 @@ function cargarDirecciones() {
 
 cargarDirecciones();
 
-// Agregar dirección
-document.getElementById('btnAgregarDireccion').addEventListener('click', async () => {
+/* ==============================
+   AGREGAR DIRECCIÓN (EL BOTÓN)
+============================== */
+document.getElementById('btnAgregarDireccion')?.addEventListener('click', async () => {
 
     const calle = document.getElementById('calle').value;
     const numero = document.getElementById('numero').value;
@@ -389,37 +382,33 @@ document.getElementById('btnAgregarDireccion').addEventListener('click', async (
         return;
     }
 
-    const body = {
-        id_usuario: usuarioId,
-        calle,
-        numero,
-        colonia,
-        ciudad,
-        codigo_postal,
-        principal
-    };
-
     const res = await fetch('/api/direcciones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+            id_usuario: usuarioId,
+            calle,
+            numero,
+            colonia,
+            ciudad,
+            codigo_postal,
+            principal
+        })
     });
 
     const data = await res.json();
 
     if (data.success) {
-        alert('Dirección guardada correctamente');
+        alert('Dirección guardada');
         cargarDirecciones();
 
-        document.getElementById('calle').value = '';
-        document.getElementById('numero').value = '';
-        document.getElementById('colonia').value = '';
-        document.getElementById('ciudad').value = '';
-        document.getElementById('codigo_postal').value = '';
+        calle.value = numero.value = colonia.value = ciudad.value = codigo_postal.value = '';
         document.getElementById('principal').checked = false;
     } else {
-        alert('Error al guardar la dirección');
+        alert('Error al guardar dirección');
     }
+});
+
 });
 </script>
 
