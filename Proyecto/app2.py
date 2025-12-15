@@ -286,7 +286,17 @@ def productos():
 def registrar_pago():
     data = request.get_json()
 
-    conn = get_db_connection()
+    id_pedido = data.get('id_pedido')
+    metodo = data.get('metodo')
+    monto = data.get('monto')
+
+    # 🔒 VALIDACIÓN CRÍTICA
+    if not monto or float(monto) <= 0:
+        return jsonify({
+            'success': False,
+            'error': 'Monto inválido'
+        }), 400
+        conn = get_db_connection()
     if not conn:
         return jsonify({'success': False}), 500
 
@@ -295,11 +305,7 @@ def registrar_pago():
             cursor.execute("""
                 INSERT INTO Pago (id_pedido, metodo, monto)
                 VALUES (%s, %s, %s)
-            """, (
-                data['id_pedido'],
-                data['metodo'],   # 👈 DEBE SER Tarjeta / Transferencia / Efectivo
-                data['monto']
-            ))
+            """, (id_pedido, metodo, monto))
             conn.commit()
 
         return jsonify({'success': True})
@@ -310,8 +316,6 @@ def registrar_pago():
 
     finally:
         conn.close()
-
-
 # ===========================
 # PEDIDO
 # ===========================

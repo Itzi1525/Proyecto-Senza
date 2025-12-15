@@ -264,6 +264,10 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
 
     const totalTexto = document.getElementById('total').textContent;
     const monto = parseFloat(totalTexto.replace('$', ''));
+    if (!monto || monto <= 0) {
+    alert('❌ No hay productos en el carrito');
+    return;
+}
 
     const res = await fetch('/api/pago', {
         method: 'POST',
