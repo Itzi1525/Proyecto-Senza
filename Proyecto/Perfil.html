@@ -4,100 +4,26 @@
     <meta charset="UTF-8">
     <title>Mi Perfil - Senza</title>
 
-    <!-- CSS GLOBAL DEL SITIO -->
+    <!-- CSS GLOBAL (el mismo que las demás páginas) -->
     <link rel="stylesheet" href="inventario.css">
 
     <!-- FUENTE -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- ICONOS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <link rel="icon" href="Imagenes/Senza.png">
-
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f8f8f8;
-            margin: 0;
-        }
-
-        .perfil-container {
-            max-width: 520px;
-            margin: 80px auto;
-            padding: 0 20px;
-        }
-
-        .perfil-card {
-            background: #fff;
-            padding: 35px;
-            border-radius: 14px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-        }
-
-        .perfil-card h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #4B3832;
-        }
-
-        label {
-            font-weight: 600;
-            margin-top: 15px;
-            display: block;
-            color: #4B3832;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 6px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #4B3832;
-        }
-
-        button {
-            margin-top: 30px;
-            width: 100%;
-            padding: 14px;
-            background: #4B3832;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #382D26;
-        }
-
-        button:disabled {
-            background: #aaa;
-            cursor: not-allowed;
-        }
-    </style>
+    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
 </head>
 
 <body>
 
-<!-- ================= NAVBAR (MISMA QUE INICIO) ================= -->
+<!-- ================= HEADER (IGUAL AL DE INICIO) ================= -->
 <header>
     <div class="logo">
-        <img src="Imagenes/Senza.png" alt="Senza" style="height:40px;">
+        <img src="Imagenes/Senza.png" alt="Senza Logo">
         <h1>Senza</h1>
     </div>
 
     <div class="search-bar">
-        <input type="text" placeholder="Buscar productos..." disabled>
+        <input type="text" placeholder="Buscar productos...">
     </div>
 
     <nav class="main-nav">
@@ -106,25 +32,21 @@
             <li><a href="03-productos.html">Menú</a></li>
 
             <li id="adminPanelLi" style="display:none;">
-                <a href="AdminOpera.html" class="admin-btn">
-                    <i class="fas fa-tools"></i> Panel de Gestión
-                </a>
+                <a href="AdminOpera.html" class="admin-btn">Panel de Gestión</a>
             </li>
 
             <li><a href="#" id="accountLink">Cuenta</a></li>
 
             <li id="logoutItem" style="display:none;">
-                <a href="#" id="logoutLink" style="color:#e74c3c;">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+                <a href="#" id="logoutLink" style="color:#e74c3c;">Salir</a>
             </li>
         </ul>
     </nav>
 </header>
 
-<!-- ================= PERFIL ================= -->
-<div class="perfil-container">
-    <div class="perfil-card">
+<!-- ================= CONTENIDO PERFIL ================= -->
+<main class="container">
+    <div class="card perfil-card">
         <h2>Mi Perfil</h2>
 
         <label>Nombre</label>
@@ -138,10 +60,11 @@
 
         <button id="btnGuardar">Guardar cambios</button>
     </div>
-</div>
+</main>
 
-<!-- ================= JS ================= -->
+<!-- ================= JS PERFIL ================= -->
 <script>
+/* ---------- VALIDAR SESIÓN ---------- */
 const usuarioId = localStorage.getItem('usuarioId');
 const nombreUsuario = localStorage.getItem('usuarioNombre');
 const rolUsuario = localStorage.getItem('usuarioRol');
@@ -150,10 +73,11 @@ if (!usuarioId) {
     window.location.href = 'Login.html';
 }
 
-// -------- NAVBAR ----------
+/* ---------- HEADER DINÁMICO ---------- */
 const accountLink = document.getElementById('accountLink');
 const adminPanelLi = document.getElementById('adminPanelLi');
 const logoutItem = document.getElementById('logoutItem');
+const logoutLink = document.getElementById('logoutLink');
 
 if (nombreUsuario) {
     accountLink.textContent = nombreUsuario.split(" ")[0];
@@ -165,35 +89,22 @@ if (nombreUsuario) {
     }
 }
 
-// -------- LOGOUT ----------
-document.getElementById('logoutLink').addEventListener('click', () => {
+logoutLink.addEventListener('click', () => {
     localStorage.clear();
     window.location.href = 'Login.html';
 });
 
-// -------- CARGAR DATOS ----------
+/* ---------- CARGAR DATOS PERFIL ---------- */
 fetch(`/api/perfil/${usuarioId}`)
-    .then(res => {
-        if (!res.ok) throw new Error();
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
         document.getElementById('nombre').value = data.nombre || '';
         document.getElementById('correo').value = data.correo || '';
         document.getElementById('telefono').value = data.telefono || '';
-    })
-    .catch(() => {
-        alert('Sesión inválida');
-        localStorage.clear();
-        window.location.href = 'Login.html';
     });
 
-// -------- GUARDAR CAMBIOS ----------
+/* ---------- GUARDAR CAMBIOS ---------- */
 document.getElementById('btnGuardar').addEventListener('click', async () => {
-    const btn = document.getElementById('btnGuardar');
-    btn.disabled = true;
-    btn.textContent = 'Guardando...';
-
     const body = {
         id: usuarioId,
         nombre: document.getElementById('nombre').value,
@@ -209,20 +120,15 @@ document.getElementById('btnGuardar').addEventListener('click', async () => {
 
     const data = await res.json();
 
-    btn.disabled = false;
-    btn.textContent = 'Guardar cambios';
-
     if (data.success) {
         alert('Perfil actualizado correctamente');
         localStorage.setItem('usuarioNombre', body.nombre);
-        accountLink.textContent = body.nombre.split(" ")[0];
     } else {
-        alert('Error al guardar');
+        alert('Error al actualizar perfil');
     }
 });
 </script>
 
 </body>
 </html>
-
 
