@@ -277,6 +277,13 @@ input {
     style="margin-top:25px;">
     Agregar dirección
 </button>
+<img 
+    src="Imagenes/trash.png"
+    style="width:24px; height:24px; opacity:0.7;"
+    onmouseover="this.style.opacity=1"
+    onmouseout="this.style.opacity=0.7"
+/>
+
 
 </div>
 
@@ -433,44 +440,43 @@ document.getElementById('btnAgregarDireccion')?.addEventListener('click', async 
 });
 
 });
-direcciones.forEach(d => {
-    cont.innerHTML += `
-        <div style="
-            border:1px solid #ddd;
-            padding:15px;
-            border-radius:8px;
-            margin-bottom:12px;
-            background:#fff;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-        ">
-            <div>
-                <strong>${d.calle} ${d.numero || ''}</strong>
-                ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
-                <br>
-                ${d.colonia}, ${d.ciudad}<br>
-                CP: ${d.codigo_postal}
-            </div>
-
-            <button
-                onclick="eliminarDireccion(${d.id_direccion})"
-                style="
-                    background:none;
-                    border:none;
-                    cursor:pointer;
-                    color:#e74c3c;
-                    font-size:20px;
-                    min-width:40px;
-                    flex-shrink:0;
-                "
-                title="Eliminar dirección"
-            >
-                <i class="fas fa-trash"></i>
-            </button>
+cont.innerHTML += `
+    <div style="
+        border:1px solid #ddd;
+        padding:15px;
+        border-radius:8px;
+        margin-bottom:12px;
+        background:#fff;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+    ">
+        <div>
+            <strong>${d.calle} ${d.numero || ''}</strong>
+            ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
+            <br>
+            ${d.colonia}, ${d.ciudad}<br>
+            CP: ${d.codigo_postal}
         </div>
-    `;
-});
+
+        <button
+            onclick="eliminarDireccion(${d.id_direccion})"
+            style="
+                background:none;
+                border:none;
+                cursor:pointer;
+                padding:5px;
+            "
+            title="Eliminar dirección"
+        >
+            <img 
+                src="Imagenes/trash.png"
+                alt="Eliminar"
+                style="width:24px; height:24px;"
+            >
+        </button>
+    </div>
+`;
 
 function eliminarDireccion(id_direccion) {
     if (!confirm('¿Seguro que deseas eliminar esta dirección?')) return;
