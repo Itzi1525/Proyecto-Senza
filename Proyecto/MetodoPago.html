@@ -135,18 +135,34 @@
     <div class="card">
         <h2>Método de pago</h2>
 
-        <div class="payment-methods">
-            <label>
-                <input type="radio" name="metodo" value="tarjeta" checked>
-                Tarjeta de crédito / débito
-            </label>
+<div class="payment-methods">
+    <label>
+        <input type="radio" name="metodo" value="tarjeta" checked>
+        Tarjeta de crédito / débito
+    </label>
 
-            <label>
-                <input type="radio" name="metodo" value="efectivo">
-                Pago en efectivo
-            </label>
-        </div>
+    <label>
+        <input type="radio" name="metodo" value="transferencia">
+        Transferencia bancaria
+    </label>
 
+    <label>
+        <input type="radio" name="metodo" value="efectivo">
+        Pago en efectivo
+    </label>
+</div>
+<div id="transferenciaForm" style="display:none;">
+    <p><strong>Datos para transferencia:</strong></p>
+    <p>Banco: BBVA</p>
+    <p>Cuenta: 1234567890</p>
+    <p>CLABE: 012345678901234567</p>
+
+    <label>Referencia / Folio</label>
+    <input type="text" id="folioTransferencia" placeholder="Ej. TRANS-1234">
+</div>
+<div id="efectivoForm" style="display:none;">
+    <p>💵 Pagarás en efectivo al recibir tu pedido.</p>
+</div>
         <div id="tarjetaForm">
             <label>Nombre en la tarjeta</label>
             <input type="text" id="nombreTarjeta">
@@ -183,7 +199,31 @@
 
 <script>
 /* ===============================
-   OBTENER ID DEL PEDIDO
+   MOSTRAR / OCULTAR FORMULARIOS
+=============================== */
+const metodoRadios = document.querySelectorAll('input[name="metodo"]');
+const tarjetaForm = document.getElementById('tarjetaForm');
+const transferenciaForm = document.getElementById('transferenciaForm');
+const efectivoForm = document.getElementById('efectivoForm');
+
+metodoRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        tarjetaForm.style.display = 'none';
+        transferenciaForm.style.display = 'none';
+        efectivoForm.style.display = 'none';
+
+        if (radio.value === 'tarjeta') {
+            tarjetaForm.style.display = 'block';
+        } else if (radio.value === 'transferencia') {
+            transferenciaForm.style.display = 'block';
+        } else {
+            efectivoForm.style.display = 'block';
+        }
+    });
+});
+
+/* ===============================
+   CONFIRMAR PAGO
 =============================== */
 document.getElementById('btnPagar').addEventListener('click', async () => {
 
@@ -195,7 +235,27 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
         return;
     }
 
-    const metodoSeleccionado = document.querySelector('input[name="metodo"]:checked').value;
+    const metodoSeleccionado =
+        document.querySelector('input[name="metodo"]:checked').value;
+
+    /* 🔐 VALIDACIONES */
+    if (metodoSeleccionado === 'tarjeta') {
+        if (
+            !nombreTarjeta.value ||
+            !numeroTarjeta.value ||
+            !cvv.value
+        ) {
+            alert('Completa los datos de la tarjeta');
+            return;
+        }
+    }
+
+    if (metodoSeleccionado === 'transferencia') {
+        if (!folioTransferencia.value) {
+            alert('Ingresa el folio de transferencia');
+            return;
+        }
+    }
 
     const metodo =
         metodoSeleccionado === 'tarjeta' ? 'Tarjeta' :
@@ -203,7 +263,7 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
         'Efectivo';
 
     const totalTexto = document.getElementById('total').textContent;
-    const monto = parseFloat(totalTexto.replace('$',''));
+    const monto = parseFloat(totalTexto.replace('$', ''));
 
     const res = await fetch('/api/pago', {
         method: 'POST',
@@ -227,5 +287,5 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
     }
 });
 </script>
-</body>
+</body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 </html>
