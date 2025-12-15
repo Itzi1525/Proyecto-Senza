@@ -173,9 +173,9 @@ input {
     <!-- FUENTE -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
-    <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+ <link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 
 </head>
 
@@ -357,7 +357,6 @@ function cargarDirecciones() {
             }
 
    direcciones.forEach(d => {
-     console.log('DIRECCIÓN:', d);
     cont.innerHTML += `
         <div style="
             border:1px solid #ddd;
@@ -377,13 +376,21 @@ function cargarDirecciones() {
                 CP: ${d.codigo_postal}
             </div>
 
-          <button
-    onclick="eliminarDireccion(${d.id_direccion})"
-    style="background:none;border:none;cursor:pointer;"
-    title="Eliminar dirección"
->
-    <i class="fa-solid fa-trash"></i>
-</button>
+            <button 
+                onclick="eliminarDireccion(${d.id_direccion})"
+                style="
+                    background:#fdecea;
+                    border:none;
+                    border-radius:8px;
+                    padding:10px 12px;
+                    cursor:pointer;
+                    color:#e74c3c;
+                    font-size:18px;
+                "
+                title="Eliminar dirección"
+            >
+                <i class="fa-solid fa-trash"></i>
+            </button>
         </div>
     `;
 });
