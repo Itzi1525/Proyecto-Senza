@@ -182,17 +182,31 @@
 </footer>
 
 <script>
+/* ===============================
+   OBTENER ID DEL PEDIDO
+=============================== */
+const params = new URLSearchParams(window.location.search);
+const idPedido = params.get('id');
+
+if (!idPedido) {
+    alert('No hay pedido activo');
+    window.location.href = 'Carrito.html';
+}
+
+/* ===============================
+   CONFIRMAR PAGO
+=============================== */
 document.getElementById('btnPagar').addEventListener('click', async () => {
 
-    const metodo = document.querySelector('input[name="metodo"]:checked').value;
-
-    // 🔴 EJEMPLO: aquí debes tener el id del pedido
-    const idPedido = localStorage.getItem('pedidoId');
-
-    if (!idPedido) {
-        alert('No hay pedido activo');
+    const metodoInput = document.querySelector('input[name="metodo"]:checked');
+    if (!metodoInput) {
+        alert('Selecciona un método de pago');
         return;
     }
+
+    const metodo = metodoInput.value === 'tarjeta'
+        ? 'Tarjeta'
+        : 'Efectivo';
 
     const montoTexto = document.getElementById('total').textContent;
     const monto = parseFloat(montoTexto.replace('$',''));
@@ -202,7 +216,7 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             id_pedido: idPedido,
-            metodo: metodo === 'tarjeta' ? 'Tarjeta' : 'Efectivo',
+            metodo: metodo,
             monto: monto
         })
     });
@@ -210,24 +224,17 @@ document.getElementById('btnPagar').addEventListener('click', async () => {
     const data = await res.json();
 
     if (data.success) {
-        alert('✅ Pago registrado con éxito');
+        alert('✅ Compra exitosa');
+
+        // limpiar carrito
         localStorage.removeItem('cart');
-        localStorage.removeItem('pedidoId');
-        window.location.href = 'Inicio.html';
+
+        // ir a detalle del pedido
+        window.location.href = `DetallePedido.html?id=${idPedido}`;
     } else {
         alert('❌ Error al registrar el pago');
     }
 });
-if (data.success) {
-    alert('✅ Compra exitosa');
-
-    // limpiar carrito
-    localStorage.removeItem('cart');
-
-    // redirigir al detalle del pedido
-    window.location.href = `DetallePedido.html?id=${idPedido}`;
-}
 </script>
-
 </body>
 </html>
