@@ -263,7 +263,9 @@ input {
 
 <!-- ================= JS PERFIL ================= -->
 <script>
-/* ---------- VALIDAR SESIÓN ---------- */
+/* ==============================
+   VALIDAR SESIÓN
+============================== */
 const usuarioId = localStorage.getItem('usuarioId');
 const nombreUsuario = localStorage.getItem('usuarioNombre');
 const rolUsuario = localStorage.getItem('usuarioRol');
@@ -272,7 +274,9 @@ if (!usuarioId) {
     window.location.href = 'Login.html';
 }
 
-/* ---------- HEADER DINÁMICO ---------- */
+/* ==============================
+   HEADER DINÁMICO
+============================== */
 const accountLink = document.getElementById('accountLink');
 const adminPanelLi = document.getElementById('adminPanelLi');
 const logoutItem = document.getElementById('logoutItem');
@@ -293,7 +297,9 @@ logoutLink.addEventListener('click', () => {
     window.location.href = 'Login.html';
 });
 
-/* ---------- CARGAR DATOS PERFIL ---------- */
+/* ==============================
+   CARGAR PERFIL
+============================== */
 fetch(`/api/perfil/${usuarioId}`)
     .then(res => res.json())
     .then(data => {
@@ -302,7 +308,9 @@ fetch(`/api/perfil/${usuarioId}`)
         document.getElementById('telefono').value = data.telefono || '';
     });
 
-/* ---------- GUARDAR CAMBIOS ---------- */
+/* ==============================
+   GUARDAR PERFIL
+============================== */
 document.getElementById('btnGuardar').addEventListener('click', async () => {
     const body = {
         id: usuarioId,
@@ -327,15 +335,11 @@ document.getElementById('btnGuardar').addEventListener('click', async () => {
     }
 });
 
-</script>
-<script>
-const usuarioId = localStorage.getItem('usuarioId');
+/* ==============================
+   DIRECCIONES
+============================== */
 
-if (!usuarioId) {
-    window.location.href = 'Login.html';
-}
-
-// -------- CARGAR DIRECCIONES --------
+// Cargar direcciones
 function cargarDirecciones() {
     fetch(`/api/direcciones/${usuarioId}`)
         .then(res => res.json())
@@ -370,7 +374,7 @@ function cargarDirecciones() {
 
 cargarDirecciones();
 
-// -------- AGREGAR DIRECCIÓN --------
+// Agregar dirección
 document.getElementById('btnAgregarDireccion').addEventListener('click', async () => {
 
     const calle = document.getElementById('calle').value;
