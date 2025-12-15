@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Método de Pago | Senza</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-primary: #D2B48C;
+            --color-secondary: #4B3832;
+            --color-bg: #F8F8F8;
+            --card-bg: #FFFFFF;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-secondary);
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header a {
+            text-decoration: none;
+            font-weight: 600;
+            color: var(--color-secondary);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            margin-top: 15px;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-family: 'Poppins';
+        }
+
+        .payment-methods label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .btn-pagar {
+            margin-top: 25px;
+            width: 100%;
+            padding: 15px;
+            background: var(--color-secondary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-pagar:hover {
+            background: #382D26;
+        }
+
+        .resumen p {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+            background: var(--color-secondary);
+            color: #fff;
+        }
+
+        @media(max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Senza</h2>
+    <a href="carrito.html">← Volver al carrito</a>
+</header>
+
+<div class="container">
+
+    <!-- MÉTODO DE PAGO -->
+    <div class="card">
+        <h2>Método de pago</h2>
+
+        <div class="payment-methods">
+            <label>
+                <input type="radio" name="metodo" value="tarjeta" checked>
+                Tarjeta de crédito / débito
+            </label>
+
+            <label>
+                <input type="radio" name="metodo" value="efectivo">
+                Pago en efectivo
+            </label>
+        </div>
+
+        <div id="tarjetaForm">
+            <label>Nombre en la tarjeta</label>
+            <input type="text" id="nombreTarjeta">
+
+            <label>Número de tarjeta</label>
+            <input type="text" id="numeroTarjeta" maxlength="16">
+
+            <label>Fecha de expiración</label>
+            <input type="month" id="fecha">
+
+            <label>CVV</label>
+            <input type="password" id="cvv" maxlength="3">
+        </div>
+
+        <button class="btn-pagar" id="btnPagar">
+            Confirmar pago
+        </button>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="card resumen">
+        <h2>Resumen</h2>
+        <p><span>Subtotal</span><span id="subtotal">$0</span></p>
+        <p><span>Envío</span><span>$50</span></p>
+        <hr>
+        <p><span>Total</span><span id="total">$0</span></p>
+    </div>
+
+</div>
+
+<footer>
+    © 2025 Senza — Pago seguro
+</footer>
+
+<script>
+/* =====================
+   CARGAR TOTAL
+===================== */
+const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+let subtotal = 0;
+cart.forEach(item => {
+    subtotal += item.price * item.qty;
+});
+
+document.getElementById('subtotal').textContent = `$${subtotal}`;
+document.getElementById('total').textContent = `$${subtotal + 50}`;
+
+/* =====================
+   MÉTODO DE PAGO
+===================== */
+const radios = document.querySelectorAll('input[name="metodo"]');
+const tarjetaForm = document.getElementById('tarjetaForm');
+
+radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        tarjetaForm.style.display = radio.value === 'tarjeta' ? 'block' : 'none';
+    });
+});
+
+/* =====================
+   CONFIRMAR PAGO
+===================== */
+document.getElementById('btnPagar').addEventListener('click', () => {
+
+    if (cart.length === 0) {
+        alert('Tu carrito está vacío');
+        return;
+    }
+
+    alert('✅ Pago realizado con éxito\nGracias por tu compra');
+
+    localStorage.removeItem('cart');
+    window.location.href = 'Inicio.html';
+});
+</script>
+
+</body>
+</html>
