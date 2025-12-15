@@ -2,6 +2,9 @@ print("🔥 app2.py CORRECTO cargado")
 
 from flask import Flask, request, jsonify, send_from_directory, session
 from flask_cors import CORS
+# Importaciones de Google
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 import pymysql
 
 # ===========================
@@ -29,7 +32,75 @@ def get_db_connection():
 
 
 # ===========================
-# LOGIN (API)
+# LOGIN CON GOOGLE (NUEVO)
+# ===========================
+@app.route('/google-login', methods=['POST'])
+def google_login():
+    data = request.get_json()
+    token_google = data.get('token')
+    
+    # TU CLIENT ID DE GOOGLE
+    CLIENT_ID = "87366328254-63lo1bk93htqig3shql9ljsj0kbsm22q.apps.googleusercontent.com"
+
+    try:
+        # 1. Verificar el token con Google
+        idinfo = id_token.verify_oauth2_token(token_google, google_requests.Request(), CLIENT_ID)
+        email = idinfo['email']
+        nombre = idinfo['name']
+        
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'success': False, 'message': 'Error de conexión a BD'}), 500
+            
+        try:
+            with conn.cursor() as cursor:
+                # 2. Buscar si el usuario ya existe
+                cursor.execute("SELECT id_usuario, nombre, rol FROM Usuario WHERE correo = %s", (email,))
+                user = cursor.fetchone()
+
+                if user:
+                    # A) YA EXISTE -> INICIAR SESIÓN
+                    session['user_id'] = user['id_usuario']
+                    return jsonify({
+                        'success': True, 
+                        'message': 'Bienvenido de nuevo',
+                        'user': {'id': user['id_usuario'], 'nombre': user['nombre'], 'rol': user['rol']}
+                    })
+                else:
+                    # B) NO EXISTE -> REGISTRARLO AUTOMÁTICAMENTE
+                    password_dummy = "GOOGLE_LOGIN_USER" 
+                    
+                    # Insertar en Usuario
+                    cursor.execute(
+                        "INSERT INTO Usuario (nombre, correo, contrasena, rol) VALUES (%s, %s, %s, %s)",
+                        (nombre, email, password_dummy, 'Cliente')
+                    )
+                    id_nuevo = cursor.lastrowid # Obtener el ID generado en MySQL
+                    
+                    # Insertar en Cliente
+                    cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (%s)", (id_nuevo,))
+                    conn.commit()
+                    
+                    # Iniciar sesión automáticamente
+                    session['user_id'] = id_nuevo
+                    
+                    return jsonify({
+                        'success': True, 
+                        'message': 'Cuenta creada con Google',
+                        'user': {'id': id_nuevo, 'nombre': nombre, 'rol': 'Cliente'}
+                    })
+        finally:
+            conn.close()
+
+    except ValueError:
+        return jsonify({'success': False, 'message': 'Token Google inválido'}), 401
+    except Exception as e:
+        print("Error Google:", e)
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ===========================
+# LOGIN NORMAL (API)
 # ===========================
 @app.route('/login', methods=['POST'])
 def login():
@@ -70,7 +141,7 @@ def login():
 
 
 # ===========================
-# PERFIL (API, COMO LOGIN)
+# PERFIL (API)
 # ===========================
 @app.route('/api/perfil/<int:id_usuario>', methods=['GET'])
 def obtener_perfil(id_usuario):
@@ -114,7 +185,7 @@ def update_usuario():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("UPDATE Usuario SET nombre = ?, correo = ?, rol = ? WHERE id_usuario = ?", 
+        cursor.execute("UPDATE Usuario SET nombre = %s, correo = %s, rol = %s WHERE id_usuario = %s", 
                       (data['nombre'], data['correo'], data['rol'], data['id']))
         conn.commit()
         return jsonify({'success': True, 'message': 'Usuario actualizado'})
@@ -130,7 +201,7 @@ def delete_usuario():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM Usuario WHERE id_usuario = ?", (data['id'],))
+        cursor.execute("DELETE FROM Usuario WHERE id_usuario = %s", (data['id'],))
         conn.commit()
         return jsonify({'success': True, 'message': 'Usuario eliminado'})
     except Exception as e:
@@ -167,10 +238,10 @@ def actualizar_perfil():
         conn.close()
 
     return jsonify({'success': True})
+
 # ===========================
 # DIRECCIÓNES API
 # ===========================
-
 @app.route('/api/direcciones/<int:id_usuario>', methods=['GET'])
 def obtener_direcciones(id_usuario):
     conn = get_db_connection()
@@ -240,6 +311,7 @@ def agregar_direccion():
 
     finally:
         conn.close()
+
 @app.route('/api/direcciones/<int:id_direccion>', methods=['DELETE'])
 def eliminar_direccion(id_direccion):
     conn = get_db_connection()
@@ -259,8 +331,6 @@ def eliminar_direccion(id_direccion):
     finally:
         conn.close()
 
-
-
 # ===========================
 # PRODUCTOS API
 # ===========================
@@ -279,7 +349,8 @@ def productos():
             return jsonify(productos)
     finally:
         conn.close()
-        # ===========================
+
+# ===========================
 # METODO PAGO API
 # ===========================
 @app.route('/api/pago', methods=['POST'])
@@ -290,13 +361,15 @@ def registrar_pago():
     metodo = data.get('metodo')
     monto = data.get('monto')
 
-    # 🔒 VALIDACIÓN CRÍTICA
+    # 🔒 VALIDACIÓN
     if not monto or float(monto) <= 0:
         return jsonify({
             'success': False,
             'error': 'Monto inválido'
         }), 400
-        conn = get_db_connection()
+    
+    # Conexión correcta (fuera del if anterior)
+    conn = get_db_connection()
     if not conn:
         return jsonify({'success': False}), 500
 
@@ -316,10 +389,10 @@ def registrar_pago():
 
     finally:
         conn.close()
+
 # ===========================
 # PEDIDO
 # ===========================
-
 @app.route('/api/pedido/<int:id_pedido>', methods=['GET'])
 def obtener_pedido(id_pedido):
     conn = get_db_connection()
@@ -386,7 +459,6 @@ def crear_pedido():
 # ===========================
 # ARCHIVOS ESTÁTICOS
 # ===========================
-
 # IMÁGENES
 @app.route('/Imagenes/<path:filename>')
 def imagenes(filename):
