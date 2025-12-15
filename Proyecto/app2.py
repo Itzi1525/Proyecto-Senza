@@ -210,7 +210,22 @@ def obtener_direcciones(id_usuario):
 
     finally:
         conn.close()
+@app.route('/api/direcciones/<int:id_direccion>', methods=['DELETE'])
+def eliminar_direccion(id_direccion):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False}), 500
 
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "DELETE FROM Direccion WHERE id_direccion = %s",
+                (id_direccion,)
+            )
+            conn.commit()
+        return jsonify({'success': True})
+    finally:
+        conn.close()
 
 
 # ===========================
