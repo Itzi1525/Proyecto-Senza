@@ -205,6 +205,9 @@ input {
             </li>
         </ul>
     </nav>
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </header>
 
 <!-- ================= CONTENIDO PERFIL ================= -->
@@ -429,56 +432,45 @@ document.getElementById('btnAgregarDireccion')?.addEventListener('click', async 
 });
 
 });
-function cargarDirecciones() {
-    fetch(`/api/direcciones/${usuarioId}`)
-        .then(res => res.json())
-        .then(direcciones => {
-            const cont = document.getElementById('listaDirecciones');
-            cont.innerHTML = '';
+direcciones.forEach(d => {
+    cont.innerHTML += `
+        <div style="
+            border:1px solid #ddd;
+            padding:15px;
+            border-radius:8px;
+            margin-bottom:12px;
+            background:#fff;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        ">
+            <div>
+                <strong>${d.calle} ${d.numero || ''}</strong>
+                ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
+                <br>
+                ${d.colonia}, ${d.ciudad}<br>
+                CP: ${d.codigo_postal}
+            </div>
 
-            if (!direcciones || direcciones.length === 0) {
-                cont.innerHTML = '<p>No tienes direcciones registradas.</p>';
-                return;
-            }
+            <button
+                onclick="eliminarDireccion(${d.id_direccion})"
+                style="
+                    background:none;
+                    border:none;
+                    cursor:pointer;
+                    color:#e74c3c;
+                    font-size:20px;
+                    min-width:40px;
+                    flex-shrink:0;
+                "
+                title="Eliminar dirección"
+            >
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+});
 
-            direcciones.forEach(d => {
-                cont.innerHTML += `
-                    <div style="
-                        border:1px solid #ddd;
-                        padding:15px;
-                        border-radius:8px;
-                        margin-bottom:12px;
-                        background:#fff;
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                    ">
-                        <div>
-                            <strong>${d.calle} ${d.numero || ''}</strong>
-                            ${d.principal ? '<span style="color:#27ae60;"> (Principal)</span>' : ''}
-                            <br>
-                            ${d.colonia}, ${d.ciudad}<br>
-                            CP: ${d.codigo_postal}
-                        </div>
-
-                        <button 
-                            onclick="eliminarDireccion(${d.id_direccion})"
-                            style="
-                                background:none;
-                                border:none;
-                                cursor:pointer;
-                                color:#e74c3c;
-                                font-size:20px;
-                            "
-                            title="Eliminar dirección"
-                        >
-                            🗑️
-                        </button>
-                    </div>
-                `;
-            });
-        });
-}
 function eliminarDireccion(id_direccion) {
     if (!confirm('¿Seguro que deseas eliminar esta dirección?')) return;
 
