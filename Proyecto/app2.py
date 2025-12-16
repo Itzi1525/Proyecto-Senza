@@ -454,15 +454,16 @@ def productos_pedido(id_pedido):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
+
         cursor.execute("""
             SELECT 
-                pr.nombre,
-                dp.precio_unitario,
-                dp.cantidad,
-                dp.subtotal
-            FROM DetallePedido dp
-            JOIN Producto pr ON dp.id_producto = pr.id_producto
-            WHERE dp.id_pedido = %s
+                p.nombre AS nombre_producto,
+                d.precio_unitario,
+                d.cantidad,
+                d.subtotal
+            FROM DetallePedido d
+            JOIN Producto p ON d.id_producto = p.id_producto
+            WHERE d.id_pedido = %s
         """, (id_pedido,))
 
         rows = cursor.fetchall()
@@ -470,17 +471,18 @@ def productos_pedido(id_pedido):
         productos = []
         for r in rows:
             productos.append({
-                "nombre_producto": r["nombre"],
-                "precio": float(r["precio_unitario"]),
-                "cantidad": r["cantidad"],
-                "subtotal": float(r["subtotal"])
+                'nombre_producto': r[0],
+                'precio': float(r[1]),
+                'cantidad': r[2],
+                'subtotal': float(r[3])
             })
 
         return jsonify(productos)
 
     except Exception as e:
-        print("❌ ERROR productos_pedido REAL:", repr(e))
+        print("❌ ERROR productos_pedido:", e)
         return jsonify([]), 500
+
     finally:
         conn.close()
 
