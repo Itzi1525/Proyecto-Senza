@@ -543,6 +543,41 @@ def archivos(filename):
 def inicio():
     return send_from_directory('.', 'Inicio.html')
 
+# ===========================
+# REPORTE DE VENTAS (NUEVO)
+# ===========================
+@app.route('/api/reporte/ventas', methods=['GET'])
+def reporte_ventas():
+    conn = get_db_connection()
+    if not conn: return jsonify([])
+
+    try:
+        with conn.cursor() as cursor:
+            # Esta consulta agrupa las ventas por Mes y Año
+            query = """
+                SELECT 
+                    DATE_FORMAT(pa.fecha_pago, '%Y-%m') as mes,
+                    SUM(pa.monto) as total_ventas,
+                    COUNT(p.id_pedido) as total_pedidos
+                FROM Pedido p
+                JOIN Pago pa ON p.id_pedido = pa.id_pedido
+                GROUP BY mes
+                ORDER BY mes DESC
+                LIMIT 12
+            """
+            cursor.execute(query)
+            datos = cursor.fetchall()
+            
+            # Convertimos decimales a float para que JSON no falle
+            for d in datos:
+                d['total_ventas'] = float(d['total_ventas'])
+                
+            return jsonify(datos)
+    except Exception as e:
+        print("❌ Error Reporte:", e)
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 # ===========================
 # RUN
