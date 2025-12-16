@@ -225,19 +225,24 @@ fetch(`/api/pedido/${idPedido}/productos`)
         const tbody = document.getElementById('tablaProductos');
         tbody.innerHTML = '';
 
-        productos.forEach(p => {
-            const subtotal = p.precio_unitario * p.cantidad;
+        let total = 0;
 
-tbody.innerHTML += `
-    <tr>
-        <td>${p.nombre_producto}</td>
-        <td>$${p.precio_unitario}</td>
-        <td>${p.cantidad}</td>
-        <td>$${subtotal}</td>
-    </tr>
-`;
+        productos.forEach(p => {
+            total += p.subtotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${p.nombre}</td>
+                    <td>$${p.precio_unitario}</td>
+                    <td>${p.cantidad}</td>
+                    <td>$${p.subtotal}</td>
+                </tr>
+            `;
         });
+
+        document.getElementById('totalPedido').textContent = `$${total}`;
     });
+
 </script>
 
 </body>
