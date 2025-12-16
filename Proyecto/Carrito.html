@@ -224,28 +224,31 @@ function renderCart() {
     `;
 
     let subtotal = 0;
+cart.forEach((item, index) => {
 
-    cart.forEach((item, index) => {
-        const itemTotal = item.price * item.qty;
-        subtotal += itemTotal;
+    const nombre = item.nombre;
+    const precio = Number(item.precio);
+    const cantidad = Number(item.cantidad);
 
-        html += `
-            <tr>
-                <td>${item.name}</td>
-                <td>$${item.price}</td>
-                <td>
-                    <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
-                    ${item.qty}
-                    <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
-                </td>
-                <td>$${itemTotal}</td>
-                <td>
-                    <button class="delete-btn" onclick="removeItem(${index})">✕</button>
-                </td>
-            </tr>
-        `;
-    });
+    const itemTotal = precio * cantidad;
+    subtotal += itemTotal;
 
+    html += `
+        <tr>
+            <td>${nombre}</td>
+            <td>$${precio}</td>
+            <td>
+                <button onclick="changeQty(${index}, -1)">-</button>
+                ${cantidad}
+                <button onclick="changeQty(${index}, 1)">+</button>
+            </td>
+            <td>$${itemTotal}</td>
+            <td>
+                <button onclick="removeItem(${index})">✕</button>
+            </td>
+        </tr>
+    `;
+});
     html += "</table>";
     cartContainer.innerHTML = html;
 
