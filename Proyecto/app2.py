@@ -426,10 +426,9 @@ def crear_pedido():
                     (id_pedido, id_producto, cantidad, precio_unitario)
                     VALUES (%s, %s, %s, %s)
                 """, (
-                    id_pedido,
-                    item['id_producto'],
-                    item['qty'],
-                    item['price']
+    id_producto = item['id_producto']
+    cantidad = item['cantidad']      # ✅ CORRECTO
+    precio = item['precio']  
                 ))
 
             conn.commit()
