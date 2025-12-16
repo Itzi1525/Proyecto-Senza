@@ -190,7 +190,14 @@
             logoutLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 if(confirm("¿Deseas cerrar sesión?")) {
-                    localStorage.clear();
+                    
+                    // --- CORRECCIÓN AQUÍ ---
+                    // En lugar de localStorage.clear(); usamos esto:
+                    localStorage.removeItem('usuarioNombre');
+                    localStorage.removeItem('usuarioRol');
+                    // localStorage.removeItem('cart'); // Descomenta si quieres borrar el carrito al salir
+                    
+                    // Al no borrar 'reviews_db', tus reseñas se quedan guardadas.
                     window.location.href = "Login.html";
                 }
             });

@@ -259,7 +259,13 @@
         <ul>
             <li><a href="Inicio.html">Inicio</a></li>
             <li><a href="03-productos.html">Menú</a></li>
+            
             <li><a href="#" id="accountLink">Cuenta</a></li>
+
+            <li id="logoutItem" style="display: none;">
+                <a href="#" id="logoutLink" style="color: #e74c3c;"><i class="fas fa-sign-out-alt"></i> Salir</a>
+            </li>
+            
             <li><a href="Carrito.html">Carrito</a></li>
         </ul>
     </nav>
@@ -897,6 +903,63 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+    // ==========================================
+    // 1. LÓGICA DE USUARIO (NOMBRE Y LOGOUT)
+    // ==========================================
+    const nombreUsuario = localStorage.getItem('usuarioNombre');
+    const rolUsuario = localStorage.getItem('usuarioRol');
+
+    const accountLink = document.getElementById('accountLink');
+    const accountModal = document.getElementById('accountModal');
+    const logoutItem = document.getElementById('logoutItem');
+    const logoutLink = document.getElementById('logoutLink');
+
+    if (nombreUsuario && accountLink) {
+        // SI ESTÁ LOGUEADO:
+        // 1. Ponemos su nombre
+        const primerNombre = nombreUsuario.split(" ")[0];
+        accountLink.textContent = "Hola, " + primerNombre;
+        
+        // 2. Cambiamos el link para que no abra el modal, sino que vaya al perfil (opcional)
+        // O simplemente quitamos el evento de abrir modal.
+        // Aquí clonamos el nodo para eliminar el evento de click anterior si existiera
+        const newLink = accountLink.cloneNode(true);
+        accountLink.parentNode.replaceChild(newLink, accountLink);
+        newLink.href = "Perfil.html"; // O '#' si no tienes perfil aún
+
+        // 3. Mostramos el botón de salir
+        if (logoutItem) logoutItem.style.display = 'block';
+
+    } else {
+        // SI NO ESTÁ LOGUEADO:
+        // Mantenemos la lógica del Modal
+        if (accountLink && accountModal) {
+            accountLink.addEventListener('click', e => {
+                e.preventDefault();
+                accountModal.style.display = 'flex';
+            });
+    
+            window.addEventListener('click', e => {
+                if (e.target === accountModal) {
+                    accountModal.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // Lógica de Cerrar Sesión (Correcta, sin borrar reseñas)
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(confirm("¿Deseas cerrar sesión?")) {
+                localStorage.removeItem('usuarioNombre');
+                localStorage.removeItem('usuarioRol');
+                window.location.href = "Login.html";
+            }
+        });
+    }
+
+
     /* =======================
        FILTRO POR CATEGORÍA
     ======================= */
@@ -953,26 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* =======================
-       MODAL DE CUENTA
-    ======================= */
-    const accountLink = document.getElementById('accountLink');
-    const accountModal = document.getElementById('accountModal');
-
-    if (accountLink && accountModal) {
-        accountLink.addEventListener('click', e => {
-            e.preventDefault();
-            accountModal.style.display = 'flex';
-        });
-
-        window.addEventListener('click', e => {
-            if (e.target === accountModal) {
-                accountModal.style.display = 'none';
-            }
-        });
-    }
-
-    /* =======================
-       IR A DETALLE DEL PRODUCTO (CORREGIDO)
+       IR A DETALLE DEL PRODUCTO
     ======================= */
     const productImages = document.querySelectorAll('.product-image');
 
@@ -982,21 +1026,19 @@ document.addEventListener('DOMContentLoaded', () => {
         imageContainer.addEventListener('click', () => {
             const card = imageContainer.closest('.product-card');
 
-            // 1. OBTENER DATOS (Incluyendo ID y Descripción)
+            // 1. OBTENER DATOS
             const id = card.dataset.id; 
             const nombre = card.querySelector('h3').innerText;
             const precio = card.querySelector('.price').textContent.replace('$','').trim();
             const imagenSrc = card.querySelector('img').src;
             
-            // Buscamos el primer párrafo <p> que suele ser la descripción en tu HTML
             const descripcionElement = card.querySelector('p');
-            const descripcion = descripcionElement ? descripcionElement.innerText : "Descripción no disponible";
+            const descripcion = descripcionElement ? descripcionElement.innerText : "";
 
-            // 2. CREAR URL CORRECTA
-            // Apuntamos a 'DetalleProducto.html' y le pegamos todos los parámetros
+            // 2. CREAR URL
             const url = `DetalleProducto.html?id=${id}&nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&img=${encodeURIComponent(imagenSrc)}&desc=${encodeURIComponent(descripcion)}`;
             
-            // 3. REDIRIGIR USANDO LA VARIABLE URL
+            // 3. REDIRIGIR
             window.location.href = url;
         });
     });
