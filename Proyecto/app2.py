@@ -398,13 +398,12 @@ def registrar_pago():
 # ===========================
 # CREAR PEDIDO
 # ===========================
-
 @app.route('/api/pedido', methods=['POST'])
 def crear_pedido():
     data = request.get_json()
     id_cliente = data['id_cliente']
     total = data['total']
-    carrito = data['carrito']  # ⬅️ productos
+    carrito = data['carrito']
 
     conn = get_db_connection()
     if not conn:
@@ -412,23 +411,26 @@ def crear_pedido():
 
     try:
         with conn.cursor() as cursor:
+
             # 1️⃣ Crear pedido
             cursor.execute("""
                 INSERT INTO Pedido (id_cliente, total)
                 VALUES (%s, %s)
             """, (id_cliente, total))
+
             id_pedido = cursor.lastrowid
 
-            # 2️⃣ Insertar productos
+            # 2️⃣ Insertar detalle del pedido
             for item in carrito:
                 cursor.execute("""
                     INSERT INTO DetallePedido
                     (id_pedido, id_producto, cantidad, precio_unitario)
                     VALUES (%s, %s, %s, %s)
                 """, (
-    item['id_producto'],
-    item['cantidad'],      # ✅ CORRECTO
-    item['precio']  
+                    id_pedido,
+                    item['id_producto'],
+                    item['cantidad'],
+                    item['precio']
                 ))
 
             conn.commit()
@@ -438,7 +440,7 @@ def crear_pedido():
     except Exception as e:
         conn.rollback()
         print("❌ ERROR PEDIDO:", e)
-        return jsonify({'success': False}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
     finally:
         conn.close()
