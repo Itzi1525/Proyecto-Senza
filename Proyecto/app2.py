@@ -449,32 +449,39 @@ def productos_pedido(id_pedido):
         cursor = conn.cursor()
         cursor.execute("""
             SELECT 
-                p.nombre,
+                pr.nombre,
                 dp.precio_unitario,
                 dp.cantidad,
                 dp.subtotal
             FROM DetallePedido dp
-            JOIN Producto p ON dp.id_producto = p.id_producto
+            JOIN Producto pr ON dp.id_producto = pr.id_producto
             WHERE dp.id_pedido = %s
         """, (id_pedido,))
 
+        rows = cursor.fetchall()
+
+        if not rows:
+            print("⚠️ No hay productos para el pedido:", id_pedido)
+            return jsonify([])
+
         productos = []
-        for row in cursor.fetchall():
+        for r in rows:
             productos.append({
-                "nombre": row[0],
-                "precio": float(row[1]),
-                "cantidad": row[2],
-                "subtotal": float(row[3])
+                "nombre_producto": r[0],
+                "precio": float(r[1]),
+                "cantidad": r[2],
+                "subtotal": float(r[3])
             })
 
         return jsonify(productos)
 
     except Exception as e:
-        print("❌ ERROR productos_pedido:", e)
+        print("❌ ERROR productos_pedido REAL:", repr(e))
         return jsonify([]), 500
 
     finally:
         conn.close()
+
 
 
 @app.route('/api/pedido/<int:id_pedido>')
@@ -483,24 +490,33 @@ def obtener_pedido(id_pedido):
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT id_pedido, fecha, estado, total
-            FROM Pedido
-            WHERE id_pedido = %s
+            SELECT 
+                p.id_pedido,
+                p.fecha,
+                p.estado,
+                p.total,
+                pg.metodo
+            FROM Pedido p
+            LEFT JOIN Pago pg ON p.id_pedido = pg.id_pedido
+            WHERE p.id_pedido = %s
         """, (id_pedido,))
 
         row = cursor.fetchone()
-        if not row:
+
+        if row is None:
+            print("⚠️ Pedido no encontrado:", id_pedido)
             return jsonify({}), 404
 
         return jsonify({
             "id_pedido": row[0],
-            "fecha": str(row[1]),
+            "fecha": row[1].strftime("%Y-%m-%d %H:%M"),
             "estado": row[2],
-            "total": float(row[4])
+            "total": float(row[3]),
+            "metodo": row[4] if row[4] else "No definido"
         })
 
     except Exception as e:
-        print("❌ ERROR obtener_pedido:", e)
+        print("❌ ERROR obtener_pedido REAL:", repr(e))
         return jsonify({}), 500
 
     finally:
