@@ -399,31 +399,72 @@ def registrar_pago():
 # CREAR PEDIDO
 # ===========================
 
-@app.route('/api/pedido/<int:id_pedido>', methods=['GET'])
-def obtener_pedido(id_pedido):
+@app.route('/api/pedido', methods=['POST'])
+def crear_pedido():
+    data = request.get_json()
+    id_cliente = data['id_cliente']
+    total = data['total']
+    carrito = data['carrito']  # ⬅️ productos
+
     conn = get_db_connection()
     if not conn:
-        return jsonify({'error': 'BD'}), 500
+        return jsonify({'success': False}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            # 1️⃣ Crear pedido
+            cursor.execute("""
+                INSERT INTO Pedido (id_cliente, total)
+                VALUES (%s, %s)
+            """, (id_cliente, total))
+            id_pedido = cursor.lastrowid
+
+            # 2️⃣ Insertar productos
+            for item in carrito:
+                cursor.execute("""
+                    INSERT INTO DetallePedido
+                    (id_pedido, id_producto, cantidad, precio_unitario)
+                    VALUES (%s, %s, %s, %s)
+                """, (
+                    id_pedido,
+                    item['id_producto'],
+                    item['qty'],
+                    item['price']
+                ))
+
+            conn.commit()
+
+        return jsonify({'success': True, 'id_pedido': id_pedido})
+
+    except Exception as e:
+        conn.rollback()
+        print("❌ ERROR PEDIDO:", e)
+        return jsonify({'success': False}), 500
+
+    finally:
+        conn.close()
+
+@app.route('/api/pedido/<int:id_pedido>/productos')
+def productos_pedido(id_pedido):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify([])
 
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
                 SELECT 
-                    p.id_pedido,
-                    p.fecha,
-                    p.estado,
-                    p.total,
-                    pa.metodo
-                FROM Pedido p
-                LEFT JOIN Pago pa ON pa.id_pedido = p.id_pedido
-                WHERE p.id_pedido = %s
+                    pr.nombre AS nombre_producto,
+                    d.cantidad,
+                    d.precio_unitario AS precio
+                FROM DetallePedido d
+                JOIN Producto pr ON pr.id_producto = d.id_producto
+                WHERE d.id_pedido = %s
             """, (id_pedido,))
-
-            pedido = cursor.fetchone()
-            return jsonify(pedido)
-
+            return jsonify(cursor.fetchall())
     finally:
         conn.close()
+
 
 
 # ===========================

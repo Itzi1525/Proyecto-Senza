@@ -320,6 +320,19 @@ document.addEventListener('DOMContentLoaded', () => {
    INICIAR
 ========================= */
 renderCart();
+const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+const res = await fetch('/api/pedido', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        id_cliente: usuarioId,
+        total: subtotal + 50,
+        carrito: cart   // ⬅️ CLAVE
+    })
+});
+
+
 </script>
 
 </body>
