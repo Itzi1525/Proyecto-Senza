@@ -483,7 +483,7 @@ def obtener_pedido(id_pedido):
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT id_pedido, fecha, estado, metodo_pago, total
+            SELECT id_pedido, fecha, estado, metodo, total
             FROM Pedido
             WHERE id_pedido = %s
         """, (id_pedido,))
