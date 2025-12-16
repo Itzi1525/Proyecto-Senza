@@ -7,60 +7,170 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+:root {
+    --color-primary: #D2B48C;
+    --color-secondary: #4B3832;
+    --color-bg: #F8F8F8;
+    --card-bg: #FFFFFF;
+}
+
 body {
+    margin: 0;
     font-family: 'Poppins', sans-serif;
-    background:#f8f8f8;
-    margin:0;
+    background: var(--color-bg);
+    color: var(--color-secondary);
 }
 
+/* HEADER */
+header {
+    background: var(--card-bg);
+    padding: 20px 40px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header a {
+    text-decoration: none;
+    font-weight: 600;
+    color: var(--color-secondary);
+}
+
+/* CONTENEDOR */
 .container {
-    max-width:600px;
-    margin:60px auto;
-    background:#fff;
-    padding:30px;
-    border-radius:12px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
 }
 
-h2 {
-    text-align:center;
-    margin-bottom:20px;
+/* TARJETA */
+.card {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
 }
 
-.item {
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:10px;
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
+/* INFO PEDIDO */
+#infoPedido p {
+    margin: 8px 0;
+    font-weight: 600;
+}
+
+/* TABLA */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+thead {
+    background: var(--color-primary);
+}
+
+th, td {
+    padding: 14px;
+    text-align: center;
+}
+
+th {
+    color: var(--color-secondary);
+    font-weight: 700;
+}
+
+tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* TOTAL */
 .total {
-    font-weight:700;
-    font-size:1.2em;
-    margin-top:20px;
-    text-align:right;
+    text-align: right;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 20px;
+}
+
+/* ESTADO */
+.estado {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--color-primary);
+    font-weight: 600;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    padding: 30px;
+    background: var(--color-secondary);
+    color: white;
+    margin-top: 60px;
+}
+
+/* RESPONSIVE */
+@media(max-width: 600px) {
+    th, td {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
 }
 </style>
+
 </head>
 
 <body>
 
-<h2>Detalle del Pedido</h2>
+<header>
+    <h2>Senza</h2>
+    <a href="Inicio.html">← Volver al inicio</a>
+</header>
 
-<div id="infoPedido"></div>
+<div class="container">
 
-<table border="1" width="100%" style="margin-top:20px;">
-    <thead>
-        <tr>
-            <th>Producto</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
-    <tbody id="tablaProductos"></tbody>
-</table>
+    <div class="card">
+        <h2>Detalle del Pedido</h2>
+        <div id="infoPedido"></div>
+    </div>
 
-<h3 style="text-align:right;">Total: <span id="totalPedido">$0</span></h3>
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="tablaProductos"></tbody>
+        </table>
+
+        <div class="total">
+            Total: <span id="totalPedido">$0</span>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    © 2025 Senza — Gracias por tu compra 💚
+</footer>
+
 
 
 <script>

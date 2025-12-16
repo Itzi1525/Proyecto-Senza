@@ -393,33 +393,7 @@ def registrar_pago():
 # ===========================
 # PEDIDO
 # ===========================
-@app.route('/api/pedido/<int:id_pedido>', methods=['GET'])
-def obtener_pedido(id_pedido):
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({'success': False}), 500
 
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT p.id_pedido, p.total, pa.metodo, pa.fecha_pago
-                FROM Pedido p
-                JOIN Pago pa ON pa.id_pedido = p.id_pedido
-                WHERE p.id_pedido = %s
-            """, (id_pedido,))
-            pedido = cursor.fetchone()
-
-            if not pedido:
-                return jsonify({'success': False})
-
-            return jsonify({
-                'id_pedido': pedido['id_pedido'],
-                'total': float(pedido['total']),
-                'metodo': pedido['metodo'],
-                'fecha': str(pedido['fecha_pago'])
-            })
-    finally:
-        conn.close()
 
 # ===========================
 # CREAR PEDIDO
