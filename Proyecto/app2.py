@@ -444,27 +444,69 @@ def crear_pedido():
 
     finally:
         conn.close()
-        
+
 @app.route('/api/pedido/<int:id_pedido>/productos')
 def productos_pedido(id_pedido):
     conn = get_db_connection()
     try:
-        with conn.cursor(dictionary=True) as cursor:
-            cursor.execute("""
-                SELECT 
-                    p.nombre AS nombre,
-                    dp.cantidad,
-                    dp.precio_unitario,
-                    (dp.cantidad * dp.precio_unitario) AS subtotal
-                FROM DetallePedido dp
-                JOIN Producto p ON dp.id_producto = p.id_producto
-                WHERE dp.id_pedido = %s
-            """, (id_pedido,))
-            
-            productos = cursor.fetchall()
-            return jsonify(productos)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT 
+                p.nombre,
+                dp.cantidad,
+                dp.precio_unitario,
+                dp.cantidad * dp.precio_unitario AS subtotal
+            FROM DetallePedido dp
+            JOIN Producto p ON dp.id_producto = p.id_producto
+            WHERE dp.id_pedido = ?
+        """, (id_pedido,))
+
+        rows = cursor.fetchall()
+
+        productos = []
+        for r in rows:
+            productos.append({
+                "nombre": r[0],
+                "cantidad": r[1],
+                "precio_unitario": float(r[2]),
+                "subtotal": float(r[3])
+            })
+
+        return jsonify(productos)
+
+    except Exception as e:
+        print("❌ ERROR productos_pedido:", e)
+        return jsonify([]), 500
+
     finally:
         conn.close()
+
+@app.route('/api/pedido/<int:id_pedido>')
+def obtener_pedido(id_pedido):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id_pedido, fecha, estado, metodo_pago, total
+            FROM Pedido
+            WHERE id_pedido = ?
+        """, (id_pedido,))
+
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({}), 404
+
+        return jsonify({
+            "id_pedido": row[0],
+            "fecha": str(row[1]),
+            "estado": row[2],
+            "metodo": row[3],
+            "total": float(row[4])
+        })
+
+    finally:
+        conn.close()
+
 # ===========================
 # ARCHIVOS ESTÁTICOS
 # ===========================
