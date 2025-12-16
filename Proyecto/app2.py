@@ -398,37 +398,58 @@ def registrar_pago():
 # ===========================
 # CREAR PEDIDO
 # ===========================
-@app.route('/api/pedido', methods=['POST'])
-def crear_pedido():
-    data = request.get_json()
-
+@app.route('/api/pedido/<int:id_pedido>', methods=['GET'])
+def obtener_pedido(id_pedido):
     conn = get_db_connection()
     if not conn:
-        return jsonify({'success': False}), 500
+        return jsonify({'error': 'BD'}), 500
 
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO Pedido (id_cliente, total)
-                VALUES (%s, %s)
-            """, (
-                data['id_cliente'],
-                data['total']
-            ))
+                SELECT 
+                    p.id_pedido,
+                    p.fecha,
+                    p.estado,
+                    p.total,
+                    pa.metodo
+                FROM Pedido p
+                LEFT JOIN Pago pa ON pa.id_pedido = p.id_pedido
+                WHERE p.id_pedido = %s
+            """, (id_pedido,))
 
-            id_pedido = cursor.lastrowid
-            conn.commit()
-
-        return jsonify({
-            'success': True,
-            'id_pedido': id_pedido
-        })
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+            pedido = cursor.fetchone()
+            return jsonify(pedido)
 
     finally:
         conn.close()
+
+@app.route('/api/pedido/<int:id_pedido>', methods=['GET'])
+def obtener_pedido(id_pedido):
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'error': 'BD'}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    p.id_pedido,
+                    p.fecha,
+                    p.estado,
+                    p.total,
+                    pa.metodo
+                FROM Pedido p
+                LEFT JOIN Pago pa ON pa.id_pedido = p.id_pedido
+                WHERE p.id_pedido = %s
+            """, (id_pedido,))
+
+            pedido = cursor.fetchone()
+            return jsonify(pedido)
+
+    finally:
+        conn.close()
+
 
 # ===========================
 # ARCHIVOS ESTÁTICOS

@@ -226,16 +226,16 @@ fetch(`/api/pedido/${idPedido}/productos`)
         tbody.innerHTML = '';
 
         productos.forEach(p => {
-            const subtotal = p.precio * p.cantidad;
+            const subtotal = p.precio_unitario * p.cantidad;
 
-            tbody.innerHTML += `
-                <tr>
-                    <td>${p.nombre_producto}</td>
-                    <td>$${p.precio}</td>
-                    <td>${p.cantidad}</td>
-                    <td>$${subtotal}</td>
-                </tr>
-            `;
+tbody.innerHTML += `
+    <tr>
+        <td>${p.nombre_producto}</td>
+        <td>$${p.precio_unitario}</td>
+        <td>${p.cantidad}</td>
+        <td>$${subtotal}</td>
+    </tr>
+`;
         });
     });
 </script>
