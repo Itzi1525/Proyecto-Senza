@@ -921,37 +921,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* =======================
-       AGREGAR AL CARRITO (CORRECTO)
+       AGREGAR AL CARRITO
     ======================= */
     document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const card = btn.closest('.product-card');
+        btn.addEventListener('click', () => {
+            const card = btn.closest('.product-card');
 
-        const id_producto = Number(card.dataset.id);
-        const nombre = card.dataset.name;
-        const precio = Number(
-            card.querySelector('.price').textContent.replace('$','')
-        );
+            const id_producto = Number(card.dataset.id);
+            const nombre = card.dataset.name;
+            const precio = Number(
+                card.querySelector('.price').textContent.replace('$','')
+            );
 
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-        let prod = cart.find(p => p.id_producto === id_producto);
+            let prod = cart.find(p => p.id_producto === id_producto);
 
-        if (prod) {
-            prod.cantidad++;
-        } else {
-            cart.push({
-                id_producto,
-                nombre,
-                precio,
-                cantidad: 1
-            });
-        }
+            if (prod) {
+                prod.cantidad++;
+            } else {
+                cart.push({
+                    id_producto,
+                    nombre,
+                    precio,
+                    cantidad: 1
+                });
+            }
 
-        localStorage.setItem('cart', JSON.stringify(cart));
-        alert("Agregado al carrito ✅");
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert("Agregado al carrito ✅");
+        });
     });
-});
+
     /* =======================
        MODAL DE CUENTA
     ======================= */
@@ -970,6 +971,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    /* =======================
+       NUEVO: IR A DETALLE DEL PRODUCTO
+    ======================= */
+    // Seleccionamos todas las imágenes de los productos
+    const productImages = document.querySelectorAll('.product-image');
+
+    productImages.forEach(imageContainer => {
+        // Ponemos el cursor como manita para indicar que es clickeable
+        imageContainer.style.cursor = "pointer"; 
+
+        imageContainer.addEventListener('click', () => {
+            const card = imageContainer.closest('.product-card');
+
+            // Obtenemos los datos para pasarlos por la URL
+            const nombre = card.querySelector('h3').innerText;
+            const precio = card.querySelector('.price').textContent.replace('$','').trim();
+            const imagenSrc = card.querySelector('img').src;
+            
+            // Creamos la URL con los parámetros
+            const url = `Detalle.html?nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&img=${encodeURIComponent(imagenSrc)}`;
+            
+            // Redirigimos a la página de detalle
+            window.location.href = url;
+        });
+    });
 
 });
 </script>
