@@ -119,14 +119,34 @@
                 grid-template-columns: 1fr;
             }
         }
+        .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* La imagen se ajusta al tamaño sin deformarse */
+}
     </style>
 </head>
 
 <body>
-
 <header>
+    <div class="logo">
+        <h1>Senza</h1>
+    </div>
+    
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Buscar productos...">
+    </div>
+    
+    <nav class="main-nav">
+        <ul>
+            <li><a href="Inicio.html">Inicio</a></li>
+            <li><a href="03-productos.html">Menú</a></li>
+            <li><a href="#" id="accountLink">Cuenta</a></li>
+            <li><a href="Carrito.html">Carrito</a></li>
+        </ul>
+    </nav>
     <h2>Senza</h2>
-    <a href="carrito.html">← Volver al carrito</a>
+    <a href="Carrito.html">← Volver al carrito</a>
 </header>
 
 <div class="container">
