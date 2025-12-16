@@ -308,33 +308,62 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- 1. CARGAR DATOS DEL PRODUCTO ---
+        // --- 1. CARGAR DATOS DEL PRODUCTO DESDE LA URL ---
         const params = new URLSearchParams(window.location.search);
+        
+        // Obtenemos los parámetros
+        const id = params.get('id');
         const nombre = params.get('nombre');
         const precio = params.get('precio');
-        const desc = params.get('desc');
+        const desc = params.get('desc'); // Ahora sí recibimos la descripción
         const img = params.get('img');
 
+        // Si tenemos nombre, llenamos la página
         if (nombre) {
             document.getElementById('nameProd').textContent = nombre;
             document.getElementById('priceProd').textContent = "$" + precio;
+            
+            // Usamos la descripción que viene de la URL, o una por defecto
             document.getElementById('descProd').textContent = desc || "Un sabor inolvidable elaborado artesanalmente.";
+            
             document.getElementById('imgProd').src = img;
             
-            // Botón Agregar al Carrito
+            // --- LOGICA DEL CARRITO (Corregida para coincidir con 03-productos) ---
             document.getElementById('btnAdd').addEventListener('click', () => {
                 let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                let existing = cart.find(p => p.name === nombre);
-                if(existing) { existing.qty++; } 
-                else { cart.push({ name: nombre, price: Number(precio), qty: 1 }); }
+                
+                // Buscamos por ID (más seguro) o por Nombre si no hay ID
+                let prodId = id ? Number(id) : null;
+                
+                let existing = null;
+                if(prodId) {
+                    existing = cart.find(p => p.id_producto === prodId);
+                } else {
+                    existing = cart.find(p => p.nombre === nombre);
+                }
+
+                if(existing) { 
+                    existing.cantidad++; 
+                } else { 
+                    // Agregamos con la MISMA estructura que en 03-productos.html
+                    cart.push({ 
+                        id_producto: prodId,
+                        nombre: nombre, 
+                        precio: Number(precio), 
+                        cantidad: 1 
+                    }); 
+                }
+                
                 localStorage.setItem('cart', JSON.stringify(cart));
                 alert("¡" + nombre + " agregado al carrito! 🛒");
             });
 
             // Cargar reseñas existentes
             loadReviews(nombre);
+
         } else {
-             document.querySelector('.detail-wrapper').innerHTML = "<h2>Selecciona un producto del menú.</h2>";
+             // Si entras directo sin dar click en un producto
+             document.querySelector('.detail-wrapper').innerHTML = "<h2 style='text-align:center; width:100%;'>⚠️ No se ha seleccionado ningún producto. <br><a href='03-productos.html' style='font-size:0.6em;'>Volver al menú</a></h2>";
         }
 
         // --- 2. LÓGICA DE ESTRELLAS (Rating) ---
@@ -371,10 +400,8 @@
                 return;
             }
 
-            // Objeto compatible con tu BD SQL
             const nuevaResena = {
-                id_producto: nombre,
-                id_cliente: 1, 
+                id_producto: nombre, // Usamos el nombre para ligar la reseña
                 calificacion: selectedRating,
                 comentario: comment,
                 fecha: new Date().toLocaleDateString()
@@ -407,14 +434,14 @@
             productReviews.forEach(r => {
                 let starsHTML = "";
                 for(let i=0; i<5; i++) {
-                    starsHTML += i < r.calificacion ? "★" : "☆";
+                    starsHTML += i < r.calificacion ? "★" : "☆"; // Estrellas llenas o vacías
                 }
 
                 const card = document.createElement('div');
                 card.className = "review-card";
                 card.innerHTML = `
                     <div class="review-header">
-                        <span>Cliente Verificado</span>
+                        <span>Cliente</span>
                         <span class="review-stars">${starsHTML}</span>
                     </div>
                     <div class="review-date">${r.fecha}</div>

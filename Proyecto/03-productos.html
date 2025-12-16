@@ -934,7 +934,6 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
             let prod = cart.find(p => p.id_producto === id_producto);
 
             if (prod) {
@@ -973,28 +972,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =======================
-       NUEVO: IR A DETALLE DEL PRODUCTO
+       IR A DETALLE DEL PRODUCTO (CORREGIDO)
     ======================= */
-    // Seleccionamos todas las imágenes de los productos
     const productImages = document.querySelectorAll('.product-image');
 
     productImages.forEach(imageContainer => {
-        // Ponemos el cursor como manita para indicar que es clickeable
         imageContainer.style.cursor = "pointer"; 
 
         imageContainer.addEventListener('click', () => {
             const card = imageContainer.closest('.product-card');
 
-            // Obtenemos los datos para pasarlos por la URL
+            // 1. OBTENER DATOS (Incluyendo ID y Descripción)
+            const id = card.dataset.id; 
             const nombre = card.querySelector('h3').innerText;
             const precio = card.querySelector('.price').textContent.replace('$','').trim();
             const imagenSrc = card.querySelector('img').src;
             
-            // Creamos la URL con los parámetros
-            const url = `Detalle.html?nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&img=${encodeURIComponent(imagenSrc)}`;
+            // Buscamos el primer párrafo <p> que suele ser la descripción en tu HTML
+            const descripcionElement = card.querySelector('p');
+            const descripcion = descripcionElement ? descripcionElement.innerText : "Descripción no disponible";
+
+            // 2. CREAR URL CORRECTA
+            // Apuntamos a 'DetalleProducto.html' y le pegamos todos los parámetros
+            const url = `DetalleProducto.html?id=${id}&nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&img=${encodeURIComponent(imagenSrc)}&desc=${encodeURIComponent(descripcion)}`;
             
-            // Redirigimos a la página de detalle
-            window.location.href = "DetalleProducto.html";
+            // 3. REDIRIGIR USANDO LA VARIABLE URL
+            window.location.href = url;
         });
     });
 
