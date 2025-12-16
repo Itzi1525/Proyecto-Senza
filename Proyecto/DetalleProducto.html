@@ -308,33 +308,30 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- 1. CARGAR DATOS DEL PRODUCTO DESDE LA URL ---
+        // ==========================================
+        // 1. CARGAR DATOS DEL PRODUCTO
+        // ==========================================
         const params = new URLSearchParams(window.location.search);
         
-        // Obtenemos los parámetros
-        const id = params.get('id');
+        const id = params.get('id'); // ID numérico
         const nombre = params.get('nombre');
         const precio = params.get('precio');
-        const desc = params.get('desc'); // Ahora sí recibimos la descripción
+        const desc = params.get('desc');
         const img = params.get('img');
 
-        // Si tenemos nombre, llenamos la página
+        // Validamos que venga información
         if (nombre) {
             document.getElementById('nameProd').textContent = nombre;
             document.getElementById('priceProd').textContent = "$" + precio;
-            
-            // Usamos la descripción que viene de la URL, o una por defecto
-            document.getElementById('descProd').textContent = desc || "Un sabor inolvidable elaborado artesanalmente.";
-            
+            document.getElementById('descProd').textContent = desc || "Descripción no disponible.";
             document.getElementById('imgProd').src = img;
             
-            // --- LOGICA DEL CARRITO (Corregida para coincidir con 03-productos) ---
+            // --- LOGICA DEL CARRITO ---
             document.getElementById('btnAdd').addEventListener('click', () => {
                 let cart = JSON.parse(localStorage.getItem('cart')) || [];
-                
-                // Buscamos por ID (más seguro) o por Nombre si no hay ID
                 let prodId = id ? Number(id) : null;
                 
+                // Buscamos si ya existe en el carrito
                 let existing = null;
                 if(prodId) {
                     existing = cart.find(p => p.id_producto === prodId);
@@ -345,7 +342,6 @@
                 if(existing) { 
                     existing.cantidad++; 
                 } else { 
-                    // Agregamos con la MISMA estructura que en 03-productos.html
                     cart.push({ 
                         id_producto: prodId,
                         nombre: nombre, 
@@ -358,15 +354,17 @@
                 alert("¡" + nombre + " agregado al carrito! 🛒");
             });
 
-            // Cargar reseñas existentes
+            // Cargar reseñas al iniciar
             loadReviews(nombre);
 
         } else {
-             // Si entras directo sin dar click en un producto
-             document.querySelector('.detail-wrapper').innerHTML = "<h2 style='text-align:center; width:100%;'>⚠️ No se ha seleccionado ningún producto. <br><a href='03-productos.html' style='font-size:0.6em;'>Volver al menú</a></h2>";
+             document.querySelector('.detail-wrapper').innerHTML = 
+             "<h2 style='text-align:center;'>⚠️ Error: No se ha seleccionado producto. <br><a href='03-productos.html'>Volver</a></h2>";
         }
 
-        // --- 2. LÓGICA DE ESTRELLAS (Rating) ---
+        // ==========================================
+        // 2. LÓGICA DE ESTRELLAS (Rating UI)
+        // ==========================================
         let selectedRating = 0;
         const stars = document.querySelectorAll('#starRating span');
 
@@ -387,43 +385,88 @@
             });
         }
 
-        // --- 3. PUBLICAR RESEÑA ---
+        // ==========================================
+        // 3. PUBLICAR RESEÑA (LÓGICA BD)
+        // ==========================================
         document.getElementById('btnSubmitReview').addEventListener('click', () => {
+            
+            // A) VALIDACIONES
             const comment = document.getElementById('reviewComment').value;
+            
+            // Recuperamos el usuario de la sesión
+            const usuarioNombre = localStorage.getItem('usuarioNombre'); 
+            const usuarioRol = localStorage.getItem('usuarioRol') || 'Cliente'; // Si no tiene rol, es Cliente
+
+            if (!usuarioNombre) {
+                alert("Debes iniciar sesión para comentar.");
+                // Opcional: Redirigir al login
+                // window.location.href = "Login.html"; 
+                return;
+            }
 
             if (selectedRating === 0) {
-                alert("Por favor selecciona las estrellas.");
+                alert("Por favor selecciona una calificación (estrellas).");
                 return;
             }
             if (comment.trim() === "") {
-                alert("Por favor escribe un comentario.");
+                alert("Por favor escribe tu opinión.");
                 return;
             }
 
+            // B) CREAR EL OBJETO RESEÑA
+            // Aquí estructuramos lo que se va a guardar en la BD
             const nuevaResena = {
-                id_producto: nombre, // Usamos el nombre para ligar la reseña
+                id_producto: nombre, // Vinculamos por nombre (o podrías usar 'id')
+                autor: usuarioNombre,
+                rol: usuarioRol, // 'Administrador', 'Operador' o 'Cliente'
                 calificacion: selectedRating,
                 comentario: comment,
                 fecha: new Date().toLocaleDateString()
             };
 
-            let allReviews = JSON.parse(localStorage.getItem('reviews_db')) || [];
-            allReviews.push(nuevaResena);
-            localStorage.setItem('reviews_db', JSON.stringify(allReviews));
+            // C) GUARDAR (Aquí elegimos entre LocalStorage o AWS Real)
+            guardarResena(nuevaResena);
+        });
 
+        function guardarResena(resena) {
+            // --- MODO 1: SIMULACIÓN LOCAL (Para que funcione YA) ---
+            let allReviews = JSON.parse(localStorage.getItem('reviews_db')) || [];
+            allReviews.push(resena);
+            localStorage.setItem('reviews_db', JSON.stringify(allReviews));
+            
+            // --- MODO 2: AWS REAL (Descomenta esto cuando tengas tu API) ---
+            /*
+            fetch('https://tu-api-aws.com/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(resena)
+            })
+            .then(response => response.json())
+            .then(data => console.log('Guardado en AWS:', data))
+            .catch(error => console.error('Error:', error));
+            */
+
+            // D) LIMPIEZA Y RECARGA
             document.getElementById('reviewComment').value = "";
             selectedRating = 0;
             updateStars(0);
-            loadReviews(nombre);
-            alert("¡Gracias por tu opinión!");
-        });
+            
+            loadReviews(resena.id_producto); // Recargamos la lista para ver la nueva
+            alert("¡Gracias por tu opinión! Se ha guardado como: " + resena.rol);
+        }
 
-        // --- 4. MOSTRAR RESEÑAS ---
+        // ==========================================
+        // 4. MOSTRAR RESEÑAS
+        // ==========================================
         function loadReviews(productName) {
             const reviewsContainer = document.getElementById('reviewsList');
             reviewsContainer.innerHTML = ""; 
             
+            // LEER DE LA BD (Simulada)
+            // Si usaras AWS, aquí harías un fetch('https://tu-api.com/reviews?prod=...')
             let allReviews = JSON.parse(localStorage.getItem('reviews_db')) || [];
+            
+            // Filtramos solo las de este producto
             const productReviews = allReviews.filter(r => r.id_producto === productName);
 
             if (productReviews.length === 0) {
@@ -431,17 +474,32 @@
                 return;
             }
 
+            // Renderizamos cada reseña
             productReviews.forEach(r => {
                 let starsHTML = "";
                 for(let i=0; i<5; i++) {
-                    starsHTML += i < r.calificacion ? "★" : "☆"; // Estrellas llenas o vacías
+                    starsHTML += i < r.calificacion ? "★" : "☆";
+                }
+
+                // Definimos color o etiqueta según el rol
+                let etiquetaRol = "";
+                let bordeColor = "var(--color-primary)"; // Default clientes
+
+                if (r.rol === 'Administrador') {
+                    etiquetaRol = " <span style='background:#4B3832; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px;'>ADMIN</span>";
+                    bordeColor = "#4B3832";
+                } else if (r.rol === 'Operador') {
+                    etiquetaRol = " <span style='background:#D2B48C; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px;'>STAFF</span>";
                 }
 
                 const card = document.createElement('div');
                 card.className = "review-card";
+                // Añadimos un borde dinámico según quién comentó
+                card.style.borderLeft = `4px solid ${bordeColor}`;
+
                 card.innerHTML = `
                     <div class="review-header">
-                        <span>Cliente</span>
+                        <span>${r.autor} ${etiquetaRol}</span>
                         <span class="review-stars">${starsHTML}</span>
                     </div>
                     <div class="review-date">${r.fecha}</div>
