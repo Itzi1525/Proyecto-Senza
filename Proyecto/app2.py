@@ -401,46 +401,43 @@ def registrar_pago():
 @app.route('/api/pedido', methods=['POST'])
 def crear_pedido():
     data = request.get_json()
+
     id_cliente = data['id_cliente']
     total = data['total']
-    carrito = data['carrito']
+    carrito = data['carrito']   # ← lista de productos
 
     conn = get_db_connection()
-    if not conn:
-        return jsonify({'success': False}), 500
-
     try:
-        with conn.cursor() as cursor:
+        cursor = conn.cursor()
 
-            # 1️⃣ Crear pedido
+        # 1️⃣ Crear pedido
+        cursor.execute("""
+            INSERT INTO Pedido (id_cliente, total)
+            VALUES (%s, %s)
+        """, (id_cliente, total))
+
+        id_pedido = cursor.lastrowid
+
+        # 2️⃣ Insertar detalle de productos
+        for item in carrito:
             cursor.execute("""
-                INSERT INTO Pedido (id_cliente, total)
-                VALUES (%s, %s)
-            """, (id_cliente, total))
+                INSERT INTO DetallePedido
+                (id_pedido, id_producto, cantidad, precio_unitario)
+                VALUES (%s, %s, %s, %s)
+            """, (
+                id_pedido,
+                item['id_producto'],
+                item['cantidad'],
+                item['precio']
+            ))
 
-            id_pedido = cursor.lastrowid
-
-            # 2️⃣ Insertar detalle del pedido
-            for item in carrito:
-                cursor.execute("""
-                    INSERT INTO DetallePedido
-                    (id_pedido, id_producto, cantidad, precio_unitario)
-                    VALUES (%s, %s, %s, %s)
-                """, (
-                    id_pedido,
-                    item['id_producto'],
-                    item['cantidad'],
-                    item['precio']
-                ))
-
-            conn.commit()
-
+        conn.commit()
         return jsonify({'success': True, 'id_pedido': id_pedido})
 
     except Exception as e:
         conn.rollback()
         print("❌ ERROR PEDIDO:", e)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False}), 500
 
     finally:
         conn.close()
@@ -453,23 +450,21 @@ def productos_pedido(id_pedido):
         cursor.execute("""
             SELECT 
                 p.nombre,
-                dp.cantidad,
                 dp.precio_unitario,
-                dp.cantidad * dp.precio_unitario AS subtotal
+                dp.cantidad,
+                dp.subtotal
             FROM DetallePedido dp
             JOIN Producto p ON dp.id_producto = p.id_producto
             WHERE dp.id_pedido = %s
         """, (id_pedido,))
 
-        rows = cursor.fetchall()
-
         productos = []
-        for r in rows:
+        for row in cursor.fetchall():
             productos.append({
-                "nombre": r[0],
-                "cantidad": r[1],
-                "precio_unitario": float(r[2]),
-                "subtotal": float(r[3])
+                "nombre": row[0],
+                "precio": float(row[1]),
+                "cantidad": row[2],
+                "subtotal": float(row[3])
             })
 
         return jsonify(productos)

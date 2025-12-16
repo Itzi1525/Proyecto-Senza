@@ -188,61 +188,40 @@ footer {
 <footer>
     © 2025 Senza — Gracias por tu compra 💚
 </footer>
+    <script>
+const idPedido = new URLSearchParams(window.location.search).get('id');
 
-
-
-<script>
-const params = new URLSearchParams(window.location.search);
-const idPedido = params.get('id');
-
-if (!idPedido) {
-    alert('Pedido no válido');
-    window.location.href = 'Inicio.html';
-}
-
-/* ===========================
-   CARGAR INFO DEL PEDIDO
-=========================== */
+/* INFO DEL PEDIDO */
 fetch(`/api/pedido/${idPedido}`)
-    .then(res => res.json())
-    .then(pedido => {
-        document.getElementById('infoPedido').innerHTML = `
-            <p><strong>Pedido #:</strong> ${pedido.id_pedido}</p>
-            <p><strong>Fecha:</strong> ${pedido.fecha}</p>
-            <p><strong>Estado:</strong> ${pedido.estado}</p>
-            <p><strong>Método de pago:</strong> ${pedido.metodo}</p>
-        `;
+  .then(res => res.json())
+  .then(pedido => {
+    document.getElementById('infoPedido').innerHTML = `
+        <p><strong>Pedido #:</strong> ${pedido.id_pedido}</p>
+        <p><strong>Fecha:</strong> ${pedido.fecha}</p>
+        <p><strong>Estado:</strong> ${pedido.estado}</p>
+        <p><strong>Método de pago:</strong> ${pedido.metodo}</p>
+    `;
+    document.getElementById('totalPedido').textContent = `$${pedido.total}`;
+  });
 
-        document.getElementById('totalPedido').textContent = `$${pedido.total}`;
-    });
-
-/* ===========================
-   CARGAR PRODUCTOS
-=========================== */
+/* PRODUCTOS */
 fetch(`/api/pedido/${idPedido}/productos`)
-    .then(res => res.json())
-    .then(productos => {
-        const tbody = document.getElementById('tablaProductos');
-        tbody.innerHTML = '';
+  .then(res => res.json())
+  .then(productos => {
+    const tbody = document.getElementById('tablaProductos');
+    tbody.innerHTML = '';
 
-        let total = 0;
-
-        productos.forEach(p => {
-            total += p.subtotal;
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${p.nombre}</td>
-                    <td>$${p.precio_unitario}</td>
-                    <td>${p.cantidad}</td>
-                    <td>$${p.subtotal}</td>
-                </tr>
-            `;
-        });
-
-        document.getElementById('totalPedido').textContent = `$${total}`;
+    productos.forEach(p => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${p.nombre}</td>
+                <td>$${p.precio}</td>
+                <td>${p.cantidad}</td>
+                <td>$${p.subtotal}</td>
+            </tr>
+        `;
     });
-
+  });
 </script>
 
 </body>
