@@ -894,19 +894,15 @@
         </div>
     </div>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const productCards = document.querySelectorAll('.product-card');
-    const searchInput = document.getElementById('searchInput');
-    const accountLink = document.getElementById('accountLink');
-    const accountModal = document.getElementById('accountModal');
 
     /* =======================
        FILTRO POR CATEGORÍA
     ======================= */
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const productCards = document.querySelectorAll('.product-card');
+
     filterButtons.forEach(button => {
         button.addEventListener('click', e => {
             e.preventDefault();
@@ -924,6 +920,45 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    /* =======================
+       AGREGAR AL CARRITO (CORRECTO)
+    ======================= */
+    document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+        btn.addEventListener('click', () => {
+
+            const card = btn.closest('.product-card');
+
+            const producto = {
+                id_producto: Number(card.dataset.id),
+                nombre: card.dataset.name,
+                precio: Number(
+                    card.querySelector('.price').textContent.replace('$','')
+                ),
+                cantidad: 1
+            };
+
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            const existente = cart.find(
+                p => p.id_producto === producto.id_producto
+            );
+
+            if (existente) {
+                existente.cantidad++;
+            } else {
+                cart.push(producto);
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert('Agregado al carrito 🛒');
+        });
+    });
+
+    /* =======================
+       MODAL DE CUENTA
+    ======================= */
+    const accountLink = document.getElementById('accountLink');
+    const accountModal = document.getElementById('accountModal');
 
     if (accountLink && accountModal) {
         accountLink.addEventListener('click', e => {
@@ -938,85 +973,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* =======================
-       AGREGAR AL CARRITO
-    ======================= */
-    document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const card = btn.closest('.product-card');
-
-            const id_producto = card.dataset.id;
-            const name = card.dataset.name;
-             const priceText = card.querySelector('.price').textContent;
-            const price = Number(priceText.replace('$',''));
-
-
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            let prod = cart.find(p => p.name === name);
-
-            if (prod) {
-                prod.qty++;
-            } else {
-                cart.push({ name, price, qty: 1 });
-            }
-
-            localStorage.setItem('cart', JSON.stringify(cart));
-            alert("Agregado al carrito ✅");
-        });
-    });
-
-    /* =======================
-       IR A DETALLE DE PRODUCTO
-    ======================= */
-    document.querySelectorAll('.product-image').forEach(div => {
-        div.style.cursor = 'pointer';
-        div.addEventListener('click', () => {
-            const card = div.closest('.product-card');
-
-            const nombre = card.querySelector('h3').innerText;
-            const precio = card.querySelector('.price').innerText.replace('$','').trim();
-            const descripcion = card.querySelector('p').innerText;
-            const imagenSrc = card.querySelector('img').src;
-
-            const url = `DetalleProducto.html?nombre=${encodeURIComponent(nombre)}
-            &precio=${encodeURIComponent(precio)}
-            &desc=${encodeURIComponent(descripcion)}
-            &img=${encodeURIComponent(imagenSrc)}`;
-
-            window.location.href = url;
-        });
-    });
-
 });
 </script>
-  <script src="buscador.js"></script>
-<script>
-function cargarProductos() {
-    fetch("/productos")
-        .then(res => res.json())
-        .then(data => {
-            const contenedor = document.querySelector(".productos-grid");
-            contenedor.innerHTML = ""; // Limpiar estáticos
 
-            data.forEach(prod => {
-                const item = `
-                <div class="producto">
-                    <img src="${prod.imagen}" alt="${prod.nombre}">
-                    <h3>${prod.nombre}</h3>
-                    <p class="precio">$${prod.precio}</p>
-                    <button onclick="agregarCarrito(${prod.id_producto})">
-                        Agregar al carrito
-                    </button>
-                </div>`;
-                
-                contenedor.innerHTML += item;
-            });
-        })
-        .catch(error => console.log("Error cargando productos:", error));
-}
-
-cargarProductos();
-</script>
+<script src="buscador.js"></script>
 
 </body>
 </html>
