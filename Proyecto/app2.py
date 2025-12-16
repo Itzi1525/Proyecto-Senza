@@ -445,30 +445,26 @@ def crear_pedido():
     finally:
         conn.close()
         
-
 @app.route('/api/pedido/<int:id_pedido>/productos')
 def productos_pedido(id_pedido):
     conn = get_db_connection()
-    if not conn:
-        return jsonify([])
-
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(dictionary=True) as cursor:
             cursor.execute("""
                 SELECT 
-                    pr.nombre AS nombre_producto,
-                    d.cantidad,
-                    d.precio_unitario AS precio
-                FROM DetallePedido d
-                JOIN Producto pr ON pr.id_producto = d.id_producto
-                WHERE d.id_pedido = %s
+                    p.nombre AS nombre,
+                    dp.cantidad,
+                    dp.precio_unitario,
+                    (dp.cantidad * dp.precio_unitario) AS subtotal
+                FROM DetallePedido dp
+                JOIN Producto p ON dp.id_producto = p.id_producto
+                WHERE dp.id_pedido = %s
             """, (id_pedido,))
-            return jsonify(cursor.fetchall())
+            
+            productos = cursor.fetchall()
+            return jsonify(productos)
     finally:
         conn.close()
-
-
-
 # ===========================
 # ARCHIVOS ESTÁTICOS
 # ===========================
