@@ -404,9 +404,10 @@ def crear_pedido():
 
     id_cliente = data['id_cliente']
     total = data['total']
-    carrito = data['carrito']   # ← lista de productos
+    carrito = data['carrito']  # lista de productos
 
     conn = get_db_connection()
+
     try:
         cursor = conn.cursor()
 
@@ -422,17 +423,22 @@ def crear_pedido():
         for item in carrito:
             cursor.execute("""
                 INSERT INTO DetallePedido
-                (id_pedido, id_producto, cantidad, precio_unitario)
-                VALUES (%s, %s, %s, %s)
+                (id_pedido, id_producto, cantidad, precio_unitario, subtotal)
+                VALUES (%s, %s, %s, %s, %s)
             """, (
                 id_pedido,
                 item['id_producto'],
                 item['cantidad'],
-                item['precio']
+                item['precio'],
+                item['cantidad'] * item['precio']
             ))
 
         conn.commit()
-        return jsonify({'success': True, 'id_pedido': id_pedido})
+
+        return jsonify({
+            'success': True,
+            'id_pedido': id_pedido
+        })
 
     except Exception as e:
         conn.rollback()
@@ -441,6 +447,7 @@ def crear_pedido():
 
     finally:
         conn.close()
+
 
 @app.route('/api/pedido/<int:id_pedido>/productos')
 def productos_pedido(id_pedido):
