@@ -188,6 +188,7 @@
 <footer>
     © 2025 Senza — Todos los derechos reservados
 </footer>
+
 <script>
 /* =========================
    CARRITO DESDE LOCALSTORAGE
@@ -285,55 +286,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!checkoutBtn) return;
 
-    checkoutBtn.addEventListener('click', async () => {
-        console.log('🟢 CLICK en proceder al pago');
+   checkoutBtn.addEventListener('click', async () => {
 
-        const usuarioId = localStorage.getItem('usuarioId');
-        if (!usuarioId) {
-            alert('Debes iniciar sesión');
-            return;
-        }
+    const usuarioId = localStorage.getItem('usuarioId');
+    if (!usuarioId) {
+        alert('Debes iniciar sesión');
+        return;
+    }
 
-        let subtotal = 0;
-        cart.forEach(item => subtotal += item.price * item.qty);
-
-        const res = await fetch('/api/pedido', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id_cliente: usuarioId,
-                total: subtotal + 50
-            })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
-        } else {
-            alert('Error al crear pedido');
+    let subtotal = 0;
+    cart.forEach(item => {
+        if (item.price && item.qty) {
+            subtotal += item.price * item.qty;
         }
     });
+
+    if (subtotal <= 0) {
+        alert('No hay productos en el carrito');
+        return;
+    }
+
+    const carritoValido = cart.filter(p =>
+        p.name && p.price && p.qty
+    );
+
+    if (carritoValido.length === 0) {
+        alert('No hay productos válidos');
+        return;
+    }
+
+    const res = await fetch('/api/pedido', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id_cliente: usuarioId,
+            total: subtotal + 50,
+            carrito: carritoValido
+        })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
+    } else {
+        alert('Error al crear pedido');
+    }
 });
-
-/* =========================
-   INICIAR
-========================= */
-renderCart();
-const cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-const res = await fetch('/api/pedido', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        id_cliente: usuarioId,
-        total: subtotal + 50,
-        carrito: cart   // ⬅️ CLAVE
-    })
+    renderCart();
 });
-
-
 </script>
+
 
 </body>
 </html>
