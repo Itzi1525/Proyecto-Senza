@@ -460,17 +460,13 @@ def productos_pedido(id_pedido):
 
         rows = cursor.fetchall()
 
-        if not rows:
-            print("⚠️ No hay productos para el pedido:", id_pedido)
-            return jsonify([])
-
         productos = []
         for r in rows:
             productos.append({
-                "nombre_producto": r[0],
-                "precio": float(r[1]),
-                "cantidad": r[2],
-                "subtotal": float(r[3])
+                "nombre_producto": r["nombre"],
+                "precio": float(r["precio_unitario"]),
+                "cantidad": r["cantidad"],
+                "subtotal": float(r["subtotal"])
             })
 
         return jsonify(productos)
@@ -478,11 +474,8 @@ def productos_pedido(id_pedido):
     except Exception as e:
         print("❌ ERROR productos_pedido REAL:", repr(e))
         return jsonify([]), 500
-
     finally:
         conn.close()
-
-
 
 @app.route('/api/pedido/<int:id_pedido>')
 def obtener_pedido(id_pedido):
@@ -503,24 +496,24 @@ def obtener_pedido(id_pedido):
 
         row = cursor.fetchone()
 
-        if row is None:
-            print("⚠️ Pedido no encontrado:", id_pedido)
+        if not row:
             return jsonify({}), 404
 
         return jsonify({
-            "id_pedido": row[0],
-            "fecha": row[1].strftime("%Y-%m-%d %H:%M"),
-            "estado": row[2],
-            "total": float(row[3]),
-            "metodo": row[4] if row[4] else "No definido"
+            "id_pedido": row["id_pedido"],
+            "fecha": row["fecha"].strftime("%Y-%m-%d %H:%M"),
+            "estado": row["estado"],
+            "total": float(row["total"]),
+            "metodo": row["metodo"] or "No definido"
         })
 
     except Exception as e:
         print("❌ ERROR obtener_pedido REAL:", repr(e))
         return jsonify({}), 500
-
     finally:
         conn.close()
+
+
 
 
 # ===========================
