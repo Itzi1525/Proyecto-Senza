@@ -32,7 +32,7 @@ def get_db_connection():
 
 
 # ===========================
-# LOGIN CON GOOGLE (NUEVO)
+# LOGIN CON GOOGLE
 # ===========================
 @app.route('/google-login', methods=['POST'])
 def google_login():
@@ -162,7 +162,7 @@ def obtener_perfil(id_usuario):
         conn.close()
 
 # ==========================================
-# 4. CRUD DE USUARIOS
+# CRUD DE USUARIOS
 # ==========================================
 @app.route('/usuarios', methods=['GET'])
 def get_usuarios():
@@ -186,7 +186,7 @@ def update_usuario():
     cursor = conn.cursor()
     try:
         cursor.execute("UPDATE Usuario SET nombre = %s, correo = %s, rol = %s WHERE id_usuario = %s", 
-                      (data['nombre'], data['correo'], data['rol'], data['id']))
+                       (data['nombre'], data['correo'], data['rol'], data['id']))
         conn.commit()
         return jsonify({'success': True, 'message': 'Usuario actualizado'})
     except Exception as e:
@@ -368,7 +368,6 @@ def registrar_pago():
             'error': 'Monto inválido'
         }), 400
     
-    # Conexión correcta (fuera del if anterior)
     conn = get_db_connection()
     if not conn:
         return jsonify({'success': False}), 500
@@ -391,27 +390,25 @@ def registrar_pago():
         conn.close()
 
 # ===========================
-# PEDIDO
-# ===========================
-
-
-# ===========================
 # CREAR PEDIDO
 # ===========================
 @app.route('/api/pedido', methods=['POST'])
 def crear_pedido():
     data = request.get_json()
 
-    id_cliente = data['id_cliente']
-    total = data['total']
-    carrito = data['carrito']  # lista de productos
+    id_cliente = data.get('id_cliente')
+    total = data.get('total')
+    carrito = data.get('carrito', []) # Usa 'carrito' o 'productos' según tu frontend
+
+    if not carrito and 'productos' in data:
+        carrito = data['productos']
 
     conn = get_db_connection()
 
     try:
         cursor = conn.cursor()
 
-        # 1️⃣ Crear pedido
+        # 1️⃣ Crear pedido principal
         cursor.execute("""
             INSERT INTO Pedido (id_cliente, total)
             VALUES (%s, %s)
@@ -419,18 +416,24 @@ def crear_pedido():
 
         id_pedido = cursor.lastrowid
 
-        # 2️⃣ Insertar detalle de productos
+        # 2️⃣ Insertar detalle de productos (Tabla: Detalle_Pedido)
+        # Nota: La tabla creada NO tiene 'precio_unitario', solo 'subtotal'
         for item in carrito:
+            # Detectar si viene como 'id' o 'id_producto'
+            id_prod = item.get('id_producto') or item.get('id')
+            cantidad = item['cantidad']
+            precio = float(item['precio'])
+            subtotal = cantidad * precio
+            
             cursor.execute("""
-                INSERT INTO DetallePedido
-                (id_pedido, id_producto, cantidad, precio_unitario, subtotal)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO Detalle_Pedido
+                (id_pedido, id_producto, cantidad, subtotal)
+                VALUES (%s, %s, %s, %s)
             """, (
                 id_pedido,
-                item['id_producto'],
-                item['cantidad'],
-                item['precio'],
-                item['cantidad'] * item['precio']
+                id_prod,
+                cantidad,
+                subtotal
             ))
 
         conn.commit()
@@ -443,7 +446,7 @@ def crear_pedido():
     except Exception as e:
         conn.rollback()
         print("❌ ERROR PEDIDO:", e)
-        return jsonify({'success': False}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
     finally:
         conn.close()
@@ -454,14 +457,13 @@ def productos_pedido(id_pedido):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-
+        # Corregido a Detalle_Pedido
         cursor.execute("""
             SELECT 
                 p.nombre AS nombre_producto,
-                d.precio_unitario,
                 d.cantidad,
                 d.subtotal
-            FROM DetallePedido d
+            FROM Detalle_Pedido d
             JOIN Producto p ON d.id_producto = p.id_producto
             WHERE d.id_pedido = %s
         """, (id_pedido,))
@@ -471,10 +473,9 @@ def productos_pedido(id_pedido):
         productos = []
         for r in rows:
             productos.append({
-                'nombre_producto': r[0],
-                'precio': float(r[1]),
-                'cantidad': r[2],
-                'subtotal': float(r[3])
+                'nombre_producto': r['nombre_producto'],
+                'cantidad': r['cantidad'],
+                'subtotal': float(r['subtotal'])
             })
 
         return jsonify(productos)
@@ -522,29 +523,8 @@ def obtener_pedido(id_pedido):
     finally:
         conn.close()
 
-
-
-
 # ===========================
-# ARCHIVOS ESTÁTICOS
-# ===========================
-# IMÁGENES
-@app.route('/Imagenes/<path:filename>')
-def imagenes(filename):
-    return send_from_directory('static/Imagenes', filename)
-
-# HTML, JS, CSS
-@app.route('/<path:filename>')
-def archivos(filename):
-    return send_from_directory('.', filename)
-
-# RAÍZ
-@app.route('/')
-def inicio():
-    return send_from_directory('.', 'Inicio.html')
-
-# ===========================
-# REPORTE DE VENTAS (NUEVO)
+# REPORTE DE VENTAS (MESES)
 # ===========================
 @app.route('/api/reporte/ventas', methods=['GET'])
 def reporte_ventas():
@@ -578,6 +558,59 @@ def reporte_ventas():
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
+
+# ===========================
+# REPORTE DE PRODUCTOS 
+# ===========================
+@app.route('/api/reporte/productos', methods=['GET'])
+def reporte_productos_top():
+    conn = get_db_connection()
+    if not conn: return jsonify([])
+
+    try:
+        with conn.cursor() as cursor:
+            # Esta consulta suma cuántos se vendieron de cada pan usando Detalle_Pedido
+            query = """
+                SELECT 
+                    p.nombre,
+                    SUM(dp.cantidad) as cantidad_total,
+                    SUM(dp.subtotal) as dinero_total
+                FROM Detalle_Pedido dp
+                JOIN Producto p ON dp.id_producto = p.id_producto
+                GROUP BY p.id_producto, p.nombre
+                ORDER BY cantidad_total DESC
+                LIMIT 10
+            """
+            cursor.execute(query)
+            datos = cursor.fetchall()
+            
+            for d in datos:
+                d['cantidad_total'] = int(d['cantidad_total'])
+                d['dinero_total'] = float(d['dinero_total'])
+                
+            return jsonify(datos)
+    except Exception as e:
+        print("❌ Error Reporte Productos:", e)
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+
+# ===========================
+# ARCHIVOS ESTÁTICOS
+# ===========================
+@app.route('/Imagenes/<path:filename>')
+def imagenes(filename):
+    return send_from_directory('static/Imagenes', filename)
+
+@app.route('/<path:filename>')
+def archivos(filename):
+    return send_from_directory('.', filename)
+
+@app.route('/')
+def inicio():
+    return send_from_directory('.', 'Inicio.html')
+
 
 # ===========================
 # RUN

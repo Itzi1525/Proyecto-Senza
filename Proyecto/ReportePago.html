@@ -5,196 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Ventas - Senza</title>
     <link rel="icon" type="image/png" href="Imagenes/Senza.png">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-        :root {
-            --color-primary: #D2B48C;
-            --color-secondary: #4B3832;
-            --color-background: #F8F8F8;
-            --color-card-bg: #FFFFFF;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--color-background);
-            color: var(--color-secondary);
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 40px;
-            background-color: var(--color-card-bg);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .logo h2 { margin: 0; }
+        :root { --color-primary: #D2B48C; --color-secondary: #4B3832; --bg: #F8F8F8; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg); color: var(--color-secondary); margin: 0; }
+        
+        header { padding: 20px 40px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         .nav-admin a { text-decoration: none; color: var(--color-secondary); font-weight: 600; }
 
-        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-
-        .grid-report {
-            display: grid;
-            grid-template-columns: 2fr 1fr; /* Gráfica grande, tabla pequeña */
-            gap: 30px;
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        
+        .grid-dashboard {
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 30px; 
+            margin-bottom: 30px; 
         }
+        
+        @media (max-width: 768px) { .grid-dashboard { grid-template-columns: 1fr; } }
 
-        @media (max-width: 768px) {
-            .grid-report { grid-template-columns: 1fr; }
-        }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h3 { border-bottom: 2px solid var(--color-primary); padding-bottom: 10px; margin-top: 0; }
 
-        .card {
-            background-color: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        h3 { margin-top: 0; border-bottom: 2px solid var(--color-primary); padding-bottom: 10px; display: inline-block; }
-
-        /* Estilos de Tabla */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
         th { background-color: var(--color-secondary); color: white; }
-        tr:hover { background-color: #f9f9f9; }
-
-        .total-highlight {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #27ae60;
-        }
+        .money { font-weight: bold; color: #27ae60; }
     </style>
 </head>
 <body>
 
     <script>
         const rol = localStorage.getItem('usuarioRol');
-        if (rol !== 'Administrador' && rol !== 'Operador') {
-            window.location.href = 'Inicio.html';
-        }
+        if (rol !== 'Administrador' && rol !== 'Operador') window.location.href = 'Inicio.html';
     </script>
 
     <header>
-        <div class="logo"><h2>📊 Reporte Mensual</h2></div>
-        <nav class="nav-admin">
-            <a href="AdminOpera.html">← Volver al Panel</a>
-        </nav>
+        <div class="logo"><h2>📊 Reporte Global</h2></div>
+        <nav class="nav-admin"><a href="AdminOpera.html">← Volver al Panel</a></nav>
     </header>
 
     <main class="container">
-        <div class="grid-report">
-            
+        
+        <div class="grid-dashboard">
             <div class="card">
-                <h3>Tendencia de Ventas ($)</h3>
+                <h3>Tendencia de Ventas</h3>
                 <canvas id="ventasChart"></canvas>
             </div>
-
             <div class="card">
-                <h3>Resumen por Mes</h3>
+                <h3>Historial Mensual</h3>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Mes</th>
-                            <th>Pedidos</th>
-                            <th>Total ($)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaBody">
-                        <tr><td colspan="3">Cargando datos...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Mes</th><th>Pedidos</th><th>Total ($)</th></tr></thead>
+                    <tbody id="tablaMeses"><tr><td colspan="3">Cargando...</td></tr></tbody>
                 </table>
             </div>
-
         </div>
+
+        <div class="card">
+            <h3>🏆 Productos Más Vendidos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad Vendida</th>
+                        <th>Ingresos Generados</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProductos">
+                    <tr><td colspan="3">Cargando datos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
     </main>
 
     <script>
-        const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-            ? 'http://127.0.0.1:5000' : ''; 
+        const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') ? 'http://127.0.0.1:5000' : ''; 
 
-        document.addEventListener('DOMContentLoaded', cargarDatos);
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarVentasMensuales();
+            cargarTopProductos();
+        });
 
-        async function cargarDatos() {
+        async function cargarVentasMensuales() {
             try {
-                // 1. Pedir datos a Python
-                const response = await fetch(`${API_URL}/api/reporte/ventas`);
-                const datos = await response.json();
+                const res = await fetch(`${API_URL}/api/reporte/ventas`);
+                const datos = await res.json();
+                
+                // Gráfica (Orden Cronológico)
+                const datosGrafica = [...datos].reverse();
+                dibujarGrafica(datosGrafica.map(d => d.mes), datosGrafica.map(d => d.total_ventas));
 
-                // 2. Preparar datos para la Gráfica
-                // Invertimos el orden para que la gráfica vaya de Enero -> Diciembre
-                datos.reverse(); 
+                // Tabla (Más reciente arriba)
+                const tbody = document.getElementById('tablaMeses');
+                tbody.innerHTML = '';
+                datos.forEach(d => {
+                    tbody.innerHTML += `<tr><td>${d.mes}</td><td>${d.total_pedidos}</td><td class="money">$${d.total_ventas.toFixed(2)}</td></tr>`;
+                });
+            } catch (e) { console.error(e); }
+        }
 
-                const etiquetas = datos.map(d => formatearMes(d.mes));
-                const valores = datos.map(d => d.total_ventas);
+        async function cargarTopProductos() {
+            try {
+                const res = await fetch(`${API_URL}/api/reporte/productos`);
+                const productos = await res.json();
+                
+                const tbody = document.getElementById('tablaProductos');
+                tbody.innerHTML = '';
 
-                // 3. Dibujar Gráfica
-                dibujarGrafica(etiquetas, valores);
+                if(productos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3">No hay datos de productos aún.</td></tr>';
+                    return;
+                }
 
-                // 4. Llenar Tabla (Orden original: Más reciente primero)
-                llenarTabla(datos.reverse()); // Volvemos a invertir para tabla
-
-            } catch (error) {
-                console.error("Error cargando reporte:", error);
-                document.getElementById('tablaBody').innerHTML = "<tr><td colspan='3'>No hay ventas registradas aún.</td></tr>";
-            }
+                productos.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${p.nombre}</strong></td>
+                            <td>${p.cantidad_total} pzas</td>
+                            <td class="money">$${p.dinero_total.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            } catch (e) { console.error(e); }
         }
 
         function dibujarGrafica(labels, data) {
-            const ctx = document.getElementById('ventasChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line', // Tipo de gráfica (bar, line, pie)
+            new Chart(document.getElementById('ventasChart'), {
+                type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Ventas ($)',
-                        data: data,
-                        borderColor: '#4B3832',
-                        backgroundColor: 'rgba(210, 180, 140, 0.2)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3 // Curvatura de la línea
-                    }]
+                    datasets: [{ label: 'Ventas ($)', data: data, borderColor: '#4B3832', tension: 0.3, fill: true, backgroundColor: 'rgba(210, 180, 140, 0.2)' }]
                 },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
+                options: { responsive: true, plugins: { legend: { display: false } } }
             });
-        }
-
-        function llenarTabla(datos) {
-            const tbody = document.getElementById('tablaBody');
-            tbody.innerHTML = '';
-
-            datos.forEach(d => {
-                const fila = `
-                    <tr>
-                        <td>${formatearMes(d.mes)}</td>
-                        <td>${d.total_pedidos}</td>
-                        <td class="total-highlight">$${d.total_ventas.toFixed(2)}</td>
-                    </tr>
-                `;
-                tbody.innerHTML += fila;
-            });
-        }
-
-        // Convierte "2025-12" a "Dic 2025"
-        function formatearMes(fechaString) {
-            const [year, month] = fechaString.split('-');
-            const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-            return `${meses[parseInt(month) - 1]} ${year}`;
         }
     </script>
-
 </body>
 </html>
