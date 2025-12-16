@@ -442,6 +442,7 @@ def crear_pedido():
 
     finally:
         conn.close()
+        
 
 @app.route('/api/pedido/<int:id_pedido>/productos')
 def productos_pedido(id_pedido):
