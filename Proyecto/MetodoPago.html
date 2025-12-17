@@ -208,7 +208,8 @@
         <p><span>Subtotal</span><span id="subtotal">$0</span></p>
         <p><span>Envío</span><span>$50</span></p>
         <hr>
-        <p><span>Total</span><span id="total">$0</span></p>
+ <p>Total a pagar: <strong id="totalPago"></strong></p>
+
     </div>
 
 </div>
@@ -248,23 +249,17 @@ metodoRadios.forEach(radio => {
    CARGAR TOTAL DESDE CARRITO
 =============================== */
 document.addEventListener('DOMContentLoaded', () => {
-    const total = localStorage.getItem('cartTotal');
 
-    if (!total || parseFloat(total) <= 0) {
+    const params = new URLSearchParams(window.location.search);
+    const total = parseFloat(params.get('total'));
+
+    if (!total || isNaN(total) || total <= 0) {
         alert('No hay total válido para pagar');
-        window.location.href = 'Carrito.html';
         return;
     }
 
-    document.getElementById('total').textContent = `$${total}`;
-    document.getElementById('subtotal').textContent = `$${total - 50}`;
-
-    // método por defecto
-    tarjetaForm.style.display = 'block';
-    transferenciaForm.style.display = 'none';
-    efectivoForm.style.display = 'none';
+    document.getElementById('totalPago').textContent = `$${total.toFixed(2)}`;
 });
-
 /* ===============================
    CONFIRMAR PAGO
 =============================== */
