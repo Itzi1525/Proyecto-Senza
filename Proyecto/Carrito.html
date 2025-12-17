@@ -252,16 +252,12 @@ function renderCart() {
 function changeQty(index, delta) {
     cart[index].cantidad += delta;
     if (cart[index].cantidad <= 0) cart.splice(index, 1);
-    renderCart();
 }
 
 function removeItem(index) {
     cart.splice(index, 1);
     renderCart();
 }
-
-renderCart();
-
 /* ===== PROCEDER AL PAGO ===== */
 document.querySelector('.checkout-btn').addEventListener('click', async () => {
 
