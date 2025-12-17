@@ -75,25 +75,37 @@
     document.getElementById('btnRegistrar').addEventListener('click', async (e) => {
         e.preventDefault(); 
 
-        // Ahora sí va a encontrar estos elementos porque les pusimos ID en el HTML
+        // 1. OBTENER LOS VALORES DEL HTML
         const nombre = document.getElementById('nombre').value;
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        // Validaciones básicas
+        // 2. VALIDACIONES BÁSICAS
         if (!nombre || !email || !password) {
-            alert("Llena los campos obligatorios");
+            alert("Por favor llena los campos obligatorios.");
             return;
         }
 
+        // 3. REGLAS DEL MAESTRO (SEGURIDAD)
+        if (password.length < 8) {
+            alert("⚠️ La contraseña es muy corta. Debe tener al menos 8 caracteres.");
+            return;
+        }
+
+        if (!/[A-Z]/.test(password)) {
+            alert("⚠️ La contraseña debe incluir al menos una letra MAYÚSCULA.");
+            return;
+        }
+
+        // 4. VALIDAR QUE COINCIDAN
         if (password !== confirmPassword) {
-            alert("Las contraseñas no coinciden");
+            alert("❌ Las contraseñas no coinciden.");
             return;
         }
 
+        // 5. ENVIAR AL SERVIDOR (PYTHON)
         try {
-            // Enviamos los datos a la ruta /register de Python
             const response = await fetch('/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -101,21 +113,21 @@
                     nombre: nombre, 
                     email: email, 
                     password: password,
-                    telefono: "" // Enviamos vacío si no hay campo teléfono
+                    telefono: "" // Se envía vacío si no tienes el campo en este formulario
                 })
             });
 
             const data = await response.json();
 
             if (data.success) {
-                alert("¡Registro Exitoso! Bienvenido.");
+                alert("✅ ¡Registro Exitoso! Bienvenido a Senza.");
                 window.location.href = "Login.html";
             } else {
                 alert("Error: " + data.message);
             }
         } catch (error) {
             console.error(error);
-            alert("No se pudo conectar con el servidor.");
+            alert("❌ No se pudo conectar con el servidor.");
         }
     });
 </script>

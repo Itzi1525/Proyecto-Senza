@@ -142,6 +142,9 @@ def login():
 # ===========================
 # REGISTRO DE USUARIO
 # ===========================
+# ===========================
+# REGISTRO DE USUARIO (CON REGLAS DEL MAESTRO)
+# ===========================
 @app.route('/register', methods=['POST'])
 def register():
     # 1. Recibir datos
@@ -151,11 +154,21 @@ def register():
     password = data.get('password')
     telefono = data.get('telefono', '') 
 
-    print(f"📩 Intento de registro: {email}") 
+    print(f"📩 Intento de registro: {email}")
 
-    # 2. Validar
+    # 2. Validar que existan datos
     if not nombre or not email or not password:
         return jsonify({'success': False, 'message': 'Faltan datos'}), 400
+
+    # --- VALIDACIONES DEL MAESTRO ---
+    # A) Mínimo 8 caracteres (Esto evita "123", "abc", etc.)
+    if len(password) < 8:
+        return jsonify({'success': False, 'message': 'La contraseña es muy corta. Mínimo 8 caracteres.'}), 400
+    
+    # B) Al menos una mayúscula
+    if not any(char.isupper() for char in password):
+        return jsonify({'success': False, 'message': 'La contraseña debe tener al menos una MAYÚSCULA.'}), 400
+    # --------------------------------
 
     conn = get_db_connection()
     if not conn:
@@ -163,7 +176,7 @@ def register():
 
     try:
         with conn.cursor() as cursor:
-            # 3. Verificar si ya existe
+            # 3. Verificar si ya existe el correo
             cursor.execute("SELECT id_usuario FROM Usuario WHERE correo = %s", (email,))
             if cursor.fetchone():
                 return jsonify({'success': False, 'message': 'El correo ya existe'}), 409
@@ -173,7 +186,7 @@ def register():
             cursor.execute(sql_user, (nombre, email, password, telefono))
             id_nuevo = cursor.lastrowid
 
-            # 5. Insertar Cliente (Vinculación obligatoria)
+            # 5. Insertar Cliente
             cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (%s)", (id_nuevo,))
             conn.commit()
             
