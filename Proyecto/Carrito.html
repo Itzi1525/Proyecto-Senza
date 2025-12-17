@@ -206,10 +206,10 @@ function renderCart() {
     const totalEl = document.getElementById('total');
 
     if (cart.length === 0) {
-        cartContainer.innerHTML = '<p>Carrito vacío</p>';
-        return;
-    }
-
+    cartContainer.innerHTML = '<p class="empty">Carrito vacío</p>';
+    document.getElementById('summary').style.display = 'none';
+    return;
+}
 let html = `
     <table class="cart-table">
         <tr>
@@ -251,6 +251,7 @@ ${item.cantidad}
 
     subtotalEl.textContent = `$${subtotal}`;
     totalEl.textContent = `$${subtotal + 50}`;
+    document.getElementById('summary').style.display = 'block';
 
     localStorage.setItem('cart', JSON.stringify(cart));
 }
@@ -336,7 +337,7 @@ checkoutBtn.addEventListener('click', async () => {
     }
 });
  renderCart();
- document.getElementById('summary').style.display = 'block';
+
 document.getElementById('summary').style.display = 'none';
 });
 </script>
