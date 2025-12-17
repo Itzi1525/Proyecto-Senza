@@ -193,9 +193,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* =============================
-       LEER CARRITO DESDE LOCALSTORAGE
-       ============================= */
+    /* =====================================
+       LEER CARRITO (MISMA CLAVE EN TODO)
+       ===================================== */
     let cart = JSON.parse(localStorage.getItem('carrito')) || [];
 
     const cartContainer = document.getElementById('cartContainer');
@@ -204,9 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const summary = document.getElementById('summary');
     const checkoutBtn = document.querySelector('.checkout-btn');
 
-    /* =============================
+    /* =====================================
        RENDERIZAR CARRITO
-       ============================= */
+       ===================================== */
     function renderCart() {
 
         if (!cartContainer) return;
@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cart.length === 0) {
             cartContainer.innerHTML = '<p class="empty">Carrito vacío</p>';
             summary.style.display = 'none';
+            localStorage.setItem('carrito', JSON.stringify(cart));
             return;
         }
 
@@ -221,13 +222,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = `
             <table class="cart-table">
-                <tr>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th>
-                    <th></th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
         `;
 
         cart.forEach((item, index) => {
@@ -251,7 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
 
-        html += '</table>';
+        html += `
+                </tbody>
+            </table>
+        `;
 
         cartContainer.innerHTML = html;
         subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
@@ -261,47 +268,39 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('carrito', JSON.stringify(cart));
     }
 
-    /* =============================
-       EVENTOS DEL CARRITO
-       ============================= */
-cartContainer.addEventListener('click', (e) => {
+    /* =====================================
+       EVENTOS (+, -, ✕)
+       ===================================== */
+    cartContainer.addEventListener('click', (e) => {
 
-    const btn = e.target.closest('button');
-    if (!btn) return;
+        const btn = e.target.closest('button');
+        if (!btn) return;
 
-    // BOTONES DE CANTIDAD
-    if (btn.classList.contains('qty-btn')) {
         const index = parseInt(btn.dataset.index);
-        const delta = parseInt(btn.dataset.delta);
+        if (isNaN(index) || !cart[index]) return;
 
-        if (!cart[index]) return;
+        // BOTONES + -
+        if (btn.classList.contains('qty-btn')) {
+            const delta = parseInt(btn.dataset.delta);
+            cart[index].cantidad += delta;
 
-        cart[index].cantidad += delta;
+            if (cart[index].cantidad <= 0) {
+                cart.splice(index, 1);
+            }
 
-        if (cart[index].cantidad <= 0) {
-            cart.splice(index, 1);
+            renderCart();
         }
 
-        localStorage.setItem('carrito', JSON.stringify(cart));
-        renderCart();
-    }
+        // BOTÓN ELIMINAR
+        if (btn.classList.contains('delete-btn')) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+    });
 
-    // BOTÓN ELIMINAR
-    if (btn.classList.contains('delete-btn')) {
-        const index = parseInt(btn.dataset.index);
-
-        if (!cart[index]) return;
-
-        cart.splice(index, 1);
-        localStorage.setItem('carrito', JSON.stringify(cart));
-        renderCart();
-    }
-});
-
-
-    /* =============================
-       CHECKOUT
-       ============================= */
+    /* =====================================
+       CHECKOUT / CREAR PEDIDO
+       ===================================== */
     checkoutBtn.addEventListener('click', async () => {
 
         const usuarioId = localStorage.getItem('usuarioId');
@@ -320,42 +319,48 @@ cartContainer.addEventListener('click', (e) => {
         cart.forEach(p => subtotal += p.precio * p.cantidad);
         const total = subtotal + 50;
 
+        // 🔑 FORMATO EXACTO QUE ESPERA EL BACKEND
+        const carritoFormateado = cart.map(p => ({
+            id_producto: p.id_producto,
+            cantidad: p.cantidad,
+            precio: p.precio
+        }));
+
         try {
             const res = await fetch('/api/pedido', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                const carritoFormateado = cart.map(p => ({
-    id_producto: p.id,          // 👈 CLAVE
-    cantidad: p.cantidad,
-    precio: p.precio
-}));
-
-body: JSON.stringify({
-    id_cliente: usuarioId,
-    total,
-    carrito: carritoFormateado
-})
+                body: JSON.stringify({
+                    id_cliente: usuarioId,
+                    total,
+                    carrito: carritoFormateado
+                })
             });
 
             const data = await res.json();
+            console.log('Respuesta backend:', data);
 
             if (data.success) {
+                // 🧹 Vaciar carrito después del pedido
+                localStorage.removeItem('carrito');
                 window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
             } else {
-                alert('Error al crear pedido');
+                alert(data.error || 'Error al crear pedido');
             }
+
         } catch (err) {
             console.error(err);
-            alert('Error de conexión');
+            alert('Error de conexión con el servidor');
         }
     });
 
-    /* =============================
+    /* =====================================
        INICIAR
-       ============================= */
+       ===================================== */
     renderCart();
 });
 </script>
+
 
 </body>
 </html>
