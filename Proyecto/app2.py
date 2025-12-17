@@ -532,7 +532,7 @@ def productos_pedido(id_pedido):
         productos = []
         for r in rows:
             nombre = r[0]
-            cantidad = r[1]
+            cantidad = int(r[1])
             subtotal = float(r[2])
             precio = subtotal / cantidad if cantidad > 0 else 0
 
@@ -551,6 +551,7 @@ def productos_pedido(id_pedido):
 
     finally:
         conn.close()
+
 
 @app.route('/api/pedido/<int:id_pedido>')
 def obtener_pedido(id_pedido):
