@@ -515,7 +515,7 @@ def crear_pedido():
 def productos_pedido(id_pedido):
     conn = get_db_connection()
     try:
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor()
 
         cursor.execute("""
             SELECT 
@@ -524,18 +524,23 @@ def productos_pedido(id_pedido):
                 d.subtotal
             FROM Detalle_Pedido d
             JOIN Producto p ON d.id_producto = p.id_producto
-            WHERE d.id_pedido = %s
+            WHERE d.id_pedido = ?
         """, (id_pedido,))
 
         rows = cursor.fetchall()
 
         productos = []
         for r in rows:
+            nombre = r[0]
+            cantidad = r[1]
+            subtotal = float(r[2])
+            precio = subtotal / cantidad if cantidad > 0 else 0
+
             productos.append({
-                'nombre_producto': r['nombre_producto'],
-                'cantidad': r['cantidad'],
-                'subtotal': float(r['subtotal']),
-                'precio': float(r['subtotal']) / r['cantidad']
+                'nombre_producto': nombre,
+                'precio': round(precio, 2),
+                'cantidad': cantidad,
+                'subtotal': round(subtotal, 2)
             })
 
         return jsonify(productos)
