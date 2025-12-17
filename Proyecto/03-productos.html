@@ -298,17 +298,19 @@
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+    // 1. CARGAR PRODUCTOS DESDE PYTHON/AWS
     fetch('/api/productos')
         .then(res => res.json())
         .then(productos => {
-
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '';
 
             productos.forEach(p => {
+                // Generamos la tarjeta con todos los datos necesarios en los dataset
                 grid.innerHTML += `
                 <div class="product-card"
                     data-id="${p.id_producto}"
@@ -316,68 +318,144 @@ document.addEventListener('DOMContentLoaded', () => {
                     data-precio="${p.precio}"
                     data-category="${p.categoria}">
 
-                    <div class="product-image">
+                    <div class="product-image" style="cursor: pointer;"> 
                         <img src="${p.imagen}" alt="${p.nombre}">
                     </div>
 
                     <div class="product-content">
                         <h3>${p.nombre}</h3>
-                        <p>${p.descripcion}</p>
+                        <p>${p.descripcion || ''}</p>
                         <p class="price">$${p.precio}</p>
                         <button class="btn-add-to-cart">Agregar al carrito</button>
                     </div>
                 </div>
                 `;
             });
+        })
+        .catch(err => console.error("Error cargando productos:", err));
+
+
+    // ==========================================
+    // 2. DETECTOR DE CLICS (CARRITO Y REDIRECCIÓN)
+    // ==========================================
+    document.addEventListener('click', (e) => {
+        
+        // --- CASO A: AGREGAR AL CARRITO ---
+        if (e.target.classList.contains('btn-add-to-cart')) {
+            const card = e.target.closest('.product-card');
+
+            const producto = {
+                id_producto: card.dataset.id, // Importante: usar el ID real de la BD
+                nombre: card.dataset.nombre,
+                precio: parseFloat(card.dataset.precio),
+                imagen: card.querySelector('img').src,
+                cantidad: 1
+            };
+
+            let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+            
+            // Verificamos si ya existe por ID
+            const existe = carrito.find(p => p.id_producto === producto.id_producto);
+
+            if (existe) {
+                existe.cantidad++;
+            } else {
+                carrito.push(producto);
+            }
+
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+            alert(`¡${producto.nombre} agregado al carrito! 🛒`);
+            return; // Terminamos aquí
+        }
+
+        // --- CASO B: CLIC EN LA IMAGEN (IR A DETALLE) ---
+        // Usamos .closest('.product-image') para detectar si diste click en la foto o su contenedor
+        const imageContainer = e.target.closest('.product-image');
+        
+        if (imageContainer) {
+            const card = imageContainer.closest('.product-card');
+
+            // Obtenemos datos
+            const id = card.dataset.id;
+            const nombre = card.dataset.nombre;
+            const precio = card.dataset.precio;
+            const imagenSrc = card.querySelector('img').src;
+            // Buscamos el párrafo de descripción (el primero dentro de content)
+            const desc = card.querySelector('.product-content p').innerText;
+
+            // Construimos la URL
+            const url = `DetalleProducto.html?id=${id}&nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&img=${encodeURIComponent(imagenSrc)}&desc=${encodeURIComponent(desc)}`;
+            
+            // Redirigimos
+            window.location.href = url;
+        }
+    });
+
+    // ==========================================
+    // 3. FILTROS Y LÓGICA DE USUARIO
+    // ==========================================
+    
+    // (Lógica de filtros)
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Quitar clase active a todos
+            filterButtons.forEach(b => b.classList.remove('active'));
+            // Poner al actual
+            btn.classList.add('active');
+            
+            const categoria = btn.dataset.category;
+            const cards = document.querySelectorAll('.product-card');
+
+            cards.forEach(card => {
+                // Si es 'all' mostramos todo, si no, checamos coincidencia
+                if (categoria === 'all' || card.dataset.category === categoria) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         });
-});
+    });
 
-/* ===== AGREGAR AL CARRITO (UNA SOLA VEZ) ===== */
+    // (Lógica básica de sesión para el menú)
+    const nombreUsuario = localStorage.getItem('usuarioNombre');
+    const accountLink = document.getElementById('accountLink');
+    const logoutItem = document.getElementById('logoutItem');
+    const logoutLink = document.getElementById('logoutLink');
 
-document.addEventListener('click', function (e) {
-
-    if (!e.target.classList.contains('btn-add-to-cart')) return;
-
-    const card = e.target.closest('.product-card');
-
-    const producto = {
-        id: card.dataset.id,
-        nombre: card.dataset.nombre,
-        precio: parseFloat(card.dataset.precio),
-        imagen: card.querySelector('img').src,
-        cantidad: 1
-    };
-
-    agregarAlCarrito(producto);
-});
-
-/* ===== FUNCIÓN CARRITO ===== */
-document.addEventListener('click', function (e) {
-
-    if (!e.target.classList.contains('btn-add-to-cart')) return;
-
-    const card = e.target.closest('.product-card');
-
-    const producto = {
-        id_producto: card.dataset.id,   // 👈 CLAVE CORRECTA
-        nombre: card.dataset.nombre,
-        precio: parseFloat(card.dataset.precio),
-        imagen: card.querySelector('img').src,
-        cantidad: 1
-    };
-
-    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-
-    const existe = carrito.find(p => p.id_producto === producto.id_producto);
-
-    if (existe) {
-        existe.cantidad++;
+    if (nombreUsuario && accountLink) {
+        accountLink.textContent = "Hola, " + nombreUsuario.split(" ")[0];
+        accountLink.href = "Perfil.html"; // Opcional: ir a perfil
+        if (logoutItem) logoutItem.style.display = 'block';
     } else {
-        carrito.push(producto);
+        // Modal logic si no hay sesión (solo si existe el modal)
+        const accountModal = document.getElementById('accountModal');
+        if (accountModal) {
+            accountLink.addEventListener('click', (e) => {
+                if(!nombreUsuario) {
+                    e.preventDefault();
+                    accountModal.style.display = 'flex';
+                }
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target === accountModal) accountModal.style.display = 'none';
+            });
+        }
     }
 
-    localStorage.setItem('carrito', JSON.stringify(carrito));
-    alert('Producto agregado al carrito');
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(confirm("¿Cerrar sesión?")) {
+                localStorage.removeItem('usuarioNombre');
+                localStorage.removeItem('usuarioRol');
+                window.location.reload();
+            }
+        });
+    }
+
 });
 </script>
 
