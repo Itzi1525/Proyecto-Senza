@@ -379,6 +379,49 @@ def eliminar_direccion(id_direccion):
         conn.close()
 
 # ===========================
+# CAMBIAR CONTRASEÑA
+# ===========================
+@app.route('/api/usuario/password', methods=['PUT'])
+def cambiar_password():
+    data = request.get_json()
+    
+    id_usuario = data.get('id')
+    pass_actual = data.get('actual')
+    pass_nueva = data.get('nueva')
+
+    if not id_usuario or not pass_actual or not pass_nueva:
+        return jsonify({'success': False, 'message': 'Faltan datos'}), 400
+
+    conn = get_db_connection()
+    if not conn: return jsonify({'success': False, 'message': 'Error BD'}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            # 1. Verificar que la contraseña actual sea correcta
+            cursor.execute("SELECT contrasena FROM Usuario WHERE id_usuario = %s", (id_usuario,))
+            user = cursor.fetchone()
+
+            if not user:
+                return jsonify({'success': False, 'message': 'Usuario no encontrado'}), 404
+
+            # NOTA: Si usas encriptación (hash), aquí deberías usar check_password_hash
+            if user['contrasena'] != pass_actual:
+                return jsonify({'success': False, 'message': 'La contraseña actual es incorrecta'}), 401
+
+            # 2. Si es correcta, actualizamos por la nueva
+            cursor.execute("UPDATE Usuario SET contrasena = %s WHERE id_usuario = %s", (pass_nueva, id_usuario))
+            conn.commit()
+
+        return jsonify({'success': True, 'message': 'Contraseña actualizada correctamente'})
+
+    except Exception as e:
+        conn.rollback()
+        print("❌ Error password:", e)
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+# ===========================
 # PRODUCTOS API 
 # ===========================
 
