@@ -506,13 +506,14 @@ def productos_pedido(id_pedido):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-        # Corregido a Detalle_Pedido
+
         cursor.execute("""
             SELECT 
                 p.nombre AS nombre_producto,
+                d.precio_unitario,
                 d.cantidad,
                 d.subtotal
-            FROM Detalle_Pedido d
+            FROM DetallePedido d
             JOIN Producto p ON d.id_producto = p.id_producto
             WHERE d.id_pedido = %s
         """, (id_pedido,))
@@ -522,9 +523,10 @@ def productos_pedido(id_pedido):
         productos = []
         for r in rows:
             productos.append({
-                'nombre_producto': r['nombre_producto'],
-                'cantidad': r['cantidad'],
-                'subtotal': float(r['subtotal'])
+                'nombre_producto': r[0],
+                'precio': float(r[1]),
+                'cantidad': r[2],
+                'subtotal': float(r[3])
             })
 
         return jsonify(productos)
