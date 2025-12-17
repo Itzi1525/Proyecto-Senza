@@ -196,10 +196,10 @@
             <label>CVV</label>
             <input type="password" id="cvv" maxlength="3">
         </div>
+<button class="btn-pagar" id="btnPagar" type="button">
+    Confirmar pago
+</button>
 
-        <button class="btn-pagar" id="btnPagar">
-            Confirmar pago
-        </button>
     </div>
 
     <!-- RESUMEN -->
@@ -270,63 +270,89 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ===============================
    CONFIRMAR PAGO
 =============================== */
-document.getElementById('btnPagar').addEventListener('click', async () => {
+document.addEventListener('DOMContentLoaded', () => {
 
-    const idPedido = new URLSearchParams(window.location.search).get('id');
-    if (!idPedido) {
-        alert('No hay pedido activo');
+    const btn = document.getElementById('btnPagar');
+    if (!btn) {
+        console.error('❌ Botón btnPagar no encontrado');
         return;
     }
 
-    const metodoSeleccionado =
-        document.querySelector('input[name="metodo"]:checked').value;
+    btn.addEventListener('click', async () => {
 
-    /* VALIDACIONES */
-    if (metodoSeleccionado === 'tarjeta') {
-        if (!nombreTarjeta.value || !numeroTarjeta.value || !cvv.value) {
-            alert('Completa los datos de la tarjeta');
+        const params = new URLSearchParams(window.location.search);
+        const idPedido = params.get('id');
+
+        if (!idPedido) {
+            alert('No hay pedido activo');
             return;
         }
-    }
 
-    if (metodoSeleccionado === 'transferencia') {
-        if (!folioTransferencia.value) {
-            alert('Ingresa el folio de transferencia');
+        const metodoInput = document.querySelector('input[name="metodo"]:checked');
+        if (!metodoInput) {
+            alert('Selecciona un método de pago');
             return;
         }
-    }
 
-    const metodo =
-        metodoSeleccionado === 'tarjeta' ? 'Tarjeta' :
-        metodoSeleccionado === 'transferencia' ? 'Transferencia' :
-        'Efectivo';
+        const metodoSeleccionado = metodoInput.value;
 
-    const monto = parseFloat(
-        document.getElementById('total').textContent.replace('$','')
-    );
+        // VALIDACIONES
+        if (metodoSeleccionado === 'tarjeta') {
+            if (!nombreTarjeta.value || !numeroTarjeta.value || !cvv.value) {
+                alert('Completa los datos de la tarjeta');
+                return;
+            }
+        }
 
-    if (!monto || monto <= 0) {
-        alert('❌ No hay productos en el carrito');
-        return;
-    }
+        if (metodoSeleccionado === 'transferencia') {
+            if (!folioTransferencia.value) {
+                alert('Ingresa el folio de transferencia');
+                return;
+            }
+        }
 
-    const res = await fetch('/api/pago', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_pedido: idPedido, metodo, monto })
+        const metodo =
+            metodoSeleccionado === 'tarjeta' ? 'Tarjeta' :
+            metodoSeleccionado === 'transferencia' ? 'Transferencia' :
+            'Efectivo';
+
+        const totalText = document.getElementById('totalPago')?.textContent;
+        const monto = parseFloat(totalText?.replace('$',''));
+
+        if (!monto || monto <= 0) {
+            alert('❌ No hay monto válido');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/pago', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id_pedido: idPedido,
+                    metodo,
+                    monto
+                })
+            });
+
+            const data = await res.json();
+            console.log('Pago:', data);
+
+            if (data.success) {
+                alert('✅ Compra exitosa');
+                localStorage.removeItem('carrito'); // 🔑 clave correcta
+                window.location.href = `DetallePedido.html?id=${idPedido}`;
+            } else {
+                alert(data.error || '❌ Error al registrar el pago');
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert('❌ Error de conexión');
+        }
     });
-
-    const data = await res.json();
-
-    if (data.success) {
-        alert('✅ Compra exitosa');
-        localStorage.removeItem('cart');
-        localStorage.removeItem('cartTotal');
-        window.location.href = `DetallePedido.html?id=${idPedido}`;
-    } else {
-        alert('❌ Error al registrar el pago');
-    }
 });
+
 </script>
 
 </body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
