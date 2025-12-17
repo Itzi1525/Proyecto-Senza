@@ -308,34 +308,29 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(productos => {
             const grid = document.getElementById('productsGrid');
-            grid.innerHTML = '';
+            grid.innerHTML += `
+<div class="product-card"
+    data-id="${p.id_producto}"
+    data-nombre="${p.nombre}"
+    data-precio="${p.precio}"
+    data-category="${p.categoria}">
 
-            productos.forEach(p => {
-                grid.innerHTML += `
-                    <div class="product-card"
-                        data-id="${p.id_producto}"
-                        data-name="${p.nombre}"
-                        data-category="${p.categoria}">
+    <div class="product-image">
+        <img src="${p.imagen}" alt="${p.nombre}">
+    </div>
 
-                        <div class="product-image">
-                            <img src="${p.imagen}" alt="${p.nombre}">
-                        </div>
-
-                        <div class="product-content">
-                            <h3>${p.nombre}</h3>
-                            <p>${p.descripcion}</p>
-                            <p class="price">$${p.precio}</p>
-                            <button class="btn-add-to-cart">
-                                Agregar al carrito
-                            </button>
-                        </div>
-                    </div>
-                `;
+    <div class="product-content">
+        <h3>${p.nombre}</h3>
+        <p>${p.descripcion}</p>
+        <p class="price">$${p.precio}</p>
+        <button class="btn-add-to-cart">Agregar al carrito</button>
+    </div>
+</div>
+`;
             });
 
             activarBotonesCarrito();
         });
-});
 
 
 document.addEventListener('DOMContentLoaded', () => {
