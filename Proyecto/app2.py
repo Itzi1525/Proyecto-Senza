@@ -957,16 +957,16 @@ def obtener_resenas():
         conn.close()
 
 # ===========================
-# RECUPERAR CONTRASEÑA (Olvidé mi contraseña)
+# RECUPERAR CONTRASEÑA 
 # ===========================
 @app.route('/api/recuperar-password', methods=['POST'])
 def recuperar_password():
     data = request.get_json()
     email = data.get('email')
-    telefono = data.get('telefono')
     nueva_pass = data.get('nueva_pass')
 
-    if not email or not telefono or not nueva_pass:
+    # Validamos solo email y password
+    if not email or not nueva_pass:
         return jsonify({'success': False, 'message': 'Faltan datos'}), 400
 
     conn = get_db_connection()
@@ -974,15 +974,14 @@ def recuperar_password():
 
     try:
         with conn.cursor() as cursor:
-            # 1. Verificar si existe ese usuario con ESE teléfono
-            # Esto actúa como pregunta de seguridad
-            cursor.execute("SELECT id_usuario FROM Usuario WHERE correo = %s AND telefono = %s", (email, telefono))
+            # 1. Verificar si existe ese correo
+            cursor.execute("SELECT id_usuario FROM Usuario WHERE correo = %s", (email,))
             user = cursor.fetchone()
 
             if not user:
-                return jsonify({'success': False, 'message': 'El correo o el teléfono no coinciden con nuestros registros.'}), 404
+                return jsonify({'success': False, 'message': 'El correo no existe.'}), 404
 
-            # 2. Si coinciden, actualizamos la contraseña
+            # 2. Actualizamos la contraseña
             cursor.execute("UPDATE Usuario SET contrasena = %s WHERE id_usuario = %s", (nueva_pass, user['id_usuario']))
             conn.commit()
 

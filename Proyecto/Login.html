@@ -98,13 +98,10 @@
         <div class="modal-content">
             <span class="close-modal" id="closeModal">&times;</span>
             <h3>Recuperar Contraseña</h3>
-            <p>Por seguridad, ingresa tu correo y el teléfono registrado en tu cuenta.</p>
+            <p>Ingresa tu correo para establecer una nueva contraseña.</p>
             
             <label>Correo</label>
             <input type="email" id="recEmail" placeholder="ejemplo@correo.com">
-            
-            <label>Teléfono (Seguridad)</label>
-            <input type="text" id="recTel" placeholder="Tu número registrado">
             
             <label>Nueva Contraseña</label>
             <input type="password" id="recPass" placeholder="Mínimo 6 caracteres">
@@ -193,10 +190,9 @@
     // Enviar petición de recuperación
     btnRecuperarAccion.addEventListener('click', async () => {
         const email = document.getElementById('recEmail').value;
-        const telefono = document.getElementById('recTel').value;
         const nuevaPass = document.getElementById('recPass').value;
 
-        if(!email || !telefono || !nuevaPass) {
+        if(!email || !nuevaPass) {
             alert("Por favor llena todos los campos.");
             return;
         }
@@ -207,7 +203,7 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     email: email,
-                    telefono: telefono,
+                    // telefono: telefono, <--- YA NO SE ENVÍA
                     nueva_pass: nuevaPass
                 })
             });
@@ -216,9 +212,7 @@
             if(data.success) {
                 alert("✅ Contraseña restablecida. Ahora puedes iniciar sesión.");
                 modal.style.display = 'none';
-                // Limpiar campos
                 document.getElementById('recEmail').value = "";
-                document.getElementById('recTel').value = "";
                 document.getElementById('recPass').value = "";
             } else {
                 alert("❌ Error: " + data.message);
