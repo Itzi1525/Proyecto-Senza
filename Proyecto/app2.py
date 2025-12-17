@@ -381,34 +381,89 @@ def eliminar_direccion(id_direccion):
         conn.close()
 
 # ===========================
-# PRODUCTOS API
+# PRODUCTOS API 
 # ===========================
 
-@app.route('/api/productos')
+# 1. OBTENER (GET) - Corregido para incluir stock
+@app.route('/api/productos', methods=['GET'])
 def obtener_productos():
     conn = get_db_connection()
     try:
         cursor = conn.cursor(pymysql.cursors.DictCursor)
-
+        # Agregamos 'stock' a la consulta
         cursor.execute("""
-            SELECT 
-                id_producto,
-                nombre,
-                precio,
-                imagen,
-                categoria,
-                descripcion
+            SELECT id_producto, nombre, precio, stock, imagen, categoria, descripcion
             FROM Producto
         """)
-
         productos = cursor.fetchall()
-
         return jsonify(productos)
-
     except Exception as e:
-        print("❌ ERROR obtener_productos:", e)
+        print("❌ ERROR obtener:", e)
         return jsonify([]), 500
+    finally:
+        conn.close()
 
+# 2. AGREGAR (POST)
+@app.route('/api/productos', methods=['POST'])
+def agregar_producto():
+    data = request.get_json()
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = """INSERT INTO Producto (nombre, precio, stock, imagen, descripcion, categoria) 
+                     VALUES (%s, %s, %s, %s, %s, %s)"""
+            cursor.execute(sql, (
+                data['nombre'], 
+                data['precio'], 
+                data['stock'], 
+                data['imagen'],
+                data.get('descripcion', ''),
+                data.get('categoria', 'General')
+            ))
+            conn.commit()
+        return jsonify({'success': True, 'message': 'Producto agregado'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+# 3. MODIFICAR (PUT)
+@app.route('/api/productos/<int:id>', methods=['PUT'])
+def actualizar_producto(id):
+    data = request.get_json()
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = """UPDATE Producto 
+                     SET nombre=%s, precio=%s, stock=%s, imagen=%s, descripcion=%s, categoria=%s 
+                     WHERE id_producto=%s"""
+            cursor.execute(sql, (
+                data['nombre'], 
+                data['precio'], 
+                data['stock'], 
+                data['imagen'],
+                data['descripcion'],
+                data['categoria'],
+                id
+            ))
+            conn.commit()
+        return jsonify({'success': True, 'message': 'Producto actualizado'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+# 4. ELIMINAR (DELETE)
+@app.route('/api/productos/<int:id>', methods=['DELETE'])
+def eliminar_producto(id):
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM Producto WHERE id_producto = %s", (id,))
+            conn.commit()
+        return jsonify({'success': True, 'message': 'Producto eliminado'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         conn.close()
 
