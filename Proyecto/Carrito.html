@@ -324,11 +324,17 @@ cartContainer.addEventListener('click', (e) => {
             const res = await fetch('/api/pedido', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id_cliente: usuarioId,
-                    total,
-                    carrito: cart
-                })
+                const carritoFormateado = cart.map(p => ({
+    id_producto: p.id,          // 👈 CLAVE
+    cantidad: p.cantidad,
+    precio: p.precio
+}));
+
+body: JSON.stringify({
+    id_cliente: usuarioId,
+    total,
+    carrito: carritoFormateado
+})
             });
 
             const data = await res.json();
