@@ -282,11 +282,8 @@
 </div>
 
 <main class="container">
-<div class="products-grid" id="productsGrid"
-    data-id="${p.id_producto}"
-    data-nombre="${p.nombre}"
-    data-precio="${p.precio}"
-    data-category="${p.categoria}">
+<div class="products-grid" id="productsGrid"></div>
+
 
 </main>
 
@@ -307,115 +304,35 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/productos')
         .then(res => res.json())
         .then(productos => {
+
             const grid = document.getElementById('productsGrid');
-            grid.innerHTML += `
-<div class="product-card"
-    data-id="${p.id_producto}"
-    data-nombre="${p.nombre}"
-    data-precio="${p.precio}"
-    data-category="${p.categoria}">
+            grid.innerHTML = '';
 
-    <div class="product-image">
-        <img src="${p.imagen}" alt="${p.nombre}">
-    </div>
+            productos.forEach(p => {
+                grid.innerHTML += `
+                <div class="product-card"
+                    data-id="${p.id_producto}"
+                    data-nombre="${p.nombre}"
+                    data-precio="${p.precio}"
+                    data-category="${p.categoria}">
 
-    <div class="product-content">
-        <h3>${p.nombre}</h3>
-        <p>${p.descripcion}</p>
-        <p class="price">$${p.precio}</p>
-        <button class="btn-add-to-cart">Agregar al carrito</button>
-    </div>
-</div>
-`;
+                    <div class="product-image">
+                        <img src="${p.imagen}" alt="${p.nombre}">
+                    </div>
+
+                    <div class="product-content">
+                        <h3>${p.nombre}</h3>
+                        <p>${p.descripcion}</p>
+                        <p class="price">$${p.precio}</p>
+                        <button class="btn-add-to-cart">Agregar al carrito</button>
+                    </div>
+                </div>
+                `;
             });
 
-            activarBotonesCarrito();
-        });
-
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    // ==========================================
-    // 1. LÓGICA DE USUARIO (NOMBRE Y LOGOUT)
-    // ==========================================
-    const nombreUsuario = localStorage.getItem('usuarioNombre');
-    const rolUsuario = localStorage.getItem('usuarioRol');
-
-    const accountLink = document.getElementById('accountLink');
-    const accountModal = document.getElementById('accountModal');
-    const logoutItem = document.getElementById('logoutItem');
-    const logoutLink = document.getElementById('logoutLink');
-
-    if (nombreUsuario && accountLink) {
-        // SI ESTÁ LOGUEADO:
-        // 1. Ponemos su nombre
-        const primerNombre = nombreUsuario.split(" ")[0];
-        accountLink.textContent = "Hola, " + primerNombre;
-        
-        // 2. Cambiamos el link para que no abra el modal, sino que vaya al perfil (opcional)
-        // O simplemente quitamos el evento de abrir modal.
-        // Aquí clonamos el nodo para eliminar el evento de click anterior si existiera
-        const newLink = accountLink.cloneNode(true);
-        accountLink.parentNode.replaceChild(newLink, accountLink);
-        newLink.href = "Perfil.html"; // O '#' si no tienes perfil aún
-
-        // 3. Mostramos el botón de salir
-        if (logoutItem) logoutItem.style.display = 'block';
-
-    } else {
-        // SI NO ESTÁ LOGUEADO:
-        // Mantenemos la lógica del Modal
-        if (accountLink && accountModal) {
-            accountLink.addEventListener('click', e => {
-                e.preventDefault();
-                accountModal.style.display = 'flex';
-            });
-    
-            window.addEventListener('click', e => {
-                if (e.target === accountModal) {
-                    accountModal.style.display = 'none';
-                }
-            });
-        }
-    }
-
-    // Lógica de Cerrar Sesión (Correcta, sin borrar reseñas)
-    if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            if(confirm("¿Deseas cerrar sesión?")) {
-                localStorage.removeItem('usuarioNombre');
-                localStorage.removeItem('usuarioRol');
-                window.location.href = "Login.html";
-            }
-        });
-    }
-    /* =======================
-       FILTRO POR CATEGORÍA
-    ======================= */
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const productCards = document.querySelectorAll('.product-card');
-
-    filterButtons.forEach(button => {
-        button.addEventListener('click', e => {
-            e.preventDefault();
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            const category = button.dataset.category;
-            productCards.forEach(card => {
-                const productCategory = card.dataset.category;
-                card.classList.toggle(
-                    'hidden',
-                    !(category === 'all' || productCategory === category)
-                );
-            });
-        });
-    });
-
-    /* =======================
-       AGREGAR AL CARRITO
-    ======================= */
+        })
+        .catch(err => console.error(err));
+});
 document.addEventListener('click', function (e) {
 
     if (!e.target.classList.contains('btn-add-to-cart')) return;
@@ -450,35 +367,6 @@ document.addEventListener('click', function (e) {
     alert('🛒 Producto agregado al carrito');
 });
 
-    /* =======================
-       IR A DETALLE DEL PRODUCTO
-    ======================= */
-    const productImages = document.querySelectorAll('.product-image');
-
-    productImages.forEach(imageContainer => {
-        imageContainer.style.cursor = "pointer"; 
-
-        imageContainer.addEventListener('click', () => {
-            const card = imageContainer.closest('.product-card');
-
-            // 1. OBTENER DATOS
-            const id = card.dataset.id; 
-            const nombre = card.querySelector('h3').innerText;
-            const precio = card.querySelector('.price').textContent.replace('$','').trim();
-            const imagenSrc = card.querySelector('img').src;
-            
-            const descripcionElement = card.querySelector('p');
-            const descripcion = descripcionElement ? descripcionElement.innerText : "";
-
-            // 2. CREAR URL
-            const url = `DetalleProducto.html?id=${id}&nombre=${encodeURIComponent(nombre)}&precio=${encodeURIComponent(precio)}&img=${encodeURIComponent(imagenSrc)}&desc=${encodeURIComponent(descripcion)}`;
-            
-            // 3. REDIRIGIR
-            window.location.href = url;
-        });
-    });
-
-});
 </script>
 
 <script src="buscador.js"></script>
