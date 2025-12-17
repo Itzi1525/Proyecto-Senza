@@ -462,17 +462,14 @@ def crear_pedido():
 
     id_cliente = data.get('id_cliente')
     total = data.get('total')
-    carrito = data.get('carrito', []) # Usa 'carrito' o 'productos' según tu frontend
-
-    if not carrito and 'productos' in data:
-        carrito = data['productos']
+    carrito = data.get('carrito', [])
 
     conn = get_db_connection()
 
     try:
         cursor = conn.cursor()
 
-        # 1️⃣ Crear pedido principal
+        # 1️⃣ Crear pedido
         cursor.execute("""
             INSERT INTO Pedido (id_cliente, total)
             VALUES (%s, %s)
@@ -480,24 +477,22 @@ def crear_pedido():
 
         id_pedido = cursor.lastrowid
 
-        # 2️⃣ Insertar detalle de productos (Tabla: Detalle_Pedido)
-        # Nota: La tabla creada NO tiene 'precio_unitario', solo 'subtotal'
+        # 2️⃣ Detalle del pedido
         for item in carrito:
-            # Detectar si viene como 'id' o 'id_producto'
-            id_prod = item.get('id_producto') or item.get('id')
-            cantidad = item['cantidad']
+            id_producto = item['id_producto']
+            cantidad = int(item['cantidad'])
             precio = float(item['precio'])
             subtotal = cantidad * precio
-            
+
             cursor.execute("""
                 INSERT INTO Detalle_Pedido
                 (id_pedido, id_producto, cantidad, subtotal)
                 VALUES (%s, %s, %s, %s)
             """, (
                 id_pedido,
-        item['id_producto'],
-        item['cantidad'],
-        item['precio']
+                id_producto,
+                cantidad,
+                subtotal
             ))
 
         conn.commit()
@@ -525,10 +520,9 @@ def productos_pedido(id_pedido):
         cursor.execute("""
             SELECT 
                 p.nombre AS nombre_producto,
-                d.precio_unitario,
                 d.cantidad,
                 d.subtotal
-            FROM DetallePedido d
+            FROM Detalle_Pedido d
             JOIN Producto p ON d.id_producto = p.id_producto
             WHERE d.id_pedido = %s
         """, (id_pedido,))
@@ -539,9 +533,9 @@ def productos_pedido(id_pedido):
         for r in rows:
             productos.append({
                 'nombre_producto': r[0],
-                'precio': float(r[1]),
-                'cantidad': r[2],
-                'subtotal': float(r[3])
+                'cantidad': r[1],
+                'subtotal': float(r[2]),
+                'precio': float(r[2]) / r[1] if r[1] > 0 else 0
             })
 
         return jsonify(productos)
