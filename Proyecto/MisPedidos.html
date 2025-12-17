@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Mis Pedidos | Senza</title>
+<title>Gestión de Pedidos | Senza</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -15,7 +15,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 40px auto;
     padding: 0 20px;
 }
@@ -27,13 +27,15 @@ h2 {
 
 .card {
     background: #fff;
-    padding: 20px;
+    padding: 18px;
     border-radius: 14px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .estado {
@@ -41,6 +43,11 @@ h2 {
     border-radius: 20px;
     font-weight: 600;
     background: #D2B48C;
+}
+
+select {
+    padding: 8px;
+    border-radius: 8px;
 }
 
 .btn {
@@ -62,94 +69,86 @@ h2 {
 <body>
 
 <div class="container">
-    <h2>Mis Pedidos</h2>
+    <h2>Gestión de Pedidos</h2>
     <div id="listaPedidos"></div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-const rol = localStorage.getItem('usuarioRol');
-if (rol !== 'Administrador' && rol !== 'Operador') {
-    alert('Acceso denegado');
-    window.location.href = 'Inicio.html';
-}
-
-function cargarPedidosAdmin() {
-    fetch('/api/pedidos')
-        .then(res => res.json())
-        .then(pedidos => {
-            const cont = document.getElementById('listaPedidosAdmin');
-            cont.innerHTML = '';
-
-            pedidos.forEach(p => {
-                cont.innerHTML += `
-                    <div style="
-                        border:1px solid #ddd;
-                        padding:15px;
-                        border-radius:8px;
-                        margin-bottom:15px;
-                        background:#fff;
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                        flex-wrap:wrap;
-                        gap:10px;
-                    ">
-                        <div>
-                            <strong>Pedido #${p.id_pedido}</strong><br>
-                            Cliente: ${p.cliente}<br>
-                            Fecha: ${p.fecha}<br>
-                            Total: $${p.total}<br>
-                            <strong>Estado:</strong> ${p.estado}
-                        </div>
-
-                        <div>
-                            <select onchange="cambiarEstado(${p.id_pedido}, this.value)"
-                                style="padding:8px;border-radius:8px;">
-                                <option disabled selected>Cambiar estado</option>
-                                <option>Pendiente</option>
-                                <option>Pagado</option>
-                                <option>En preparación</option>
-                                <option>Enviado</option>
-                                <option>Entregado</option>
-                            </select>
-
-                            <button onclick="verPedido(${p.id_pedido})"
-                                style="margin-left:10px;padding:8px 14px;border:none;border-radius:8px;background:#4B3832;color:white;">
-                                Ver detalle
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-        });
-}
-
-window.cambiarEstado = async (id_pedido, estado) => {
-    const res = await fetch('/api/pedido/estado', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_pedido, estado })
-    });
-
-    const data = await res.json();
-    if (data.success) {
-        alert('Estado actualizado');
-        cargarPedidosAdmin();
-    } else {
-        alert('Error al cambiar estado');
+    const rol = localStorage.getItem('usuarioRol');
+    if (rol !== 'Administrador' && rol !== 'Operador') {
+        alert('Acceso denegado');
+        window.location.href = 'Inicio.html';
+        return;
     }
-};
 
-window.verPedido = (id) => {
-    window.location.href = `DetallePedido.html?id=${id}`;
-};
+    function cargarPedidosAdmin() {
+        fetch('/api/pedidos')
+            .then(res => res.json())
+            .then(pedidos => {
+                const cont = document.getElementById('listaPedidos');
+                cont.innerHTML = '';
 
-cargarPedidosAdmin();
+                if (!pedidos || pedidos.length === 0) {
+                    cont.innerHTML = '<p>No hay pedidos registrados.</p>';
+                    return;
+                }
+
+                pedidos.forEach(p => {
+                    cont.innerHTML += `
+                        <div class="card">
+                            <div>
+                                <strong>Pedido #${p.id_pedido}</strong><br>
+                                Cliente: ${p.cliente}<br>
+                                Fecha: ${p.fecha}<br>
+                                Total: $${p.total}<br>
+                                <span class="estado">${p.estado}</span>
+                            </div>
+
+                            <div>
+                                <select onchange="cambiarEstado(${p.id_pedido}, this.value)">
+                                    <option disabled selected>Cambiar estado</option>
+                                    <option>Pendiente</option>
+                                    <option>Pagado</option>
+                                    <option>En preparación</option>
+                                    <option>Enviado</option>
+                                    <option>Entregado</option>
+                                </select>
+
+                                <button class="btn" onclick="verPedido(${p.id_pedido})">
+                                    Ver detalle
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+    }
+
+    window.cambiarEstado = async (id_pedido, estado) => {
+        const res = await fetch('/api/pedido/estado', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_pedido, estado })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            alert('Estado actualizado');
+            cargarPedidosAdmin();
+        } else {
+            alert('Error al cambiar estado');
+        }
+    };
+
+    window.verPedido = (id) => {
+        window.location.href = `DetallePedido.html?id=${id}`;
+    };
+
+    cargarPedidosAdmin();
 });
 </script>
-
 
 </body>
 </html>

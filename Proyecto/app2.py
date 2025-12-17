@@ -624,59 +624,45 @@ def pedidos_por_usuario(id_usuario):
         conn.close()
 
 @app.route('/api/pedido/estado', methods=['PUT'])
-def actualizar_estado_pedido():
+def cambiar_estado_pedido():
     data = request.get_json()
-    id_pedido = data.get('id_pedido')
-    estado = data.get('estado')
 
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE Pedido
-            SET estado = %s
-            WHERE id_pedido = %s
-        """, (estado, id_pedido))
-        conn.commit()
-
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                UPDATE Pedido
+                SET estado = %s
+                WHERE id_pedido = %s
+            """, (data['estado'], data['id_pedido']))
+            conn.commit()
         return jsonify({'success': True})
-    except Exception as e:
+    except:
         conn.rollback()
-        print("❌ ERROR actualizar_estado:", e)
         return jsonify({'success': False}), 500
     finally:
         conn.close()
 
 @app.route('/api/pedidos')
-def obtener_todos_los_pedidos():
+def obtener_pedidos_admin():
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT 
-                p.id_pedido,
-                p.fecha,
-                p.total,
-                p.estado,
-                u.nombre AS cliente
-            FROM Pedido p
-            JOIN Usuario u ON p.id_cliente = u.id_usuario
-            ORDER BY p.fecha DESC
-        """)
-        pedidos = cursor.fetchall()
-
-        for p in pedidos:
-            p['fecha'] = p['fecha'].strftime('%Y-%m-%d %H:%M')
-            p['total'] = float(p['total'])
-
-        return jsonify(pedidos)
-
-    except Exception as e:
-        print("❌ ERROR obtener_todos_los_pedidos:", e)
-        return jsonify([]), 500
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    p.id_pedido,
+                    p.fecha,
+                    p.total,
+                    p.estado,
+                    u.nombre AS cliente
+                FROM Pedido p
+                JOIN Cliente c ON p.id_cliente = c.id_cliente
+                JOIN Usuario u ON c.id_usuario = u.id_usuario
+                ORDER BY p.fecha DESC
+            """)
+            return jsonify(cursor.fetchall())
     finally:
         conn.close()
-
 
 # ===========================
 # REPORTE DE VENTAS (MESES)
