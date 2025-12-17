@@ -5,54 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventario - Senza Repostería</title>
 <link rel="icon" type="image/png" href="Imagenes/Senza.png">
-
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-    h1 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-    th { background-color: #d2b48c; color: #fff; }
-    input[type="text"], input[type="number"] { width: 80%; padding: 5px; }
-    button { padding: 5px 10px; margin: 2px; cursor: pointer; }
-    #addForm { background: #fff; padding: 20px; margin-top: 20px; border: 1px solid #ccc; }
-    /* Estilos generales */
-body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-h1 { text-align: center; }
+    body { font-family: 'Poppins', sans-serif; margin: 20px; background: #f5f5f5; }
+    h1 { text-align: center; color: #4B3832; }
 
-/* Tabla */
-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-th, td { border: 1px solid #ccc; padding: 10px; text-align: center; vertical-align: middle; }
-th { background-color: #d2b48c; color: #fff; }
+    /* Tabla */
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: center; vertical-align: middle; }
+    th { background-color: #D2B48C; color: #fff; font-weight: bold; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
 
-/* Botones de Acciones */
-.action-buttons {
-    display: flex;
-    gap: 5px; /* Espacio entre botones */
-    justify-content: center;
-}
-.btn-mod { background-color: #ffc107; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
-.btn-del { background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+    /* Imágenes en tabla */
+    .img-cell img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; }
 
-/* Estilos para el Modal y Formularios */
-input[type="text"], input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; }
-.form-group { margin-bottom: 15px; text-align: left; } /* Espacio entre campos */
-label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; } /* Estilo de la etiqueta */
+    /* Botones */
+    button { cursor: pointer; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; transition: 0.3s; }
+    .btn-mod { background-color: #ffc107; color: #333; }
+    .btn-mod:hover { background-color: #e0a800; }
+    .btn-del { background-color: #dc3545; color: white; }
+    .btn-del:hover { background-color: #c82333; }
+    .btn-add { background-color: #28a745; color: white; padding: 10px 20px; font-size: 1em; }
+    
+    /* Formulario Agregar */
+    #addForm { background: #fff; padding: 25px; margin-top: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin-left: auto; margin-right: auto; }
+    #addForm h2 { margin-top: 0; color: #4B3832; }
+    
+    /* Inputs */
+    input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
 
-/* Contenedor del Modal */
-#modalContent {
-    background:#fff; 
-    padding:20px; 
-    border-radius:10px; 
-    width:400px; 
-    position:relative;
-}
+    /* Modal */
+    #modalProducto { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index: 1000; }
+    #modalContent { background:#fff; padding:30px; border-radius:10px; width:90%; max-width:400px; position:relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .form-group { margin-bottom: 15px; text-align: left; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
 </style>
 </head>
 <body>
 
 <h1>Inventario de Productos</h1>
 
-<!-- Tabla de Productos -->
 <table id="tablaProductos">
     <thead>
         <tr>
@@ -66,62 +57,101 @@ label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; } /*
         </tr>
     </thead>
     <tbody>
-        <!-- Se llenará dinámicamente -->
-    </tbody>
+        </tbody>
 </table>
 
-<!-- Formulario para agregar productos -->
 <div id="addForm">
     <h2>Agregar Nuevo Producto</h2>
-    <input type="text" id="nuevoNombre" placeholder="Nombre"><br><br>
-    <input type="text" id="nuevaDescripcion" placeholder="Descripción"><br><br>
-    <input type="number" id="nuevoPrecio" placeholder="Precio"><br><br>
-    <input type="number" id="nuevoStock" placeholder="Stock"><br><br>
-    <input type="text" id="nuevaImagen" placeholder="URL de Imagen"><br><br>
-    <button onclick="agregarProducto()">Agregar Producto</button>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <input type="text" id="nuevoNombre" placeholder="Nombre del producto">
+        <input type="text" id="nuevaCategoria" placeholder="Categoría (ej. Pasteles)">
+        <input type="number" id="nuevoPrecio" placeholder="Precio ($)">
+        <input type="number" id="nuevoStock" placeholder="Stock (Cantidad)">
+        <input type="text" id="nuevaImagen" placeholder="URL de Imagen" style="grid-column: span 2;">
+        <input type="text" id="nuevaDescripcion" placeholder="Descripción breve" style="grid-column: span 2;">
+    </div>
+    <div style="text-align: center; margin-top: 15px;">
+        <button class="btn-add" onclick="agregarProducto()">+ Agregar Producto</button>
+    </div>
+</div>
+
+<div id="modalProducto">
+    <div id="modalContent">
+        <h2 style="text-align:center;">Modificar Producto</h2>
+        
+        <div class="form-group"><label>Nombre:</label><input type="text" id="modNombre"></div>
+        <div class="form-group"><label>Precio:</label><input type="number" id="modPrecio"></div>
+        <div class="form-group"><label>Stock:</label><input type="number" id="modStock"></div>
+        <div class="form-group"><label>Imagen URL:</label><input type="text" id="modImagen"></div>
+        <div class="form-group"><label>Descripción:</label><input type="text" id="modDescripcion"></div>
+        <div class="form-group"><label>Categoría:</label><input type="text" id="modCategoria"></div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="guardarModificacion()" style="background-color: #28a745; color: white; margin-right: 10px;">Guardar</button>
+            <button onclick="cerrarModal()" style="background-color: #6c757d; color: white;">Cancelar</button>
+        </div>
+    </div>
 </div>
 
 <script>
-const apiUrl = "/productos";
+// --- CAMBIO IMPORTANTE: La ruta debe coincidir con Python ---
+const apiUrl = "/api/productos";
 
 let productoActualId = null;
 
 // --- Cargar productos ---
 function cargarProductos() {
     fetch(apiUrl)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error("Error en la conexión con el servidor");
+            return res.json();
+        })
         .then(data => {
             const tbody = document.querySelector("#tablaProductos tbody");
             tbody.innerHTML = "";
 
+            if(data.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='7'>No hay productos registrados</td></tr>";
+                return;
+            }
+
             data.forEach(prod => {
                 const tr = document.createElement("tr");
+                // Usamos || '' para evitar que salga "undefined" si el campo está vacío
                 tr.innerHTML = `
                     <td>${prod.id_producto}</td>
                     <td>${prod.nombre}</td>
-                    <td>$${prod.precio}</td> <td>${prod.stock}</td>
-                    <td><img src="${prod.imagen}" alt="img" style="width:50px; height:50px; object-fit:cover;"></td> <td>${prod.descripcion || ""}</td>
-                    
+                    <td>$${prod.precio}</td> 
+                    <td>${prod.stock !== undefined ? prod.stock : 0}</td>
+                    <td class="img-cell"><img src="${prod.imagen}" alt="img" onerror="this.src='Imagenes/Senza.png'"></td> 
+                    <td>${prod.descripcion || ""}</td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="btn-mod" onclick="modificarProducto(${prod.id_producto})">Modificar</button>
-                            <button class="btn-del" onclick="eliminarProducto(${prod.id_producto})">Eliminar</button>
-                        </div>
+                        <button class="btn-mod" onclick="abrirModalModificar(${prod.id_producto})">Editar</button>
+                        <button class="btn-del" onclick="eliminarProducto(${prod.id_producto})">Borrar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         })
-        .catch(err => console.error("Error cargando productos:", err));
+        .catch(err => {
+            console.error("Error cargando productos:", err);
+            alert("No se pudieron cargar los productos. Revisa que 'python app2.py' esté ejecutándose.");
+        });
 }
 
 // --- Eliminar producto ---
 function eliminarProducto(id) {
-    if(!confirm("¿Eliminar este producto?")) return;
+    if(!confirm("¿Seguro que deseas eliminar este producto?")) return;
 
     fetch(`${apiUrl}/${id}`, { method: "DELETE" })
         .then(res => res.json())
-        .then(() => cargarProductos())
+        .then(data => {
+            if(data.success) {
+                cargarProductos();
+            } else {
+                alert("Error al eliminar: " + data.message);
+            }
+        })
         .catch(err => console.error(err));
 }
 
@@ -131,51 +161,59 @@ function agregarProducto() {
     const precio = parseFloat(document.getElementById("nuevoPrecio").value);
     const stock = parseInt(document.getElementById("nuevoStock").value);
     const imagen = document.getElementById("nuevaImagen").value.trim();
+    const descripcion = document.getElementById("nuevaDescripcion").value.trim();
+    const categoria = document.getElementById("nuevaCategoria").value.trim();
 
-    if(!nombre || isNaN(precio) || isNaN(stock)) {
-        alert("Por favor completa todos los campos correctamente.");
+    if(!nombre || isNaN(precio)) {
+        alert("El nombre y el precio son obligatorios.");
         return;
     }
 
     fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, precio, stock, imagen })
+        body: JSON.stringify({ 
+            nombre, precio, stock: stock || 0, imagen, descripcion, categoria 
+        })
     })
     .then(res => res.json())
-    .then(() => {
-        document.getElementById("nuevoNombre").value = "";
-        document.getElementById("nuevoPrecio").value = "";
-        document.getElementById("nuevoStock").value = "";
-        document.getElementById("nuevaImagen").value = "";
-        cargarProductos();
+    .then(data => {
+        if(data.success) {
+            alert("Producto agregado");
+            // Limpiar campos
+            document.querySelectorAll('#addForm input').forEach(input => input.value = '');
+            cargarProductos();
+        } else {
+            alert("Error: " + data.message);
+        }
     })
     .catch(err => console.error(err));
 }
-function modificarProducto(id) {
+
+// --- Abrir Modal (Preparar datos) ---
+function abrirModalModificar(id) {
     productoActualId = id;
-    fetch(`${apiUrl}`)
+    
+    // Obtenemos los datos actuales para llenar el modal
+    fetch(apiUrl)
         .then(res => res.json())
         .then(data => {
             const prod = data.find(p => p.id_producto === id);
             if (!prod) return alert("Producto no encontrado.");
 
-            // CORRECCIÓN: Usar los IDs que definiste en el HTML (mod...)
             document.getElementById("modNombre").value = prod.nombre;
             document.getElementById("modPrecio").value = prod.precio;
-            document.getElementById("modStock").value = prod.stock;
+            document.getElementById("modStock").value = prod.stock || 0;
             document.getElementById("modImagen").value = prod.imagen;
             document.getElementById("modDescripcion").value = prod.descripcion || "";
             document.getElementById("modCategoria").value = prod.categoria || "";
 
-            // CORRECCIÓN VISUAL: Usar 'flex' en lugar de 'block' para que el centrado funcione
-        document.getElementById("modalProducto").style.display = "flex";
+            document.getElementById("modalProducto").style.display = "flex";
         });
 }
 
 // --- Guardar cambios del modal ---
 function guardarModificacion() {
-    // CORRECCIÓN: Usar los IDs correctos aquí también
     const nombre = document.getElementById("modNombre").value.trim();
     const precio = parseFloat(document.getElementById("modPrecio").value);
     const stock = parseInt(document.getElementById("modStock").value);
@@ -189,36 +227,17 @@ function guardarModificacion() {
         body: JSON.stringify({ nombre, precio, stock, imagen, descripcion, categoria })
     })
     .then(res => res.json())
-    .then(() => {
-        cerrarModal();
-        cargarProductos();
+    .then(data => {
+        if(data.success) {
+            cerrarModal();
+            cargarProductos();
+        } else {
+            alert("Error al actualizar: " + data.message);
+        }
     })
     .catch(err => console.error(err));
 }
 
-// --- Guardar cambios del modal ---
-function guardarModificacion() {
-    const nombre = document.getElementById("modalNombre").value.trim();
-    const precio = parseFloat(document.getElementById("modalPrecio").value);
-    const stock = parseInt(document.getElementById("modalStock").value);
-    const imagen = document.getElementById("modalImagen").value.trim();
-    const descripcion = document.getElementById("modalDescripcion").value.trim();
-    const categoria = document.getElementById("modalCategoria").value.trim();
-
-    fetch(`${apiUrl}/${productoActualId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, precio, stock, imagen, descripcion, categoria })
-    })
-    .then(res => res.json())
-    .then(() => {
-        cerrarModal();
-        cargarProductos();
-    })
-    .catch(err => console.error(err));
-}
-
-// --- Cerrar modal ---
 function cerrarModal() {
     document.getElementById("modalProducto").style.display = "none";
 }
@@ -227,48 +246,5 @@ function cerrarModal() {
 document.addEventListener("DOMContentLoaded", cargarProductos);
 </script>
 
-<!-- Modal para modificar producto -->
-<div id="modalProducto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index: 1000;">
-    <div id="modalContent">
-        <h2 style="text-align:center;">Modificar Producto</h2>
-        
-        <div class="form-group">
-            <label for="modNombre">Nombre del Producto:</label>
-            <input type="text" id="modNombre">
-        </div>
-
-        <div class="form-group">
-            <label for="modPrecio">Precio:</label>
-            <input type="number" id="modPrecio">
-        </div>
-
-        <div class="form-group">
-            <label for="modStock">Cantidad en Stock:</label>
-            <input type="number" id="modStock">
-        </div>
-
-        <div class="form-group">
-            <label for="modImagen">URL de la Imagen:</label>
-            <input type="text" id="modImagen">
-        </div>
-
-        <div class="form-group">
-            <label for="modDescripcion">Descripción:</label>
-            <input type="text" id="modDescripcion">
-        </div>
-
-        <div class="form-group">
-            <label for="modCategoria">Categoría:</label>
-            <input type="text" id="modCategoria">
-        </div>
-
-        <div style="text-align: center; margin-top: 20px;">
-            <button onclick="guardarModificacion()" style="background-color: #28a745; color: white; padding: 8px 15px; border: none; cursor: pointer;">Guardar Cambios</button>
-            <button onclick="cerrarModal()" style="background-color: #6c757d; color: white; padding: 8px 15px; border: none; cursor: pointer;">Cancelar</button>
-        </div>
-    </div>
-</div>
-
 </body>
 </html>
-

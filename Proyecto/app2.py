@@ -390,16 +390,27 @@ def obtener_productos():
     conn = get_db_connection()
     try:
         cursor = conn.cursor(pymysql.cursors.DictCursor)
-        # Agregamos 'stock' a la consulta
+        
+        # AGREGUÉ 'stock' A LA LISTA DE CAMPOS
         cursor.execute("""
-            SELECT id_producto, nombre, precio, stock, imagen, categoria, descripcion
+            SELECT 
+                id_producto,
+                nombre,
+                precio,
+                stock,  
+                imagen,
+                categoria,
+                descripcion
             FROM Producto
         """)
+
         productos = cursor.fetchall()
         return jsonify(productos)
+
     except Exception as e:
-        print("❌ ERROR obtener:", e)
+        print("❌ ERROR obtener_productos:", e)
         return jsonify([]), 500
+
     finally:
         conn.close()
 
