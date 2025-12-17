@@ -517,16 +517,17 @@ def productos_pedido(id_pedido):
     try:
         cursor = conn.cursor()
 
-        cursor.execute("""
+        sql = """
             SELECT 
-                p.nombre AS nombre_producto,
+                p.nombre,
                 d.cantidad,
                 d.subtotal
             FROM Detalle_Pedido d
-            JOIN Producto p ON d.id_producto = p.id_producto
+            INNER JOIN Producto p ON d.id_producto = p.id_producto
             WHERE d.id_pedido = ?
-        """, (id_pedido,))
+        """
 
+        cursor.execute(sql, (id_pedido,))
         rows = cursor.fetchall()
 
         productos = []
@@ -537,20 +538,21 @@ def productos_pedido(id_pedido):
             precio = subtotal / cantidad if cantidad > 0 else 0
 
             productos.append({
-                'nombre_producto': nombre,
-                'precio': round(precio, 2),
-                'cantidad': cantidad,
-                'subtotal': round(subtotal, 2)
+                "nombre_producto": nombre,
+                "precio": round(precio, 2),
+                "cantidad": cantidad,
+                "subtotal": round(subtotal, 2)
             })
 
         return jsonify(productos)
 
     except Exception as e:
-        print("❌ ERROR productos_pedido:", repr(e))
+        print("❌ ERROR productos_pedido REAL:", repr(e))
         return jsonify([]), 500
 
     finally:
         conn.close()
+
 
 
 @app.route('/api/pedido/<int:id_pedido>')
