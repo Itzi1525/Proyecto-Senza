@@ -5,79 +5,140 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventario - Senza Repostería</title>
 <link rel="icon" type="image/png" href="Imagenes/Senza.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-    body { font-family: 'Poppins', sans-serif; margin: 20px; background: #f5f5f5; }
-    h1 { text-align: center; color: #4B3832; }
+    body { 
+        font-family: 'Poppins', sans-serif; 
+        margin: 0; 
+        background: #f5f5f5; 
+        color: #4B3832;
+    }
 
-    /* Tabla */
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: center; vertical-align: middle; }
-    th { background-color: #D2B48C; color: #fff; font-weight: bold; }
-    tr:nth-child(even) { background-color: #f9f9f9; }
+    /* BARRA SUPERIOR (NUEVO) */
+    .top-bar {
+        background-color: #fff;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
 
-    /* Imágenes en tabla */
-    .img-cell img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; }
+    .btn-back {
+        text-decoration: none;
+        background-color: #4B3832;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: 0.3s;
+    }
 
-    /* Botones */
+    .btn-back:hover {
+        background-color: #382D26;
+        transform: translateX(-3px); /* Pequeño efecto de movimiento */
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .container {
+        padding: 0 40px 40px;
+    }
+
+    /* TABLA */
+    table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 15px; text-align: center; vertical-align: middle; border-bottom: 1px solid #eee; }
+    th { background-color: #D2B48C; color: #fff; font-weight: bold; text-transform: uppercase; font-size: 0.9em; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background-color: #fafafa; }
+
+    /* IMÁGENES */
+    .img-cell img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
+
+    /* BOTONES ACCIONES */
     button { cursor: pointer; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; transition: 0.3s; }
-    .btn-mod { background-color: #ffc107; color: #333; }
+    .btn-mod { background-color: #ffc107; color: #333; margin-right: 5px; }
     .btn-mod:hover { background-color: #e0a800; }
     .btn-del { background-color: #dc3545; color: white; }
     .btn-del:hover { background-color: #c82333; }
-    .btn-add { background-color: #28a745; color: white; padding: 10px 20px; font-size: 1em; }
     
-    /* Formulario Agregar */
-    #addForm { background: #fff; padding: 25px; margin-top: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin-left: auto; margin-right: auto; }
-    #addForm h2 { margin-top: 0; color: #4B3832; }
+    /* FORMULARIO AGREGAR */
+    #addForm { background: #fff; padding: 30px; margin-top: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 900px; margin-left: auto; margin-right: auto; }
+    #addForm h2 { margin-top: 0; color: #4B3832; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 20px; }
     
-    /* Inputs */
-    input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    
+    input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: 'Poppins'; }
+    input:focus { outline: none; border-color: #D2B48C; }
 
-    /* Modal */
+    .btn-add { background-color: #28a745; color: white; padding: 12px 30px; font-size: 1em; margin-top: 20px; width: 100%; }
+    .btn-add:hover { background-color: #218838; }
+
+    /* MODAL */
     #modalProducto { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index: 1000; }
     #modalContent { background:#fff; padding:30px; border-radius:10px; width:90%; max-width:400px; position:relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     .form-group { margin-bottom: 15px; text-align: left; }
-    label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9em; }
 </style>
 </head>
 <body>
 
-<h1>Inventario de Productos</h1>
-
-<table id="tablaProductos">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Stock</th>
-            <th>Imagen</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        </tbody>
-</table>
-
-<div id="addForm">
-    <h2>Agregar Nuevo Producto</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <input type="text" id="nuevoNombre" placeholder="Nombre del producto">
-        <input type="text" id="nuevaCategoria" placeholder="Categoría (ej. Pasteles)">
-        <input type="number" id="nuevoPrecio" placeholder="Precio ($)">
-        <input type="number" id="nuevoStock" placeholder="Stock (Cantidad)">
-        <input type="text" id="nuevaImagen" placeholder="URL de Imagen" style="grid-column: span 2;">
-        <input type="text" id="nuevaDescripcion" placeholder="Descripción breve" style="grid-column: span 2;">
+<div class="top-bar">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <img src="Imagenes/Senza.png" alt="Logo" style="height: 40px;">
+        <h2 style="margin:0;">Gestión de Inventario</h2>
     </div>
-    <div style="text-align: center; margin-top: 15px;">
-        <button class="btn-add" onclick="agregarProducto()">+ Agregar Producto</button>
+    
+    <a href="AdminOpera.html" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Regresar al Panel
+    </a>
+</div>
+
+<div class="container">
+
+    <table id="tablaProductos">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Imagen</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+    <div id="addForm">
+        <h2><i class="fas fa-plus-circle"></i> Agregar Nuevo Producto</h2>
+        <div class="grid-form">
+            <input type="text" id="nuevoNombre" placeholder="Nombre del producto">
+            <input type="text" id="nuevaCategoria" placeholder="Categoría (ej. Pasteles)">
+            <input type="number" id="nuevoPrecio" placeholder="Precio ($)">
+            <input type="number" id="nuevoStock" placeholder="Stock (Cantidad)">
+            
+            <input type="text" id="nuevaImagen" placeholder="URL de la imagen (ej: Imagenes/pastel.jpg)" style="grid-column: span 2;">
+            
+            <input type="text" id="nuevaDescripcion" placeholder="Descripción breve" style="grid-column: span 2;">
+        </div>
+        <div style="text-align: center;">
+            <button class="btn-add" onclick="agregarProducto()">Guardar Producto</button>
+        </div>
     </div>
+
 </div>
 
 <div id="modalProducto">
     <div id="modalContent">
-        <h2 style="text-align:center;">Modificar Producto</h2>
+        <h2 style="text-align:center; margin-top:0;">Editar Producto</h2>
         
         <div class="form-group"><label>Nombre:</label><input type="text" id="modNombre"></div>
         <div class="form-group"><label>Precio:</label><input type="number" id="modPrecio"></div>
@@ -86,17 +147,15 @@
         <div class="form-group"><label>Descripción:</label><input type="text" id="modDescripcion"></div>
         <div class="form-group"><label>Categoría:</label><input type="text" id="modCategoria"></div>
 
-        <div style="text-align: center; margin-top: 20px;">
-            <button onclick="guardarModificacion()" style="background-color: #28a745; color: white; margin-right: 10px;">Guardar</button>
-            <button onclick="cerrarModal()" style="background-color: #6c757d; color: white;">Cancelar</button>
+        <div style="text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+            <button onclick="guardarModificacion()" style="background-color: #28a745; color: white; padding: 10px 20px; flex:1;">Guardar</button>
+            <button onclick="cerrarModal()" style="background-color: #6c757d; color: white; padding: 10px 20px; flex:1;">Cancelar</button>
         </div>
     </div>
 </div>
 
 <script>
-// --- CAMBIO IMPORTANTE: La ruta debe coincidir con Python ---
 const apiUrl = "/api/productos";
-
 let productoActualId = null;
 
 // --- Cargar productos ---
@@ -111,32 +170,32 @@ function cargarProductos() {
             tbody.innerHTML = "";
 
             if(data.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='7'>No hay productos registrados</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='7' style='padding:20px; color:#888;'>No hay productos registrados</td></tr>";
                 return;
             }
 
             data.forEach(prod => {
                 const tr = document.createElement("tr");
-                // Usamos || '' para evitar que salga "undefined" si el campo está vacío
                 tr.innerHTML = `
                     <td>${prod.id_producto}</td>
-                    <td>${prod.nombre}</td>
+                    <td style="font-weight:600;">${prod.nombre}</td>
                     <td>$${prod.precio}</td> 
-                    <td>${prod.stock !== undefined ? prod.stock : 0}</td>
-                    <td class="img-cell"><img src="${prod.imagen}" alt="img" onerror="this.src='Imagenes/Senza.png'"></td> 
-                    <td>${prod.descripcion || ""}</td>
                     <td>
-                        <button class="btn-mod" onclick="abrirModalModificar(${prod.id_producto})">Editar</button>
-                        <button class="btn-del" onclick="eliminarProducto(${prod.id_producto})">Borrar</button>
+                        <span style="background:${prod.stock < 5 ? '#ffebee' : '#e8f5e9'}; color:${prod.stock < 5 ? '#c62828' : '#2e7d32'}; padding:4px 10px; border-radius:15px; font-weight:bold;">
+                            ${prod.stock !== undefined ? prod.stock : 0}
+                        </span>
+                    </td>
+                    <td class="img-cell"><img src="${prod.imagen}" alt="img" onerror="this.src='Imagenes/Senza.png'"></td> 
+                    <td style="font-size:0.9em; color:#666;">${prod.descripcion || "-"}</td>
+                    <td>
+                        <button class="btn-mod" onclick="abrirModalModificar(${prod.id_producto})" title="Editar"><i class="fas fa-edit"></i></button>
+                        <button class="btn-del" onclick="eliminarProducto(${prod.id_producto})" title="Borrar"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         })
-        .catch(err => {
-            console.error("Error cargando productos:", err);
-            alert("No se pudieron cargar los productos. Revisa que 'python app2.py' esté ejecutándose.");
-        });
+        .catch(err => console.error("Error cargando productos:", err));
 }
 
 // --- Eliminar producto ---
@@ -146,26 +205,23 @@ function eliminarProducto(id) {
     fetch(`${apiUrl}/${id}`, { method: "DELETE" })
         .then(res => res.json())
         .then(data => {
-            if(data.success) {
-                cargarProductos();
-            } else {
-                alert("Error al eliminar: " + data.message);
-            }
+            if(data.success) cargarProductos();
+            else alert("Error al eliminar: " + data.message);
         })
         .catch(err => console.error(err));
 }
 
-// --- Agregar producto ---
+// --- Agregar producto (Versión JSON/Texto) ---
 function agregarProducto() {
     const nombre = document.getElementById("nuevoNombre").value.trim();
     const precio = parseFloat(document.getElementById("nuevoPrecio").value);
     const stock = parseInt(document.getElementById("nuevoStock").value);
-    const imagen = document.getElementById("nuevaImagen").value.trim();
+    const imagen = document.getElementById("nuevaImagen").value.trim(); 
     const descripcion = document.getElementById("nuevaDescripcion").value.trim();
     const categoria = document.getElementById("nuevaCategoria").value.trim();
 
-    if(!nombre || isNaN(precio)) {
-        alert("El nombre y el precio son obligatorios.");
+    if(!nombre || isNaN(precio) || !imagen) {
+        alert("Nombre, Precio e Imagen (URL) son obligatorios.");
         return;
     }
 
@@ -179,7 +235,7 @@ function agregarProducto() {
     .then(res => res.json())
     .then(data => {
         if(data.success) {
-            alert("Producto agregado");
+            alert("✅ Producto agregado");
             // Limpiar campos
             document.querySelectorAll('#addForm input').forEach(input => input.value = '');
             cargarProductos();
@@ -190,11 +246,10 @@ function agregarProducto() {
     .catch(err => console.error(err));
 }
 
-// --- Abrir Modal (Preparar datos) ---
+// --- Abrir Modal ---
 function abrirModalModificar(id) {
     productoActualId = id;
     
-    // Obtenemos los datos actuales para llenar el modal
     fetch(apiUrl)
         .then(res => res.json())
         .then(data => {
@@ -242,7 +297,6 @@ function cerrarModal() {
     document.getElementById("modalProducto").style.display = "none";
 }
 
-// --- Inicializar tabla al cargar ---
 document.addEventListener("DOMContentLoaded", cargarProductos);
 </script>
 
