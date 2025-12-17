@@ -623,6 +623,30 @@ def pedidos_por_usuario(id_usuario):
     finally:
         conn.close()
 
+@app.route('/api/pedido/estado', methods=['PUT'])
+def actualizar_estado_pedido():
+    data = request.get_json()
+    id_pedido = data.get('id_pedido')
+    estado = data.get('estado')
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE Pedido
+            SET estado = %s
+            WHERE id_pedido = %s
+        """, (estado, id_pedido))
+        conn.commit()
+
+        return jsonify({'success': True})
+    except Exception as e:
+        conn.rollback()
+        print("❌ ERROR actualizar_estado:", e)
+        return jsonify({'success': False}), 500
+    finally:
+        conn.close()
+
 
 # ===========================
 # REPORTE DE VENTAS (MESES)

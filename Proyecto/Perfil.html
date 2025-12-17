@@ -234,6 +234,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     <div id="listaDirecciones" style="margin-bottom:30px;"></div>
 
     <hr style="margin:30px 0;">
+
+<div class="card" style="margin-top:40px;">
+    <h2>Mis Pedidos</h2>
+    <div id="listaPedidos"></div>
+</div>
     
 
     <h3>Agregar dirección</h3>
@@ -287,6 +292,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 <!-- ================= JS PERFIL ================= -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
 
 /* ================= VALIDAR SESIÓN ================= */
 const usuarioId = localStorage.getItem('usuarioId');
@@ -445,8 +451,98 @@ btnAgregarDireccion.addEventListener('click', async () => {
     }
 });
 
-/* 👉 CARGAR AL INICIO */
-cargarDirecciones();
+function cargarPedidos() {
+    fetch(`/api/pedidos/usuario/${usuarioId}`)
+        .then(res => res.json())
+        .then(pedidos => {
+            const cont = document.getElementById('listaPedidos');
+            cont.innerHTML = '';
+
+            if (!pedidos || pedidos.length === 0) {
+                cont.innerHTML = '<p>No has realizado pedidos aún.</p>';
+                return;
+            }
+
+            pedidos.forEach(p => {
+                cont.innerHTML += `
+                    <div style="
+                        border:1px solid #ddd;
+                        padding:15px;
+                        border-radius:8px;
+                        margin-bottom:15px;
+                        background:#fff;
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        flex-wrap:wrap;
+                        gap:10px;
+                    ">
+                        <div>
+                            <strong>Pedido #${p.id_pedido}</strong><br>
+                            Fecha: ${p.fecha}<br>
+                            Total: $${p.total}<br>
+                            <span style="
+                                display:inline-block;
+                                margin-top:6px;
+                                padding:4px 12px;
+                                border-radius:14px;
+                                background:#D2B48C;
+                                font-weight:600;
+                            ">
+                                ${p.estado}
+                            </span>
+                        </div>
+
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="verPedido(${p.id_pedido})"
+                                style="padding:8px 14px;border-radius:8px;border:none;background:#4B3832;color:#fff;">
+                                Ver detalle
+                            </button>
+
+                            ${
+                                (rolUsuario === 'Administrador' || rolUsuario === 'Operador')
+                                ? `
+                                <select onchange="cambiarEstado(${p.id_pedido}, this.value)"
+                                    style="padding:8px;border-radius:8px;">
+                                    <option disabled selected>Cambiar estado</option>
+                                    <option>Pendiente</option>
+                                    <option>Pagado</option>
+                                    <option>En preparación</option>
+                                    <option>Enviado</option>
+                                    <option>Entregado</option>
+                                </select>
+                                `
+                                : ''
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+        });
+}
+
+window.verPedido = (id) => {
+    window.location.href = `DetallePedido.html?id=${id}`;
+};
+
+window.cambiarEstado = async (id_pedido, estado) => {
+    const res = await fetch('/api/pedido/estado', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_pedido, estado })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+        alert('Estado actualizado');
+        cargarPedidos();
+    } else {
+        alert('Error al cambiar estado');
+    }
+};
+
+/* Cargar al iniciar */
+cargarPedidos();
 
 });
 </script>
