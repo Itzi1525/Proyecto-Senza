@@ -238,6 +238,26 @@
         </div>
 
         <div class="card">
+            <h2><i class="fas fa-shield-alt"></i> Seguridad</h2>
+            <p style="font-size:0.9em; color:#666; margin-bottom:15px;">Cambia tu contraseña de acceso.</p>
+            
+            <div style="max-width: 400px;">
+                <label>Contraseña Actual</label>
+                <input type="password" id="passActual" placeholder="Ingresa tu contraseña actual">
+
+                <label>Nueva Contraseña</label>
+                <input type="password" id="passNueva" placeholder="Mínimo 6 caracteres">
+
+                <label>Confirmar Nueva Contraseña</label>
+                <input type="password" id="passConfirm" placeholder="Repite la nueva contraseña">
+
+                <button id="btnUpdatePass" class="btn-primary" style="background-color: #5D4037;">
+                    Actualizar Contraseña
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
             <h2><i class="fas fa-map-marker-alt"></i> Mis Direcciones</h2>
             <div id="listaDirecciones">
                 <p style="text-align:center; color:#888;">Cargando direcciones...</p>
@@ -317,7 +337,7 @@
             window.location.href = 'Login.html';
         });
 
-        // --- CARGAR PERFIL ---
+        // --- 1. CARGAR DATOS DE PERFIL ---
         fetch(`/api/perfil/${usuarioId}`)
             .then(res => res.json())
             .then(data => {
@@ -341,7 +361,39 @@
             alert(data.success ? '✅ Perfil actualizado correctamente' : '❌ Error al actualizar');
         });
 
-        // --- FUNCIONES DE DIRECCIONES ---
+        // --- 2. CAMBIAR CONTRASEÑA ---
+        document.getElementById('btnUpdatePass').addEventListener('click', async () => {
+            const actual = document.getElementById('passActual').value;
+            const nueva = document.getElementById('passNueva').value;
+            const confirm = document.getElementById('passConfirm').value;
+
+            if (!actual || !nueva || !confirm) return alert("Llena todos los campos de contraseña.");
+            if (nueva.length < 6) return alert("La contraseña nueva debe tener al menos 6 caracteres.");
+            if (nueva !== confirm) return alert("Las contraseñas nuevas no coinciden.");
+
+            try {
+                const res = await fetch('/api/usuario/password', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: usuarioId, actual, nueva })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert("✅ Contraseña actualizada.");
+                    document.getElementById('passActual').value = "";
+                    document.getElementById('passNueva').value = "";
+                    document.getElementById('passConfirm').value = "";
+                } else {
+                    alert("⚠️ Error: " + data.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error de conexión.");
+            }
+        });
+
+        // --- 3. FUNCIONES DE DIRECCIONES ---
         window.cargarDirecciones = function() {
             fetch(`/api/direcciones/${usuarioId}`)
                 .then(res => res.json())
@@ -403,14 +455,13 @@
             if (data.success) {
                 alert('✅ Dirección agregada');
                 cargarDirecciones();
-                // Limpiar campos
                 ['calle','numero','colonia','ciudad','codigo_postal'].forEach(id => document.getElementById(id).value = '');
             } else {
                 alert('Error al guardar dirección');
             }
         });
 
-        // --- CARGAR PEDIDOS ---
+        // --- 4. CARGAR PEDIDOS ---
         window.cargarPedidos = function() {
             fetch(`/api/pedidos/usuario/${usuarioId}`)
                 .then(res => res.json())
