@@ -590,7 +590,7 @@ def obtener_pedido(id_pedido):
     finally:
         conn.close()
 
-        @app.route('/api/pedidos/usuario/<int:id_usuario>')
+@app.route('/api/pedidos/usuario/<int:id_usuario>')
 def pedidos_por_usuario(id_usuario):
     conn = get_db_connection()
     try:
