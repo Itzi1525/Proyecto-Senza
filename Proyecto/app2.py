@@ -505,20 +505,37 @@ def actualizar_producto(id):
     finally:
         conn.close()
 
-# 4. ELIMINAR (DELETE)
+# 4. ELIMINAR (DELETE) - VERSIÓN FUERTE (Borra historial)
 @app.route('/api/productos/<int:id>', methods=['DELETE'])
 def eliminar_producto(id):
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
+            # PASO 1: Obtener nombre para borrar reseñas (que usan nombre, no ID)
+            cursor.execute("SELECT nombre FROM Producto WHERE id_producto = %s", (id,))
+            producto = cursor.fetchone()
+            
+            if producto:
+                nombre_prod = producto['nombre']
+                # Borrar reseñas de este producto
+                cursor.execute("DELETE FROM Resenas WHERE producto_nombre = %s", (nombre_prod,))
+
+            # PASO 2: Borrar de Detalle_Pedido (¡OJO! Esto altera reportes de ventas pasadas)
+            cursor.execute("DELETE FROM Detalle_Pedido WHERE id_producto = %s", (id,))
+            
+            # PASO 3: Finalmente borrar el producto
             cursor.execute("DELETE FROM Producto WHERE id_producto = %s", (id,))
+            
             conn.commit()
-        return jsonify({'success': True, 'message': 'Producto eliminado'})
+            
+        return jsonify({'success': True, 'message': 'Producto y su historial eliminados'})
+
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+        conn.rollback()
+        print("❌ Error al eliminar:", e)
+        return jsonify({'success': False, 'message': 'No se pudo eliminar: ' + str(e)}), 500
     finally:
         conn.close()
-
 
 # ===========================
 # METODO PAGO API
