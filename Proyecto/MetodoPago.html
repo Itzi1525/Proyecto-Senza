@@ -205,8 +205,9 @@
     <!-- RESUMEN -->
     <div class="card resumen">
         <h2>Resumen</h2>
-        <p><span>Subtotal</span><span id="subtotal">$0</span></p>
-        <p><span>Envío</span><span>$50</span></p>
+        <p>Subtotal: <strong id="subtotalPago"></strong></p>
+<p>Envío: <strong>$50.00</strong></p>
+<p>Total a pagar: <strong id="totalPago"></strong></p>
         <hr>
  <p>Total a pagar: <strong id="totalPago"></strong></p>
 
@@ -251,14 +252,20 @@ metodoRadios.forEach(radio => {
 document.addEventListener('DOMContentLoaded', () => {
 
     const params = new URLSearchParams(window.location.search);
+
+    const subtotal = parseFloat(params.get('subtotal'));
     const total = parseFloat(params.get('total'));
 
-    if (!total || isNaN(total) || total <= 0) {
-        alert('No hay total válido para pagar');
+    if (!subtotal || !total || isNaN(subtotal) || isNaN(total)) {
+        alert('No hay información válida de pago');
         return;
     }
 
-    document.getElementById('totalPago').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('subtotalPago').textContent =
+        `$${subtotal.toFixed(2)}`;
+
+    document.getElementById('totalPago').textContent =
+        `$${total.toFixed(2)}`;
 });
 /* ===============================
    CONFIRMAR PAGO

@@ -343,7 +343,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 // 🧹 Vaciar carrito después del pedido
                 localStorage.removeItem('carrito');
-             window.location.href = `MetodoPago.html?id=${data.id_pedido}&total=${total}`;
+            window.location.href =
+  `MetodoPago.html?id=${data.id_pedido}&subtotal=${subtotal}&total=${total}`;
             } else {
                 alert(data.error || 'Error al crear pedido');
             }
