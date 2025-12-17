@@ -611,6 +611,72 @@ def archivos(filename):
 def inicio():
     return send_from_directory('.', 'Inicio.html')
 
+# ===========================
+# RESEÑAS API (NUEVO)
+# ===========================
+@app.route('/api/resenas', methods=['POST'])
+def guardar_resena():
+    data = request.get_json()
+    
+    # 1. Validar datos
+    if not data or 'producto' not in data or 'comentario' not in data:
+        return jsonify({'success': False, 'message': 'Faltan datos'}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'message': 'Error de conexión BD'}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            # 2. Insertar en la tabla Resenas
+            # Asegúrate de que tu tabla en la BD se llame 'Resenas' (o 'resenas')
+            query = """
+                INSERT INTO Resenas (producto_nombre, autor, rol, calificacion, comentario)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (
+                data['producto'],
+                data['autor'],
+                data['rol'],
+                data['calificacion'],
+                data['comentario']
+            ))
+            conn.commit()
+            
+        return jsonify({'success': True, 'message': 'Reseña guardada'})
+
+    except Exception as e:
+        print("❌ Error guardando reseña:", e)
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/resenas', methods=['GET'])
+def obtener_resenas():
+    # Obtenemos el nombre del producto de la URL (?producto=Pastel...)
+    producto_nombre = request.args.get('producto')
+    
+    conn = get_db_connection()
+    if not conn: return jsonify([])
+
+    try:
+        with conn.cursor() as cursor:
+            if producto_nombre:
+                # Traer reseñas solo de ese producto
+                query = "SELECT * FROM Resenas WHERE producto_nombre = %s ORDER BY fecha DESC"
+                cursor.execute(query, (producto_nombre,))
+            else:
+                # Traer todas (por si acaso)
+                query = "SELECT * FROM Resenas ORDER BY fecha DESC"
+                cursor.execute(query)
+            
+            resenas = cursor.fetchall()
+            return jsonify(resenas)
+    except Exception as e:
+        print("❌ Error obteniendo reseñas:", e)
+        return jsonify([])
+    finally:
+        conn.close()
 
 # ===========================
 # RUN

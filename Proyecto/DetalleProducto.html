@@ -313,7 +313,7 @@
         // ==========================================
         const params = new URLSearchParams(window.location.search);
         
-        const id = params.get('id'); // ID numérico
+        const id = params.get('id'); 
         const nombre = params.get('nombre');
         const precio = params.get('precio');
         const desc = params.get('desc');
@@ -326,12 +326,11 @@
             document.getElementById('descProd').textContent = desc || "Descripción no disponible.";
             document.getElementById('imgProd').src = img;
             
-            // --- LOGICA DEL CARRITO ---
+            // --- LOGICA DEL CARRITO (Se mantiene igual, local) ---
             document.getElementById('btnAdd').addEventListener('click', () => {
                 let cart = JSON.parse(localStorage.getItem('cart')) || [];
                 let prodId = id ? Number(id) : null;
                 
-                // Buscamos si ya existe en el carrito
                 let existing = null;
                 if(prodId) {
                     existing = cart.find(p => p.id_producto === prodId);
@@ -354,7 +353,7 @@
                 alert("¡" + nombre + " agregado al carrito! 🛒");
             });
 
-            // Cargar reseñas al iniciar
+            // Cargar reseñas DESDE LA BASE DE DATOS al iniciar
             loadReviews(nombre);
 
         } else {
@@ -386,21 +385,17 @@
         }
 
         // ==========================================
-        // 3. PUBLICAR RESEÑA (LÓGICA BD)
+        // 3. PUBLICAR RESEÑA (CONECTADO A PYTHON/AWS)
         // ==========================================
         document.getElementById('btnSubmitReview').addEventListener('click', () => {
             
             // A) VALIDACIONES
             const comment = document.getElementById('reviewComment').value;
-            
-            // Recuperamos el usuario de la sesión
             const usuarioNombre = localStorage.getItem('usuarioNombre'); 
-            const usuarioRol = localStorage.getItem('usuarioRol') || 'Cliente'; // Si no tiene rol, es Cliente
+            const usuarioRol = localStorage.getItem('usuarioRol') || 'Cliente'; 
 
             if (!usuarioNombre) {
                 alert("Debes iniciar sesión para comentar.");
-                // Opcional: Redirigir al login
-                // window.location.href = "Login.html"; 
                 return;
             }
 
@@ -413,100 +408,118 @@
                 return;
             }
 
-            // B) CREAR EL OBJETO RESEÑA
-            // Aquí estructuramos lo que se va a guardar en la BD
+            // B) CREAR EL OBJETO PARA ENVIAR A PYTHON
             const nuevaResena = {
-                id_producto: nombre, // Vinculamos por nombre (o podrías usar 'id')
+                id_producto: nombre, // Usamos el nombre del producto
                 autor: usuarioNombre,
-                rol: usuarioRol, // 'Administrador', 'Operador' o 'Cliente'
+                rol: usuarioRol,
                 calificacion: selectedRating,
-                comentario: comment,
-                fecha: new Date().toLocaleDateString()
+                comentario: comment
             };
 
-            // C) GUARDAR (Aquí elegimos entre LocalStorage o AWS Real)
+            // C) GUARDAR EN BASE DE DATOS
             guardarResena(nuevaResena);
         });
 
         function guardarResena(resena) {
-            // --- MODO 1: SIMULACIÓN LOCAL (Para que funcione YA) ---
-            let allReviews = JSON.parse(localStorage.getItem('reviews_db')) || [];
-            allReviews.push(resena);
-            localStorage.setItem('reviews_db', JSON.stringify(allReviews));
-            
-            // --- MODO 2: AWS REAL (Descomenta esto cuando tengas tu API) ---
-            /*
-            fetch('https://tu-api-aws.com/reviews', {
+            // Conexión real a tu app2.py
+            fetch('/api/resenas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(resena)
+                body: JSON.stringify({
+                    producto: resena.id_producto,
+                    autor: resena.autor,
+                    rol: resena.rol,
+                    calificacion: resena.calificacion,
+                    comentario: resena.comentario
+                })
             })
             .then(response => response.json())
-            .then(data => console.log('Guardado en AWS:', data))
-            .catch(error => console.error('Error:', error));
-            */
-
-            // D) LIMPIEZA Y RECARGA
-            document.getElementById('reviewComment').value = "";
-            selectedRating = 0;
-            updateStars(0);
-            
-            loadReviews(resena.id_producto); // Recargamos la lista para ver la nueva
-            alert("¡Gracias por tu opinión! Se ha guardado como: " + resena.rol);
+            .then(data => {
+                if (data.success) {
+                    alert("¡Gracias! Tu reseña se ha guardado en la BD. ✅");
+                    
+                    // Limpieza
+                    document.getElementById('reviewComment').value = "";
+                    selectedRating = 0;
+                    updateStars(0);
+                    
+                    // Recargamos la lista desde la BD
+                    loadReviews(resena.id_producto);
+                } else {
+                    alert("Error al guardar: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error de conexión con el servidor.");
+            });
         }
 
         // ==========================================
-        // 4. MOSTRAR RESEÑAS
+        // 4. MOSTRAR RESEÑAS (DESDE PYTHON)
         // ==========================================
         function loadReviews(productName) {
             const reviewsContainer = document.getElementById('reviewsList');
-            reviewsContainer.innerHTML = ""; 
+            reviewsContainer.innerHTML = "<p>Cargando opiniones...</p>"; 
             
-            // LEER DE LA BD (Simulada)
-            // Si usaras AWS, aquí harías un fetch('https://tu-api.com/reviews?prod=...')
-            let allReviews = JSON.parse(localStorage.getItem('reviews_db')) || [];
-            
-            // Filtramos solo las de este producto
-            const productReviews = allReviews.filter(r => r.id_producto === productName);
+            // Solicitamos a Python las reseñas de este producto
+            fetch(`/api/resenas?producto=${encodeURIComponent(productName)}`)
+                .then(response => response.json())
+                .then(reviews => {
+                    reviewsContainer.innerHTML = ""; // Limpiar mensaje de carga
 
-            if (productReviews.length === 0) {
-                reviewsContainer.innerHTML = "<p style='color:#888; text-align:center; font-style:italic;'>Aún no hay reseñas. ¡Sé el primero en opinar!</p>";
-                return;
-            }
+                    if (!reviews || reviews.length === 0) {
+                        reviewsContainer.innerHTML = "<p style='color:#888; text-align:center; font-style:italic;'>Aún no hay reseñas. ¡Sé el primero en opinar!</p>";
+                        return;
+                    }
 
-            // Renderizamos cada reseña
-            productReviews.forEach(r => {
-                let starsHTML = "";
-                for(let i=0; i<5; i++) {
-                    starsHTML += i < r.calificacion ? "★" : "☆";
-                }
+                    reviews.forEach(r => {
+                        // Estrellas
+                        let starsHTML = "";
+                        for(let i=0; i<5; i++) {
+                            starsHTML += i < r.calificacion ? "★" : "☆";
+                        }
 
-                // Definimos color o etiqueta según el rol
-                let etiquetaRol = "";
-                let bordeColor = "var(--color-primary)"; // Default clientes
+                        // Etiqueta de Rol
+                        let etiquetaRol = "";
+                        let bordeColor = "var(--color-primary)"; 
 
-                if (r.rol === 'Administrador') {
-                    etiquetaRol = " <span style='background:#4B3832; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px;'>ADMIN</span>";
-                    bordeColor = "#4B3832";
-                } else if (r.rol === 'Operador') {
-                    etiquetaRol = " <span style='background:#D2B48C; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px;'>STAFF</span>";
-                }
+                        if (r.rol === 'Administrador') {
+                            etiquetaRol = " <span style='background:#4B3832; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px;'>ADMIN</span>";
+                            bordeColor = "#4B3832";
+                        } else if (r.rol === 'Operador') {
+                            etiquetaRol = " <span style='background:#D2B48C; color:white; font-size:0.7em; padding:2px 6px; border-radius:4px;'>STAFF</span>";
+                        }
 
-                const card = document.createElement('div');
-                card.className = "review-card";
-                // Añadimos un borde dinámico según quién comentó
-                card.style.borderLeft = `4px solid ${bordeColor}`;
+                        // Formatear Fecha (MySQL suele devolver formato ISO o string)
+                        let fechaMostrar = r.fecha;
+                        try {
+                            if(r.fecha) {
+                                const fechaObj = new Date(r.fecha);
+                                fechaMostrar = fechaObj.toLocaleDateString();
+                            }
+                        } catch(e) { console.log(e); }
 
-                card.innerHTML = `
-                    <div class="review-header">
-                        <span>${r.autor} ${etiquetaRol}</span>
-                        <span class="review-stars">${starsHTML}</span>
-                    </div>
-                    <div class="review-date">${r.fecha}</div>
-                    <p>${r.comentario}</p>
-                `;
-                reviewsContainer.appendChild(card);
-            });
+                        const card = document.createElement('div');
+                        card.className = "review-card";
+                        card.style.borderLeft = `4px solid ${bordeColor}`;
+
+                        card.innerHTML = `
+                            <div class="review-header">
+                                <span>${r.autor} ${etiquetaRol}</span>
+                                <span class="review-stars">${starsHTML}</span>
+                            </div>
+                            <div class="review-date">${fechaMostrar}</div>
+                            <p>${r.comentario}</p>
+                        `;
+                        reviewsContainer.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error cargando reseñas:", error);
+                    reviewsContainer.innerHTML = "<p>Hubo un error al cargar los comentarios.</p>";
+                });
         }
     });
 </script>
