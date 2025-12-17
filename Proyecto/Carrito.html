@@ -181,6 +181,7 @@
         <p><span>Envío</span><span>$50</span></p>
         <hr>
         <p><span>Total</span><span id="total">$0</span></p>
+        
 <button class="checkout-btn">Proceder al pago</button>
     </div>
 </div>
@@ -209,15 +210,17 @@ function renderCart() {
         return;
     }
 
-    let html = `
-        <table>
-            <tr>
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
-            </tr>
-    `;
+let html = `
+    <table class="cart-table">
+        <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+            <th></th>
+        </tr>
+`;
+
 
     let subtotal = 0;
 
@@ -230,11 +233,15 @@ function renderCart() {
                 <td>${item.nombre}</td>
                 <td>$${item.precio}</td>
                 <td>
-                    <button onclick="changeQty(${index}, -1)">-</button>
-                    ${item.cantidad}
-                    <button onclick="changeQty(${index}, 1)">+</button>
+                    <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
+${item.cantidad}
+<button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
                 </td>
                 <td>$${itemTotal}</td>
+                <td>
+    <button class="delete-btn" onclick="removeItem(${index})">✕</button>
+</td>
+
             </tr>
         `;
     });
@@ -329,6 +336,8 @@ checkoutBtn.addEventListener('click', async () => {
     }
 });
  renderCart();
+ document.getElementById('summary').style.display = 'block';
+document.getElementById('summary').style.display = 'none';
 });
 </script>
 
