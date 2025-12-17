@@ -107,14 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
 
                             <div>
-                                <select onchange="cambiarEstado(${p.id_pedido}, this.value)">
-                                    <option disabled selected>Cambiar estado</option>
-                                    <option>Pendiente</option>
-                                    <option>Pagado</option>
-                                    <option>En preparación</option>
-                                    <option>Enviado</option>
-                                    <option>Entregado</option>
-                                </select>
+                               <select onchange="cambiarEstado(${p.id_pedido}, this.value)">
+    <option disabled selected>Cambiar estado</option>
+    <option>Pendiente</option>
+    <option>En proceso</option>
+    <option>Enviado</option>
+    <option>Entregado</option>
+    <option>Cancelado</option>
+</select>
+
 
                                 <button class="btn" onclick="verPedido(${p.id_pedido})">
                                     Ver detalle
