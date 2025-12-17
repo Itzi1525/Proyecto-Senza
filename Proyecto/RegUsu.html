@@ -43,11 +43,23 @@
         <div class="register-container">
             <h2>Crear Cuenta</h2>
             <form class="register-form" id="registerForm">
-                <div class="input-container"><input type="text" name="name" placeholder="Nombre completo" required></div>
-                <div class="input-container"><input type="email" name="email" placeholder="Correo electrónico" required></div>
-                <div class="input-container"><input type="password" name="password" placeholder="Contraseña" required></div>
-                <div class="input-container"><input type="password" name="confirm-password" placeholder="Confirmar contraseña" required></div>
-                <button type="submit" id="submitBtn">Registrarse</button>
+                <div class="input-container">
+                    <input type="text" id="nombre" name="name" placeholder="Nombre completo" required>
+                </div>
+                
+                <div class="input-container">
+                    <input type="email" id="email" name="email" placeholder="Correo electrónico" required>
+                </div>
+                
+                <div class="input-container">
+                    <input type="password" id="password" name="password" placeholder="Contraseña" required>
+                </div>
+                
+                <div class="input-container">
+                    <input type="password" id="confirmPassword" name="confirm-password" placeholder="Confirmar contraseña" required>
+                </div>
+                
+                <button type="submit" id="btnRegistrar">Registrarse</button>
             </form>
 
             <div class="separator"><span>O regístrate con</span></div>
@@ -61,48 +73,49 @@
 
 <script>
     document.getElementById('btnRegistrar').addEventListener('click', async (e) => {
-        e.preventDefault(); // Evita que se recargue la página
+        e.preventDefault(); 
 
-        // 1. Obtener los datos de los inputs
-        // Asegúrate de que tus inputs tengan estos IDs: nombre, email, password, telefono
+        // Ahora sí va a encontrar estos elementos porque les pusimos ID en el HTML
         const nombre = document.getElementById('nombre').value;
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        const telefono = document.getElementById('telefono') ? document.getElementById('telefono').value : '';
+        const confirmPassword = document.getElementById('confirmPassword').value;
 
-        // 2. Validaciones simples
+        // Validaciones básicas
         if (!nombre || !email || !password) {
-            alert("Por favor llena todos los campos obligatorios.");
+            alert("Llena los campos obligatorios");
             return;
         }
 
-        // 3. Enviar a Python (app2.py)
+        if (password !== confirmPassword) {
+            alert("Las contraseñas no coinciden");
+            return;
+        }
+
         try {
-            const response = await fetch('/register', {  // <-- Esta es la ruta que acabamos de crear
+            // Enviamos los datos a la ruta /register de Python
+            const response = await fetch('/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    nombre: nombre,
-                    email: email,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    nombre: nombre, 
+                    email: email, 
                     password: password,
-                    telefono: telefono
+                    telefono: "" // Enviamos vacío si no hay campo teléfono
                 })
             });
 
             const data = await response.json();
 
             if (data.success) {
-                alert("¡Registro exitoso! Ahora puedes iniciar sesión.");
-                window.location.href = "Login.html"; // Te manda al login
+                alert("¡Registro Exitoso! Bienvenido.");
+                window.location.href = "Login.html";
             } else {
                 alert("Error: " + data.message);
             }
-
         } catch (error) {
-            console.error("Error:", error);
-            alert("Hubo un error al intentar registrarse.");
+            console.error(error);
+            alert("No se pudo conectar con el servidor.");
         }
     });
 </script>

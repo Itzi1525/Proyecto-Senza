@@ -140,52 +140,52 @@ def login():
     }), 401
 
 # ===========================
-# REGISTRO NORMAL (API) 
+# REGISTRO DE USUARIO (PEGA ESTO EN APP2.PY)
 # ===========================
 @app.route('/register', methods=['POST'])
 def register():
+    # 1. Recibir datos
     data = request.get_json()
     nombre = data.get('nombre')
     email = data.get('email')
     password = data.get('password')
-    telefono = data.get('telefono', '') # Opcional
+    telefono = data.get('telefono', '') 
 
-    # Validar datos básicos
+    print(f"📩 Intento de registro: {email}") # Esto aparecerá en tu terminal
+
+    # 2. Validar
     if not nombre or not email or not password:
-        return jsonify({'success': False, 'message': 'Faltan datos obligatorios'}), 400
+        return jsonify({'success': False, 'message': 'Faltan datos'}), 400
 
     conn = get_db_connection()
     if not conn:
-        return jsonify({'success': False, 'message': 'Error de conexión BD'}), 500
+        return jsonify({'success': False, 'message': 'Sin conexión a BD'}), 500
 
     try:
         with conn.cursor() as cursor:
-            # 1. Verificar si el correo ya existe
+            # 3. Verificar si ya existe
             cursor.execute("SELECT id_usuario FROM Usuario WHERE correo = %s", (email,))
-            usuario_existente = cursor.fetchone()
+            if cursor.fetchone():
+                return jsonify({'success': False, 'message': 'El correo ya existe'}), 409
 
-            if usuario_existente:
-                return jsonify({'success': False, 'message': 'Este correo ya está registrado'}), 409
+            # 4. Insertar Usuario
+            # IMPORTANTE: Asegúrate de que tu tabla Usuario tenga la columna 'telefono'
+            # Si no la tiene, borra ", telefono" y ", %s" de la consulta abajo.
+            sql_user = "INSERT INTO Usuario (nombre, correo, contrasena, rol, telefono) VALUES (%s, %s, %s, 'Cliente', %s)"
+            cursor.execute(sql_user, (nombre, email, password, telefono))
+            id_nuevo = cursor.lastrowid
 
-            # 2. Insertar en la tabla Usuario
-            # Nota: Asignamos rol 'Cliente' por defecto
-            sql_usuario = "INSERT INTO Usuario (nombre, correo, contrasena, rol, telefono) VALUES (%s, %s, %s, 'Cliente', %s)"
-            cursor.execute(sql_usuario, (nombre, email, password, telefono))
-            
-            id_nuevo_usuario = cursor.lastrowid
-
-            # 3. Insertar en la tabla Cliente (IMPORTANTE para que funcionen direcciones y pedidos)
-            sql_cliente = "INSERT INTO Cliente (id_usuario) VALUES (%s)"
-            cursor.execute(sql_cliente, (id_nuevo_usuario,))
-
+            # 5. Insertar Cliente (Vinculación obligatoria)
+            cursor.execute("INSERT INTO Cliente (id_usuario) VALUES (%s)", (id_nuevo,))
             conn.commit()
-
-            return jsonify({'success': True, 'message': 'Usuario registrado correctamente'})
+            
+            print(f"✅ Usuario registrado con ID: {id_nuevo}")
+            return jsonify({'success': True, 'message': 'Creado con éxito'})
 
     except Exception as e:
         conn.rollback()
-        print("❌ Error Registro:", e)
-        return jsonify({'success': False, 'message': 'Error en el servidor: ' + str(e)}), 500
+        print("❌ Error en Registro:", e) # Mira esto en tu terminal si falla
+        return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         conn.close()
 
