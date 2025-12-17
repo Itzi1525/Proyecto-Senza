@@ -193,97 +193,69 @@
 /* =========================
    CARRITO DESDE LOCALSTORAGE
 ========================= */
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-const cartContainer = document.getElementById("cartContainer");
-const subtotalEl = document.getElementById("subtotal");
-const totalEl = document.getElementById("total");
-const summary = document.getElementById("summary");
 
 /* =========================
-   RENDERIZAR CARRITO
-========================= */
+   ELIMINAR PRODUCTO
+========================= */let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
 function renderCart() {
 
+    const cartContainer = document.getElementById('cartContainer');
+    const subtotalEl = document.getElementById('subtotal');
+    const totalEl = document.getElementById('total');
+
     if (cart.length === 0) {
-        cartContainer.innerHTML = "<p class='empty'>Tu carrito está vacío 🧁</p>";
-        summary.style.display = "none";
-        localStorage.setItem("cart", JSON.stringify(cart));
+        cartContainer.innerHTML = '<p>Carrito vacío</p>';
         return;
     }
 
     let html = `
-        <table class="cart-table">
+        <table>
             <tr>
                 <th>Producto</th>
                 <th>Precio</th>
                 <th>Cantidad</th>
-                <th>Total</th>
-                <th></th>
+                <th>Subtotal</th>
             </tr>
     `;
 
     let subtotal = 0;
-    cart.forEach((item, index) => {
-    const itemTotal = item.precio * item.cantidad;
-    subtotal += itemTotal;
 
-    html += `
-        <tr>
-            <td>${item.nombre}</td>
-            <td>$${item.precio}</td>
-            <td>
-                <button onclick="changeQty(${index}, -1)">-</button>
-                ${item.cantidad}
-                <button onclick="changeQty(${index}, 1)">+</button>
-            </td>
-            <td>$${itemTotal}</td>
-            <td>
-                <button onclick="removeItem(${index})">✕</button>
-            </td>
-        </tr>
-    `;
-});
-    html += "</table>";
+    cart.forEach((item, index) => {
+        const itemTotal = item.precio * item.cantidad;
+        subtotal += itemTotal;
+
+        html += `
+            <tr>
+                <td>${item.nombre}</td>
+                <td>$${item.precio}</td>
+                <td>
+                    <button onclick="changeQty(${index}, -1)">-</button>
+                    ${item.cantidad}
+                    <button onclick="changeQty(${index}, 1)">+</button>
+                </td>
+                <td>$${itemTotal}</td>
+            </tr>
+        `;
+    });
+
+    html += '</table>';
     cartContainer.innerHTML = html;
 
     subtotalEl.textContent = `$${subtotal}`;
     totalEl.textContent = `$${subtotal + 50}`;
-    localStorage.setItem('cartTotal', subtotal + 50);
-    summary.style.display = "block";
 
-    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem('cart', JSON.stringify(cart));
 }
+
 function changeQty(index, delta) {
     cart[index].cantidad += delta;
-
-    if (cart[index].cantidad <= 0) {
-        cart.splice(index, 1);
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
+    if (cart[index].cantidad <= 0) cart.splice(index, 1);
     renderCart();
 }
 
-function removeItem(index) {
-    cart.splice(index, 1);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    renderCart();
-}
+renderCart();
 
-
-/* =========================
-   MODIFICAR CANTIDAD
-========================= */
-function changeQty(index, delta) {
-    cart[index].qty += delta;
-    if (cart[index].qty <= 0) cart.splice(index, 1);
-    renderCart();
-}
-
-/* =========================
-   ELIMINAR PRODUCTO
-========================= */
 function removeItem(index) {
     cart.splice(index, 1);
     renderCart();

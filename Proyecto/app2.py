@@ -383,21 +383,33 @@ def eliminar_direccion(id_direccion):
 # ===========================
 # PRODUCTOS API
 # ===========================
-@app.route('/productos')
-def productos():
-    conn = get_db_connection()
-    if not conn:
-        return jsonify([])
 
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM Producto WHERE activo=1")
-            productos = cursor.fetchall()
-            for p in productos:
-                p['precio'] = float(p['precio'])
-            return jsonify(productos)
-    finally:
-        conn.close()
+@app.route('/api/productos')
+def obtener_productos():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id_producto, nombre, precio, imagen, categoria, descripcion
+        FROM Producto
+    """)
+
+    productos = cursor.fetchall()
+    conn.close()
+
+    resultado = []
+    for p in productos:
+        resultado.append({
+            'id_producto': p[0],
+            'nombre': p[1],
+            'precio': float(p[2]),
+            'imagen': p[3],
+            'categoria': p[4],
+            'descripcion': p[5]
+        })
+
+    return jsonify(resultado)
+
 
 # ===========================
 # METODO PAGO API
