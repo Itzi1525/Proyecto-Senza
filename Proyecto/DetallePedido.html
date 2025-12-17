@@ -196,7 +196,6 @@ fetch(`/api/pedido/${idPedido}`)
   .then(res => res.json())
   .then(pedido => {
     document.getElementById('infoPedido').innerHTML = `
-        <p><strong>Pedido #:</strong> ${pedido.id_pedido}</p>
         <p><strong>Fecha:</strong> ${pedido.fecha}</p>
         <p><strong>Estado:</strong> ${pedido.estado}</p>
         <p><strong>Método de pago:</strong> ${pedido.metodo}</p>

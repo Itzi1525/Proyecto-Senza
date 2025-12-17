@@ -598,12 +598,26 @@ def obtener_pedido(id_pedido):
     finally:
         conn.close()
 
+
 @app.route('/api/pedidos/usuario/<int:id_usuario>')
 def pedidos_por_usuario(id_usuario):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
 
+        # 1️⃣ Convertir id_usuario ➜ id_cliente
+        cursor.execute(
+            "SELECT id_cliente FROM Cliente WHERE id_usuario = %s",
+            (id_usuario,)
+        )
+        cliente = cursor.fetchone()
+
+        if not cliente:
+            return jsonify([])
+
+        id_cliente = cliente['id_cliente']
+
+        # 2️⃣ Ahora sí buscar los pedidos
         cursor.execute("""
             SELECT 
                 p.id_pedido,
@@ -613,11 +627,10 @@ def pedidos_por_usuario(id_usuario):
             FROM Pedido p
             WHERE p.id_cliente = %s
             ORDER BY p.fecha DESC
-        """, (id_usuario,))
+        """, (id_cliente,))
 
         pedidos = cursor.fetchall()
 
-        # Formatear fecha para JSON
         for p in pedidos:
             p['fecha'] = p['fecha'].strftime('%Y-%m-%d %H:%M')
             p['total'] = float(p['total'])
