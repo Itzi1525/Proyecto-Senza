@@ -140,7 +140,7 @@ def login():
     }), 401
 
 # ===========================
-# REGISTRO DE USUARIO (PEGA ESTO EN APP2.PY)
+# REGISTRO DE USUARIO
 # ===========================
 @app.route('/register', methods=['POST'])
 def register():
@@ -151,7 +151,7 @@ def register():
     password = data.get('password')
     telefono = data.get('telefono', '') 
 
-    print(f"📩 Intento de registro: {email}") # Esto aparecerá en tu terminal
+    print(f"📩 Intento de registro: {email}") 
 
     # 2. Validar
     if not nombre or not email or not password:
@@ -169,8 +169,6 @@ def register():
                 return jsonify({'success': False, 'message': 'El correo ya existe'}), 409
 
             # 4. Insertar Usuario
-            # IMPORTANTE: Asegúrate de que tu tabla Usuario tenga la columna 'telefono'
-            # Si no la tiene, borra ", telefono" y ", %s" de la consulta abajo.
             sql_user = "INSERT INTO Usuario (nombre, correo, contrasena, rol, telefono) VALUES (%s, %s, %s, 'Cliente', %s)"
             cursor.execute(sql_user, (nombre, email, password, telefono))
             id_nuevo = cursor.lastrowid
@@ -184,7 +182,7 @@ def register():
 
     except Exception as e:
         conn.rollback()
-        print("❌ Error en Registro:", e) # Mira esto en tu terminal si falla
+        print("❌ Error en Registro:", e)
         return jsonify({'success': False, 'message': str(e)}), 500
     finally:
         conn.close()
@@ -384,14 +382,14 @@ def eliminar_direccion(id_direccion):
 # PRODUCTOS API 
 # ===========================
 
-# 1. OBTENER (GET) - Corregido para incluir stock
+# 1. OBTENER (GET)
 @app.route('/api/productos', methods=['GET'])
 def obtener_productos():
     conn = get_db_connection()
     try:
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         
-        # AGREGUÉ 'stock' A LA LISTA DE CAMPOS
+        # CONSULTA CORREGIDA CON STOCK
         cursor.execute("""
             SELECT 
                 id_producto,
@@ -479,7 +477,6 @@ def eliminar_producto(id):
         conn.close()
 
 
-
 # ===========================
 # METODO PAGO API
 # ===========================
@@ -520,7 +517,7 @@ def registrar_pago():
         conn.close()
 
 # ===========================
-# CREAR PEDIDO
+# CREAR PEDIDO (CORREGIDO: STOCK)
 # ===========================
 @app.route('/api/pedido', methods=['POST'])
 def crear_pedido():
@@ -529,21 +526,20 @@ def crear_pedido():
     total = data.get('total')
     carrito = data.get('carrito', [])
 
-    # 1️⃣ Obtener id_usuario desde la sesión
+    # 1️⃣ Validar usuario
     id_usuario = session.get('user_id')
     if not id_usuario:
         return jsonify({'success': False, 'error': 'Usuario no autenticado'}), 401
 
     conn = get_db_connection()
+    if not conn:
+        return jsonify({'success': False, 'error': 'Error de conexión'}), 500
 
     try:
         cursor = conn.cursor()
 
-        # 2️⃣ Convertir id_usuario ➜ id_cliente  (ESTA ERA LA FALLA)
-        cursor.execute(
-            "SELECT id_cliente FROM Cliente WHERE id_usuario = %s",
-            (id_usuario,)
-        )
+        # 2️⃣ Obtener id_cliente
+        cursor.execute("SELECT id_cliente FROM Cliente WHERE id_usuario = %s", (id_usuario,))
         cliente = cursor.fetchone()
 
         if not cliente:
@@ -551,29 +547,51 @@ def crear_pedido():
 
         id_cliente = cliente['id_cliente']
 
-        # 3️⃣ Crear pedido (YA CON id_cliente CORRECTO)
-        cursor.execute("""
-            INSERT INTO Pedido (id_cliente, total)
-            VALUES (%s, %s)
-        """, (id_cliente, total))
+        # --- NUEVO: VALIDAR STOCK ANTES DE CREAR PEDIDO ---
+        for item in carrito:
+            id_prod = item['id_producto']
+            cantidad_pedida = int(item['cantidad'])
+            
+            # Consultamos stock actual
+            cursor.execute("SELECT nombre, stock FROM Producto WHERE id_producto = %s", (id_prod,))
+            producto_db = cursor.fetchone()
+            
+            if not producto_db:
+                return jsonify({'success': False, 'error': f'Producto ID {id_prod} no existe'}), 400
+            
+            stock_actual = producto_db['stock']
+            nombre_prod = producto_db['nombre']
 
+            if stock_actual < cantidad_pedida:
+                return jsonify({
+                    'success': False, 
+                    'error': f'Stock insuficiente para "{nombre_prod}". Disponibles: {stock_actual}'
+                }), 400
+
+        # 3️⃣ Crear el Pedido (Si pasó la validación)
+        cursor.execute("INSERT INTO Pedido (id_cliente, total) VALUES (%s, %s)", (id_cliente, total))
         id_pedido = cursor.lastrowid
 
-        # 4️⃣ Detalle del pedido
+        # 4️⃣ Insertar Detalle y RESTAR STOCK
         for item in carrito:
+            id_prod = item['id_producto']
+            cantidad = int(item['cantidad'])
+            subtotal = float(cantidad) * float(item['precio'])
+
+            # A) Guardar en Detalle_Pedido
             cursor.execute("""
-                INSERT INTO Detalle_Pedido
-                (id_pedido, id_producto, cantidad, subtotal)
+                INSERT INTO Detalle_Pedido (id_pedido, id_producto, cantidad, subtotal)
                 VALUES (%s, %s, %s, %s)
-            """, (
-                id_pedido,
-                item['id_producto'],
-                int(item['cantidad']),
-                float(item['cantidad']) * float(item['precio'])
-            ))
+            """, (id_pedido, id_prod, cantidad, subtotal))
+
+            # B) Restar Stock en Producto
+            cursor.execute("""
+                UPDATE Producto 
+                SET stock = stock - %s 
+                WHERE id_producto = %s
+            """, (cantidad, id_prod))
 
         conn.commit()
-
         return jsonify({'success': True, 'id_pedido': id_pedido})
 
     except Exception as e:
@@ -589,7 +607,7 @@ def crear_pedido():
 def productos_pedido(id_pedido):
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()  # DictCursor
+        cursor = conn.cursor()
 
         sql = """
             SELECT 
@@ -625,8 +643,6 @@ def productos_pedido(id_pedido):
 
     finally:
         conn.close()
-
-
 
 @app.route('/api/pedido/<int:id_pedido>')
 def obtener_pedido(id_pedido):
@@ -761,7 +777,6 @@ def reporte_ventas():
 
     try:
         with conn.cursor() as cursor:
-            # Esta consulta agrupa las ventas por Mes y Año
             query = """
                 SELECT 
                     DATE_FORMAT(pa.fecha_pago, '%Y-%m') as mes,
@@ -776,7 +791,6 @@ def reporte_ventas():
             cursor.execute(query)
             datos = cursor.fetchall()
             
-            # Convertimos decimales a float para que JSON no falle
             for d in datos:
                 d['total_ventas'] = float(d['total_ventas'])
                 
@@ -797,7 +811,6 @@ def reporte_productos_top():
 
     try:
         with conn.cursor() as cursor:
-            # Esta consulta suma cuántos se vendieron de cada pan usando Detalle_Pedido
             query = """
                 SELECT 
                     p.nombre,
@@ -840,13 +853,12 @@ def inicio():
     return send_from_directory('.', 'Inicio.html')
 
 # ===========================
-# RESEÑAS API (NUEVO)
+# RESEÑAS API
 # ===========================
 @app.route('/api/resenas', methods=['POST'])
 def guardar_resena():
     data = request.get_json()
     
-    # 1. Validar datos
     if not data or 'producto' not in data or 'comentario' not in data:
         return jsonify({'success': False, 'message': 'Faltan datos'}), 400
 
@@ -856,8 +868,6 @@ def guardar_resena():
 
     try:
         with conn.cursor() as cursor:
-            # 2. Insertar en la tabla Resenas
-            # Asegúrate de que tu tabla en la BD se llame 'Resenas' (o 'resenas')
             query = """
                 INSERT INTO Resenas (producto_nombre, autor, rol, calificacion, comentario)
                 VALUES (%s, %s, %s, %s, %s)
@@ -881,7 +891,6 @@ def guardar_resena():
 
 @app.route('/api/resenas', methods=['GET'])
 def obtener_resenas():
-    # Obtenemos el nombre del producto de la URL (?producto=Pastel...)
     producto_nombre = request.args.get('producto')
     
     conn = get_db_connection()
@@ -890,11 +899,9 @@ def obtener_resenas():
     try:
         with conn.cursor() as cursor:
             if producto_nombre:
-                # Traer reseñas solo de ese producto
                 query = "SELECT * FROM Resenas WHERE producto_nombre = %s ORDER BY fecha DESC"
                 cursor.execute(query, (producto_nombre,))
             else:
-                # Traer todas (por si acaso)
                 query = "SELECT * FROM Resenas ORDER BY fecha DESC"
                 cursor.execute(query)
             
