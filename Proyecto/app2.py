@@ -480,9 +480,9 @@ def crear_pedido():
                 VALUES (%s, %s, %s, %s)
             """, (
                 id_pedido,
-                id_prod,
-                cantidad,
-                subtotal
+        item['id_producto'],
+        item['cantidad'],
+        item['precio']
             ))
 
         conn.commit()
