@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mis Pedidos | Senza</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #F8F8F8;
+    color: #4B3832;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.estado {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    background: #D2B48C;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    background: #4B3832;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Mis Pedidos</h2>
+    <div id="listaPedidos"></div>
+</div>
+
+<script>
+const usuarioId = localStorage.getItem('usuarioId');
+
+if (!usuarioId) {
+    alert('Debes iniciar sesión');
+    window.location.href = 'Inicio.html';
+}
+
+fetch(`/api/pedidos/usuario/${usuarioId}`)
+    .then(res => res.json())
+    .then(pedidos => {
+
+        const contenedor = document.getElementById('listaPedidos');
+        contenedor.innerHTML = '';
+
+        if (pedidos.length === 0) {
+            contenedor.innerHTML = '<p>No tienes pedidos aún</p>';
+            return;
+        }
+
+        pedidos.forEach(p => {
+            contenedor.innerHTML += `
+                <div class="card">
+                    <div>
+                        <p><strong>Pedido #${p.id_pedido}</strong></p>
+                        <p>Fecha: ${p.fecha}</p>
+                        <p>Total: $${p.total}</p>
+                        <span class="estado">${p.estado}</span>
+                    </div>
+                    <button class="btn"
+                        onclick="window.location.href='DetallePedido.html?id=${p.id_pedido}'">
+                        Ver detalle
+                    </button>
+                </div>
+            `;
+        });
+    });
+</script>
+
+</body>
+</html>
