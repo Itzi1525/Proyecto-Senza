@@ -387,28 +387,31 @@ def eliminar_direccion(id_direccion):
 @app.route('/api/productos')
 def obtener_productos():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
 
-    cursor.execute("""
-        SELECT id_producto, nombre, precio, imagen, categoria, descripcion
-        FROM Producto
-    """)
+        cursor.execute("""
+            SELECT 
+                id_producto,
+                nombre,
+                precio,
+                imagen,
+                categoria,
+                descripcion
+            FROM Producto
+        """)
 
-    productos = cursor.fetchall()
-    conn.close()
+        productos = cursor.fetchall()
 
-    resultado = []
-    for p in productos:
-        resultado.append({
-            'id_producto': p[0],
-            'nombre': p[1],
-            'precio': float(p[2]),
-            'imagen': p[3],
-            'categoria': p[4],
-            'descripcion': p[5]
-        })
+        return jsonify(productos)
 
-    return jsonify(resultado)
+    except Exception as e:
+        print("❌ ERROR obtener_productos:", e)
+        return jsonify([]), 500
+
+    finally:
+        conn.close()
+
 
 
 # ===========================
