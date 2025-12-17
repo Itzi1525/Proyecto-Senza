@@ -7,13 +7,15 @@
 
     <link rel="icon" type="image/png" href="Imagenes/Senza.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
             --color-primary: #D2B48C;
             --color-secondary: #4B3832;
-            --color-bg: #F8F8F8;
+            --color-bg: #F4F6F8;
             --card-bg: #FFFFFF;
+            --border-color: #E0E0E0;
         }
 
         body {
@@ -23,118 +25,226 @@
             color: var(--color-secondary);
         }
 
+        /* --- Header --- */
         header {
             background: var(--card-bg);
-            padding: 20px 40px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.05);
+            padding: 15px 5%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        header a {
+        .logo h1 { margin: 0; color: var(--color-secondary); }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 20px;
+        }
+
+        .main-nav a {
             text-decoration: none;
+            color: #666;
             font-weight: 600;
-            color: var(--color-secondary);
+            font-size: 0.9em;
+            transition: color 0.3s;
         }
 
+        .main-nav a:hover { color: var(--color-primary); }
+
+        /* --- Layout Principal --- */
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 40px auto;
             padding: 0 20px;
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1.8fr 1fr;
             gap: 30px;
         }
 
         .card {
             background: var(--card-bg);
             padding: 30px;
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0,0,0,.08);
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
         }
 
-        h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
+        h2 { margin-top: 0; font-size: 1.5rem; border-bottom: 2px solid var(--color-bg); padding-bottom: 15px; margin-bottom: 25px; }
+
+        /* --- Estilo de Opciones de Pago --- */
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
         }
 
-        label {
+        /* Escondemos el radio button original */
+        .payment-methods input[type="radio"] {
+            display: none;
+        }
+
+        /* Estilo de la etiqueta contenedora (La tarjeta de opción) */
+        .payment-option {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-option:hover {
+            border-color: var(--color-primary);
+            background-color: #FAFAFA;
+        }
+
+        /* Estilo cuando está seleccionado */
+        .payment-methods input[type="radio"]:checked + .payment-option {
+            border-color: var(--color-secondary);
+            background-color: #FDF8F5;
+            box-shadow: 0 0 0 1px var(--color-secondary);
+        }
+
+        .payment-option i {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            color: var(--color-secondary);
+            width: 30px;
+            text-align: center;
+        }
+
+        .payment-option span {
             font-weight: 600;
-            margin-top: 15px;
+            font-size: 1rem;
+        }
+
+        .check-icon {
+            margin-left: auto;
+            color: var(--color-secondary);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .payment-methods input[type="radio"]:checked + .payment-option .check-icon {
+            opacity: 1;
+        }
+
+        /* --- Formularios --- */
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
             display: block;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            margin-top: 6px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
             border-radius: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             font-family: 'Poppins';
+            background: #FAFAFA;
+            box-sizing: border-box; /* Importante para que no se salga del contenedor */
+            transition: border 0.3s;
         }
 
-        .payment-methods label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            cursor: pointer;
+        input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: #fff;
         }
 
-        .btn-pagar {
-            margin-top: 25px;
-            width: 100%;
+        /* Grid para tarjeta de crédito (Fecha y CVV en una linea) */
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* --- Información extra (Transferencia/Efectivo) --- */
+        .info-box {
+            background-color: #F0F4F8;
             padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--color-secondary);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .info-box p { margin: 5px 0; }
+
+        /* --- Botón Pagar --- */
+        .btn-pagar {
+            width: 100%;
+            padding: 16px;
             background: var(--color-secondary);
             color: #fff;
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(75, 56, 50, 0.3);
         }
 
         .btn-pagar:hover {
             background: #382D26;
+            transform: translateY(-2px);
         }
 
-        .resumen p {
+        /* --- Resumen --- */
+        .resumen h2 { font-size: 1.2rem; }
+        
+        .resumen-row {
             display: flex;
             justify-content: space-between;
-            font-weight: 600;
-            margin: 10px 0;
+            margin-bottom: 12px;
+            color: #666;
         }
 
+        .resumen-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #ddd;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--color-secondary);
+        }
+
+        /* --- Footer --- */
         footer {
             text-align: center;
             padding: 30px;
-            margin-top: 40px;
             background: var(--color-secondary);
-            color: #fff;
+            color: #aaa;
+            font-size: 0.85rem;
+            margin-top: 50px;
         }
 
+        /* --- Responsive --- */
         @media(max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
+            .container { grid-template-columns: 1fr; }
+            header { flex-direction: column; text-align: center; }
         }
-        .product-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* La imagen se ajusta al tamaño sin deformarse */
-}
     </style>
 </head>
 
 <body>
+
 <header>
     <div class="logo">
         <h1>Senza</h1>
-    </div>
-    
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Buscar productos...">
     </div>
     
     <nav class="main-nav">
@@ -145,78 +255,108 @@
             <li><a href="Carrito.html">Carrito</a></li>
         </ul>
     </nav>
-    <h2>Senza</h2>
-    <a href="Carrito.html">← Volver al carrito</a>
 </header>
 
 <div class="container">
 
-    <!-- MÉTODO DE PAGO -->
     <div class="card">
-        <h2>Método de pago</h2>
+        <h2>Elige tu método de pago</h2>
 
-<div class="payment-methods">
-    <label>
-        <input type="radio" name="metodo" value="tarjeta" checked>
-        Tarjeta de crédito / débito
-    </label>
+        <div class="payment-methods">
+            
+            <label>
+                <input type="radio" name="metodo" value="tarjeta" checked>
+                <div class="payment-option">
+                    <i class="fas fa-credit-card"></i> <span>Tarjeta de Crédito / Débito</span>
+                    <i class="fas fa-check-circle check-icon"></i>
+                </div>
+            </label>
 
-    <label>
-        <input type="radio" name="metodo" value="transferencia">
-        Transferencia bancaria
-    </label>
+            <label>
+                <input type="radio" name="metodo" value="transferencia">
+                <div class="payment-option">
+                    <i class="fas fa-university"></i> <span>Transferencia Bancaria</span>
+                    <i class="fas fa-check-circle check-icon"></i>
+                </div>
+            </label>
 
-    <label>
-        <input type="radio" name="metodo" value="efectivo">
-        Pago en efectivo
-    </label>
-</div>
-<div id="transferenciaForm" style="display:none;">
-    <p><strong>Datos para transferencia:</strong></p>
-    <p>Banco: BBVA</p>
-    <p>Cuenta: 1234567890</p>
-    <p>CLABE: 012345678901234567</p>
-
-    <label>Referencia / Folio</label>
-    <input type="text" id="folioTransferencia" placeholder="Ej. TRANS-1234">
-</div>
-<div id="efectivoForm" style="display:none;">
-    <p>💵 Pagarás en efectivo al recibir tu pedido.</p>
-</div>
-        <div id="tarjetaForm">
-            <label>Nombre en la tarjeta</label>
-            <input type="text" id="nombreTarjeta">
-
-            <label>Número de tarjeta</label>
-            <input type="text" id="numeroTarjeta" maxlength="16">
-
-            <label>Fecha de expiración</label>
-            <input type="month" id="fecha">
-
-            <label>CVV</label>
-            <input type="password" id="cvv" maxlength="3">
+            <label>
+                <input type="radio" name="metodo" value="efectivo">
+                <div class="payment-option">
+                    <i class="fas fa-money-bill-wave"></i> <span>Pago en Efectivo</span>
+                    <i class="fas fa-check-circle check-icon"></i>
+                </div>
+            </label>
         </div>
-<button class="btn-pagar" id="btnPagar" type="button">
-    Confirmar pago
-</button>
 
+        <div id="tarjetaForm">
+            <label><i class="far fa-user"></i> Nombre en la tarjeta</label>
+            <input type="text" id="nombreTarjeta" placeholder="Como aparece en el plástico">
+
+            <label><i class="far fa-credit-card"></i> Número de tarjeta</label>
+            <input type="text" id="numeroTarjeta" maxlength="16" placeholder="0000 0000 0000 0000">
+
+            <div class="card-grid">
+                <div>
+                    <label>Expiración</label>
+                    <input type="month" id="fecha">
+                </div>
+                <div>
+                    <label>CVV <i class="fas fa-question-circle" style="color:#aaa; font-size:0.8em;" title="3 dígitos al reverso"></i></label>
+                    <input type="password" id="cvv" maxlength="3" placeholder="123">
+                </div>
+            </div>
+        </div>
+
+        <div id="transferenciaForm" style="display:none;">
+            <div class="info-box">
+                <p><strong>Datos para transferencia BBVA:</strong></p>
+                <p>Cuenta: 1234567890</p>
+                <p>CLABE: 012345678901234567</p>
+                <p>Beneficiario: Senza Repostería</p>
+            </div>
+            <label>Referencia / Folio de la operación</label>
+            <input type="text" id="folioTransferencia" placeholder="Ej. TRANS-1234">
+        </div>
+
+        <div id="efectivoForm" style="display:none;">
+            <div class="info-box">
+                <p><i class="fas fa-info-circle"></i> Pagarás en efectivo al momento de recibir tu pedido. Por favor ten el monto exacto si es posible.</p>
+            </div>
+        </div>
+
+        <button class="btn-pagar" id="btnPagar" type="button">
+            Confirmar y Pagar <i class="fas fa-arrow-right" style="margin-left:10px;"></i>
+        </button>
     </div>
 
-    <!-- RESUMEN -->
     <div class="card resumen">
-        <h2>Resumen</h2>
-        <p>Subtotal: <strong id="subtotalPago"></strong></p>
-<p>Envío: <strong>$50.00</strong></p>
-<p>Total a pagar: <strong id="totalPago"></strong></p>
-        <hr>
- <p>Total a pagar: <strong id="totalPago"></strong></p>
+        <h2>Resumen del Pedido</h2>
+        
+        <div class="resumen-row">
+            <span>Subtotal</span>
+            <strong id="subtotalPago">$0.00</strong>
+        </div>
+        
+        <div class="resumen-row">
+            <span>Costo de envío</span>
+            <strong>$50.00</strong>
+        </div>
 
+        <div class="resumen-total">
+            <span>Total a Pagar</span>
+            <span id="totalPago" style="color: var(--color-secondary);">$0.00</span>
+        </div>
+
+        <div style="margin-top: 20px; font-size: 0.8em; color: #888; text-align: center;">
+            <i class="fas fa-lock"></i> Tus datos están protegidos con encriptación SSL.
+        </div>
     </div>
 
 </div>
 
 <footer>
-    © 2025 Senza — Pago seguro
+    © 2025 Senza Repostería — <a href="#" style="color:#aaa;">Términos</a> | <a href="#" style="color:#aaa;">Privacidad</a>
 </footer>
 
 <script>
@@ -250,63 +390,49 @@ metodoRadios.forEach(radio => {
    CARGAR TOTAL DESDE CARRITO
 =============================== */
 document.addEventListener('DOMContentLoaded', () => {
-
     const params = new URLSearchParams(window.location.search);
-
     const subtotal = parseFloat(params.get('subtotal'));
     const total = parseFloat(params.get('total'));
 
     if (!subtotal || !total || isNaN(subtotal) || isNaN(total)) {
-        alert('No hay información válida de pago');
+        // Opcional: Manejar si no hay datos, por ahora solo muestra $0.00
         return;
     }
 
-    document.getElementById('subtotalPago').textContent =
-        `$${subtotal.toFixed(2)}`;
-
-    document.getElementById('totalPago').textContent =
-        `$${total.toFixed(2)}`;
+    document.getElementById('subtotalPago').textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById('totalPago').textContent = `$${total.toFixed(2)}`;
 });
+
 /* ===============================
    CONFIRMAR PAGO
 =============================== */
 document.addEventListener('DOMContentLoaded', () => {
-
     const btn = document.getElementById('btnPagar');
-    if (!btn) {
-        console.error('❌ Botón btnPagar no encontrado');
-        return;
-    }
+    if (!btn) return;
 
     btn.addEventListener('click', async () => {
-
         const params = new URLSearchParams(window.location.search);
         const idPedido = params.get('id');
 
         if (!idPedido) {
-            alert('No hay pedido activo');
+            alert('Error: No se encontró un pedido activo.');
             return;
         }
 
         const metodoInput = document.querySelector('input[name="metodo"]:checked');
-        if (!metodoInput) {
-            alert('Selecciona un método de pago');
-            return;
-        }
-
         const metodoSeleccionado = metodoInput.value;
 
         // VALIDACIONES
         if (metodoSeleccionado === 'tarjeta') {
             if (!nombreTarjeta.value || !numeroTarjeta.value || !cvv.value) {
-                alert('Completa los datos de la tarjeta');
+                alert('Por favor completa todos los datos de la tarjeta.');
                 return;
             }
         }
 
         if (metodoSeleccionado === 'transferencia') {
             if (!folioTransferencia.value) {
-                alert('Ingresa el folio de transferencia');
+                alert('Por favor ingresa el folio o referencia de la transferencia.');
                 return;
             }
         }
@@ -320,10 +446,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const monto = parseFloat(totalText?.replace('$',''));
 
         if (!monto || monto <= 0) {
-            alert('❌ No hay monto válido');
+            alert('Error con el monto a pagar.');
             return;
         }
 
+        // Simulación de envío de datos
         try {
             const res = await fetch('/api/pago', {
                 method: 'POST',
@@ -336,24 +463,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await res.json();
-            console.log('Pago:', data);
-
+            
             if (data.success) {
-                alert('✅ Compra exitosa');
-                localStorage.removeItem('carrito'); // 🔑 clave correcta
+                alert('✅ ¡Pago confirmado con éxito!');
+                localStorage.removeItem('carrito');
                 window.location.href = `DetallePedido.html?id=${idPedido}`;
             } else {
-                alert(data.error || '❌ Error al registrar el pago');
+                alert(data.error || '❌ Error al registrar el pago. Intenta nuevamente.');
             }
 
         } catch (err) {
             console.error(err);
-            alert('❌ Error de conexión');
+            alert('❌ Error de conexión con el servidor.');
         }
     });
 });
-
 </script>
 
-</body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+</body>
 </html>

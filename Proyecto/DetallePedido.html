@@ -1,141 +1,258 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Detalle del Pedido | Senza</title>
+    <meta charset="UTF-8">
+    <title>Detalle del Pedido | Senza</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    <style>
+        :root {
+            --color-primary: #D2B48C;
+            --color-secondary: #4B3832;
+            --color-bg: #F4F6F8;
+            --card-bg: #FFFFFF;
+        }
 
-:root {
-    --color-primary: #D2B48C;
-    --color-secondary: #4B3832;
-    --color-bg: #F8F8F8;
-    --card-bg: #FFFFFF;
-}
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--color-bg);
+            color: var(--color-secondary);
+        }
 
-body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    background: var(--color-bg);
-    color: var(--color-secondary);
-}
+        /* --- HEADER --- */
+        header {
+            background: var(--card-bg);
+            padding: 15px 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-/* HEADER */
-header {
-    background: var(--card-bg);
-    padding: 20px 40px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+        .logo h1 { margin: 0; color: var(--color-secondary); }
 
-header a {
-    text-decoration: none;
-    font-weight: 600;
-    color: var(--color-secondary);
-}
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 20px;
+        }
 
-/* CONTENEDOR */
-.container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 0 20px;
-}
+        .main-nav a {
+            text-decoration: none;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: color 0.3s;
+        }
 
-/* TARJETA */
-.card {
-    background: var(--card-bg);
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    margin-bottom: 30px;
-}
+        .main-nav a:hover { color: var(--color-primary); }
 
-.card h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-align: center;
-}
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
 
-/* INFO PEDIDO */
-#infoPedido p {
-    margin: 8px 0;
-    font-weight: 600;
-}
+        /* --- TARJETA DE RECIBO --- */
+        .receipt-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
 
-/* TABLA */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
+        /* Decoración superior tipo ticket */
+        .receipt-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: repeating-linear-gradient(45deg, var(--color-primary), var(--color-primary) 10px, white 10px, white 20px);
+        }
 
-thead {
-    background: var(--color-primary);
-}
+        .header-receipt {
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-th, td {
-    padding: 14px;
-    text-align: center;
-}
+        .header-receipt i {
+            font-size: 3rem;
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
 
-th {
-    color: var(--color-secondary);
-    font-weight: 700;
-}
+        .header-receipt h2 {
+            margin: 10px 0 5px;
+            font-size: 1.8rem;
+        }
 
-tbody tr {
-    border-bottom: 1px solid #eee;
-}
+        .header-receipt p {
+            color: #777;
+            margin: 0;
+        }
 
-tbody tr:last-child {
-    border-bottom: none;
-}
+        /* --- INFO GRID --- */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: #FAFAFA;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+        }
 
-/* TOTAL */
-.total {
-    text-align: right;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-top: 20px;
-}
+        .info-item h4 {
+            margin: 0 0 5px;
+            color: #888;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
 
-/* ESTADO */
-.estado {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: var(--color-primary);
-    font-weight: 600;
-}
+        .info-item p {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1rem;
+        }
 
-/* FOOTER */
-footer {
-    text-align: center;
-    padding: 30px;
-    background: var(--color-secondary);
-    color: white;
-    margin-top: 60px;
-}
+        /* --- TABLA DE PRODUCTOS --- */
+        .table-container {
+            overflow-x: auto;
+        }
 
-/* RESPONSIVE */
-@media(max-width: 600px) {
-    th, td {
-        font-size: 0.9rem;
-        padding: 10px;
-    }
-}
-.product-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* La imagen se ajusta al tamaño sin deformarse */
-}
-</style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
 
+        th {
+            text-align: left;
+            padding: 12px;
+            color: #888;
+            font-size: 0.9rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .col-right { text-align: right; }
+
+        /* --- TOTALES --- */
+        .totals-section {
+            margin-top: 30px;
+            border-top: 2px dashed #ddd;
+            padding-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .totals-box {
+            width: 300px;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .totals-row.final {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--color-secondary);
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        /* --- BOTONES DE ACCIÓN --- */
+        .actions {
+            margin-top: 40px;
+            text-align: center;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--color-secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #382D26;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--color-secondary);
+            color: var(--color-secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--color-secondary);
+            color: white;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #aaa;
+            font-size: 0.85rem;
+            margin-top: 30px;
+        }
+
+        /* Etiqueta de Estado Dinámica */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-pagado { background: #e8f5e9; color: #27ae60; }
+        .status-pendiente { background: #fff3e0; color: #f39c12; }
+
+    </style>
 </head>
 
 <body>
@@ -144,6 +261,7 @@ footer {
     <div class="logo">
         <h1>Senza</h1>
     </div>
+    
     <nav class="main-nav">
         <ul>
             <li><a href="Inicio.html">Inicio</a></li>
@@ -151,76 +269,152 @@ footer {
             <li><a href="Perfil.html">Perfil</a></li>
         </ul>
     </nav>
-    <h2>Senza</h2>
-    <a href="Carrito.html">← Volver al carrito</a>
-
-    <h2>Senza</h2>
-    <a href="Inicio.html">← Volver al inicio</a>
 </header>
 
 <div class="container">
 
-    <div class="card">
-        <h2>Detalle del Pedido</h2>
-        <div id="infoPedido"></div>
-    </div>
-
-    <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-            <tbody id="tablaProductos"></tbody>
-        </table>
-
-        <div class="total">
-            Total: <span id="totalPedido">$0</span>
+    <div class="receipt-card">
+        
+        <div class="header-receipt">
+            <i class="fas fa-check-circle"></i>
+            <h2>¡Gracias por tu compra!</h2>
+            <p>Hemos recibido tu pedido correctamente.</p>
         </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <h4>N° de Pedido</h4>
+                <p>#<span id="pedidoId">...</span></p>
+            </div>
+            <div class="info-item">
+                <h4>Fecha</h4>
+                <p id="pedidoFecha">...</p>
+            </div>
+            <div class="info-item">
+                <h4>Método de Pago</h4>
+                <p id="pedidoMetodo">...</p>
+            </div>
+            <div class="info-item">
+                <h4>Estado</h4>
+                <span id="pedidoEstado" class="status-badge">...</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h3>Detalle de productos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th class="col-right">Precio Unit.</th>
+                        <th class="col-right">Cant.</th>
+                        <th class="col-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProductos">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="totals-section">
+            <div class="totals-box">
+                <div class="totals-row">
+                    <span>Subtotal</span>
+                    <span id="resumenSubtotal">$0.00</span>
+                </div>
+                <div class="totals-row">
+                    <span>Envío</span>
+                    <span>$50.00</span>
+                </div>
+                <div class="totals-row final">
+                    <span>Total Pagado</span>
+                    <span id="totalPedido">$0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button onclick="window.print()" class="btn btn-outline">
+                <i class="fas fa-print"></i> Imprimir Recibo
+            </button>
+            <a href="Inicio.html" class="btn btn-primary">
+                Volver al Inicio
+            </a>
+        </div>
+
     </div>
 
 </div>
 
 <footer>
-    © 2025 Senza — Gracias por tu compra 💚
+    © 2025 Senza Repostería — <a href="#" style="color:#aaa;">Soporte</a> | <a href="#" style="color:#aaa;">Términos</a>
 </footer>
-    <script>
-const idPedido = new URLSearchParams(window.location.search).get('id');
 
-/* INFO DEL PEDIDO */
-fetch(`/api/pedido/${idPedido}`)
-  .then(res => res.json())
-  .then(pedido => {
-    document.getElementById('infoPedido').innerHTML = `
-        <p><strong>Fecha:</strong> ${pedido.fecha}</p>
-        <p><strong>Estado:</strong> ${pedido.estado}</p>
-        <p><strong>Método de pago:</strong> ${pedido.metodo}</p>
-    `;
-    document.getElementById('totalPedido').textContent = `$${pedido.total}`;
-  });
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const idPedido = new URLSearchParams(window.location.search).get('id');
 
-/* PRODUCTOS */
-fetch(`/api/pedido/${idPedido}/productos`)
-  .then(res => res.json())
-  .then(productos => {
-    const tbody = document.getElementById('tablaProductos');
-    tbody.innerHTML = '';
+        if(!idPedido) {
+            alert("No se encontró el ID del pedido.");
+            window.location.href = "Inicio.html";
+            return;
+        }
 
-    productos.forEach(p => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${p.nombre_producto}</td>
-                <td>$${p.precio}</td>
-                <td>${p.cantidad}</td>
-                <td>$${p.subtotal}</td>
-            </tr>
-        `;
+        document.getElementById('pedidoId').textContent = idPedido;
+
+        /* 1. CARGAR INFO DEL PEDIDO */
+        fetch(`/api/pedido/${idPedido}`)
+            .then(res => res.json())
+            .then(pedido => {
+                if(!pedido || !pedido.id_pedido) {
+                    alert("Pedido no encontrado.");
+                    return;
+                }
+
+                document.getElementById('pedidoFecha').textContent = pedido.fecha;
+                document.getElementById('pedidoMetodo').textContent = pedido.metodo;
+                document.getElementById('totalPedido').textContent = `$${pedido.total.toFixed(2)}`;
+                
+                // Calcular subtotal aproximado (Total - Envío)
+                const subtotal = pedido.total - 50;
+                document.getElementById('resumenSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+
+                // Estilizar estado
+                const estadoEl = document.getElementById('pedidoEstado');
+                estadoEl.textContent = pedido.estado;
+                if (pedido.estado === 'Pagado' || pedido.estado === 'Entregado') {
+                    estadoEl.className = 'status-badge status-pagado';
+                } else {
+                    estadoEl.className = 'status-badge status-pendiente';
+                }
+            })
+            .catch(err => console.error("Error cargando pedido:", err));
+
+        /* 2. CARGAR PRODUCTOS */
+        fetch(`/api/pedido/${idPedido}/productos`)
+            .then(res => res.json())
+            .then(productos => {
+                const tbody = document.getElementById('tablaProductos');
+                tbody.innerHTML = '';
+
+                if(productos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay productos en este pedido.</td></tr>';
+                    return;
+                }
+
+                productos.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${p.nombre_producto}</strong></td>
+                            <td class="col-right">$${p.precio.toFixed(2)}</td>
+                            <td class="col-right">${p.cantidad}</td>
+                            <td class="col-right"><strong>$${p.subtotal.toFixed(2)}</strong></td>
+                        </tr>
+                    `;
+                });
+            })
+            .catch(err => console.error("Error cargando productos:", err));
     });
-  });
 </script>
 
 </body>
