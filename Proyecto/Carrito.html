@@ -252,8 +252,6 @@ ${item.cantidad}
     subtotalEl.textContent = `$${subtotal}`;
     totalEl.textContent = `$${subtotal + 50}`;
     document.getElementById('summary').style.display = 'block';
-    document.getElementById('summary').style.display = 'none';
-
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
