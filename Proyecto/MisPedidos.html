@@ -67,43 +67,89 @@ h2 {
 </div>
 
 <script>
-const usuarioId = localStorage.getItem('usuarioId');
+document.addEventListener('DOMContentLoaded', () => {
 
-if (!usuarioId) {
-    alert('Debes iniciar sesión');
+const rol = localStorage.getItem('usuarioRol');
+if (rol !== 'Administrador' && rol !== 'Operador') {
+    alert('Acceso denegado');
     window.location.href = 'Inicio.html';
 }
 
-fetch(`/api/pedidos/usuario/${usuarioId}`)
-    .then(res => res.json())
-    .then(pedidos => {
+function cargarPedidosAdmin() {
+    fetch('/api/pedidos')
+        .then(res => res.json())
+        .then(pedidos => {
+            const cont = document.getElementById('listaPedidosAdmin');
+            cont.innerHTML = '';
 
-        const contenedor = document.getElementById('listaPedidos');
-        contenedor.innerHTML = '';
+            pedidos.forEach(p => {
+                cont.innerHTML += `
+                    <div style="
+                        border:1px solid #ddd;
+                        padding:15px;
+                        border-radius:8px;
+                        margin-bottom:15px;
+                        background:#fff;
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        flex-wrap:wrap;
+                        gap:10px;
+                    ">
+                        <div>
+                            <strong>Pedido #${p.id_pedido}</strong><br>
+                            Cliente: ${p.cliente}<br>
+                            Fecha: ${p.fecha}<br>
+                            Total: $${p.total}<br>
+                            <strong>Estado:</strong> ${p.estado}
+                        </div>
 
-        if (pedidos.length === 0) {
-            contenedor.innerHTML = '<p>No tienes pedidos aún</p>';
-            return;
-        }
+                        <div>
+                            <select onchange="cambiarEstado(${p.id_pedido}, this.value)"
+                                style="padding:8px;border-radius:8px;">
+                                <option disabled selected>Cambiar estado</option>
+                                <option>Pendiente</option>
+                                <option>Pagado</option>
+                                <option>En preparación</option>
+                                <option>Enviado</option>
+                                <option>Entregado</option>
+                            </select>
 
-        pedidos.forEach(p => {
-            contenedor.innerHTML += `
-                <div class="card">
-                    <div>
-                        <p><strong>Pedido #${p.id_pedido}</strong></p>
-                        <p>Fecha: ${p.fecha}</p>
-                        <p>Total: $${p.total}</p>
-                        <span class="estado">${p.estado}</span>
+                            <button onclick="verPedido(${p.id_pedido})"
+                                style="margin-left:10px;padding:8px 14px;border:none;border-radius:8px;background:#4B3832;color:white;">
+                                Ver detalle
+                            </button>
+                        </div>
                     </div>
-                    <button class="btn"
-                        onclick="window.location.href='DetallePedido.html?id=${p.id_pedido}'">
-                        Ver detalle
-                    </button>
-                </div>
-            `;
+                `;
+            });
         });
+}
+
+window.cambiarEstado = async (id_pedido, estado) => {
+    const res = await fetch('/api/pedido/estado', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_pedido, estado })
     });
+
+    const data = await res.json();
+    if (data.success) {
+        alert('Estado actualizado');
+        cargarPedidosAdmin();
+    } else {
+        alert('Error al cambiar estado');
+    }
+};
+
+window.verPedido = (id) => {
+    window.location.href = `DetallePedido.html?id=${id}`;
+};
+
+cargarPedidosAdmin();
+});
 </script>
+
 
 </body>
 </html>
