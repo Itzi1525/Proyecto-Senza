@@ -957,6 +957,45 @@ def obtener_resenas():
         conn.close()
 
 # ===========================
+# RECUPERAR CONTRASEÑA (Olvidé mi contraseña)
+# ===========================
+@app.route('/api/recuperar-password', methods=['POST'])
+def recuperar_password():
+    data = request.get_json()
+    email = data.get('email')
+    telefono = data.get('telefono')
+    nueva_pass = data.get('nueva_pass')
+
+    if not email or not telefono or not nueva_pass:
+        return jsonify({'success': False, 'message': 'Faltan datos'}), 400
+
+    conn = get_db_connection()
+    if not conn: return jsonify({'success': False, 'message': 'Error BD'}), 500
+
+    try:
+        with conn.cursor() as cursor:
+            # 1. Verificar si existe ese usuario con ESE teléfono
+            # Esto actúa como pregunta de seguridad
+            cursor.execute("SELECT id_usuario FROM Usuario WHERE correo = %s AND telefono = %s", (email, telefono))
+            user = cursor.fetchone()
+
+            if not user:
+                return jsonify({'success': False, 'message': 'El correo o el teléfono no coinciden con nuestros registros.'}), 404
+
+            # 2. Si coinciden, actualizamos la contraseña
+            cursor.execute("UPDATE Usuario SET contrasena = %s WHERE id_usuario = %s", (nueva_pass, user['id_usuario']))
+            conn.commit()
+
+        return jsonify({'success': True, 'message': 'Contraseña restablecida correctamente'})
+
+    except Exception as e:
+        conn.rollback()
+        print("❌ Error recuperación:", e)
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+# ===========================
 # RUN
 # ===========================
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-<!<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -10,87 +10,52 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-        :root {
-            --color-primary: #D2B48C;
-            --color-secondary: #4B3832;
-            --color-background: #F8F8F8;
-            --color-light-bg: #FFF7EB;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--color-background);
-            color: var(--color-secondary);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 40px;
-            background-color: #FFFFFF;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .logo { display: flex; align-items: center; gap: 10px; }
+        :root { --color-primary: #D2B48C; --color-secondary: #4B3832; --color-bg: #F8F8F8; --card-bg: #FFFFFF; }
+        
+        body { font-family: 'Poppins', sans-serif; background-color: var(--color-bg); color: var(--color-secondary); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* HEADER */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background-color: #FFFFFF; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .logo h1 { font-size: 1.5em; margin: 0; }
+        .nav-menu ul { display: flex; list-style: none; gap: 20px; padding: 0; }
+        .nav-menu a { text-decoration: none; color: var(--color-secondary); font-weight: 600; }
+
+        /* MAIN */
+        .main-content { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .login-container { background-color: #FFF7EB; padding: 40px; border-radius: 10px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        .nav-menu ul { display: flex; list-style: none; gap: 20px; padding: 0; margin: 0; }
-        .nav-menu a { text-decoration: none; color: var(--color-secondary); font-weight: 600; transition: color 0.3s ease; }
-        .nav-menu a:hover { color: #3B2B24; }
-
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-        }
-
-        .login-container {
-            background-color: var(--color-light-bg);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
+        .input-container { margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; margin-top: 5px; font-family: 'Poppins'; }
         
-        .login-container h2 { font-size: 2em; margin-bottom: 20px; color: var(--color-secondary); }
+        button { width: 100%; padding: 12px; background-color: var(--color-secondary); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em; font-weight: 600; transition: 0.3s; }
+        button:hover { background-color: #382D26; }
 
-        .login-form input {
-            width: 100%; padding: 12px; margin-bottom: 15px;
-            border: 1px solid var(--color-secondary); border-radius: 5px;
-            box-sizing: border-box; background-color: white; font-family: 'Poppins', sans-serif;
+        .forgot-pass { 
+            display: block; 
+            margin-top: 10px; 
+            font-size: 0.9em; 
+            color: #666; 
+            text-decoration: underline; 
+            cursor: pointer; 
         }
+        .forgot-pass:hover { color: var(--color-secondary); }
 
-        .login-form button {
-            width: 100%; padding: 12px; border: none;
-            background-color: var(--color-secondary); color: white;
-            border-radius: 5px; font-size: 1.1em; cursor: pointer;
-            transition: background-color 0.3s ease; font-weight: 600;
-        }
-
-        .login-form button:hover { background-color: #382D26; }
-        
-        .link-text { margin-top: 20px; font-size: 0.9em; }
-        .link-text a { color: var(--color-secondary); text-decoration: underline; font-weight: 600; }
-
-        .separator {
-            display: flex; align-items: center; margin: 20px 0; color: #666; font-size: 0.9em;
-        }
+        .separator { display: flex; align-items: center; margin: 20px 0; color: #666; font-size: 0.9em; }
         .separator::before, .separator::after { content: ""; flex: 1; border-top: 1px solid #ccc; }
         .separator span { padding: 0 10px; }
+        
+        .link-text { margin-top: 20px; font-size: 0.9em; }
+
+        /* --- MODAL DE RECUPERACIÓN --- */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background-color: #fff; padding: 30px; border-radius: 10px; width: 90%; max-width: 350px; position: relative; text-align: left; }
+        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 1.5em; cursor: pointer; color: #aaa; }
+        .modal h3 { margin-top: 0; color: var(--color-secondary); text-align: center; }
+        .modal p { font-size: 0.85em; color: #666; text-align: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
+
     <header>
         <div class="logo"><h1>Senza</h1></div>
         <nav class="nav-menu">
@@ -104,88 +69,166 @@
 
     <div class="main-content">
         <div class="login-container">
-            <h2>Iniciar Sesión</h2>
-            <form class="login-form" id="loginForm">
-                <input type="email" name="email" placeholder="Correo electrónico" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                <button type="submit">Ingresar</button>
+            <h2>Bienvenido</h2>
+            
+            <form id="loginForm">
+                <div class="input-container">
+                    <input type="email" id="email" placeholder="Correo electrónico" required>
+                </div>
+                <div class="input-container">
+                    <input type="password" id="password" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" id="btnLogin">Iniciar Sesión</button>
             </form>
 
-            <div class="separator"><span>O continúa con</span></div>
+            <a class="forgot-pass" id="btnForgot">¿Olvidaste tu contraseña?</a>
 
+            <div class="separator"><span>O inicia con</span></div>
+            
             <div style="display: flex; justify-content: center;">
-                <div id="g_id_onload"
-                     data-client_id="87366328254-63lo1bk93htqig3shql9ljsj0kbsm22q.apps.googleusercontent.com"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
-                </div>
+                <div id="g_id_onload" data-client_id="87366328254-63lo1bk93htqig3shql9ljsj0kbsm22q.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
                 <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left" data-width="320"></div>
             </div>
-            <p class="link-text">¿No tienes una cuenta? <a href="RegUsu.html">Regístrate aquí</a></p>
+
+            <p class="link-text">¿No tienes cuenta? <a href="RegUsu.html">Regístrate aquí</a></p>
         </div>
     </div>
 
-    <script>
-        const BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-            ? 'http://127.0.0.1:5000' : '';
+    <div id="modalRecuperar" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h3>Recuperar Contraseña</h3>
+            <p>Por seguridad, ingresa tu correo y el teléfono registrado en tu cuenta.</p>
+            
+            <label>Correo</label>
+            <input type="email" id="recEmail" placeholder="ejemplo@correo.com">
+            
+            <label>Teléfono (Seguridad)</label>
+            <input type="text" id="recTel" placeholder="Tu número registrado">
+            
+            <label>Nueva Contraseña</label>
+            <input type="password" id="recPass" placeholder="Mínimo 6 caracteres">
+            
+            <button id="btnRecuperarAccion" style="margin-top: 20px;">Restablecer</button>
+        </div>
+    </div>
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('loginForm');
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    const email = form.querySelector('input[name="email"]').value;
-                    const password = form.querySelector('input[name="password"]').value;
+<script>
+    // --- LÓGICA DE LOGIN ---
+    document.getElementById('btnLogin').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-                    try {
-                        const response = await fetch(`${BASE_URL}/login`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email, password })
-                        });
-                        const data = await response.json();
-                        procesarLogin(data);
-                    } catch (error) {
-                        console.error(error);
-                        alert("Error de conexión. Asegúrate de que app.py esté corriendo.");
-                    }
-                });
-            }
-        });
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
 
-        async function handleCredentialResponse(response) {
-            try {
-                const res = await fetch(`/google-login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: response.credential })
-                });
-                const data = await res.json();
-                procesarLogin(data);
-            } catch (error) {
-                console.error(error);
-                alert("Error al conectar con Google.");
-            }
-        }
-
-        function procesarLogin(data) {
             if (data.success) {
-                // --- ¡ESTO ES LO IMPORTANTE! GUARDAR EL ID ---
-                localStorage.setItem('usuarioId', data.user.id);
+                // Guardar datos en sesión local
                 localStorage.setItem('usuarioNombre', data.user.nombre);
                 localStorage.setItem('usuarioRol', data.user.rol);
+                localStorage.setItem('usuarioId', data.user.id);
                 
-                alert("¡Bienvenido " + data.user.nombre + "!");
-
+                // Redirigir según rol
                 if (data.user.rol === 'Administrador' || data.user.rol === 'Operador') {
-                    window.location.href = 'AdminOpera.html';
+                    window.location.href = "AdminOpera.html";
                 } else {
-                    window.location.href = 'Inicio.html';
+                    window.location.href = "03-productos.html";
                 }
             } else {
                 alert("Error: " + data.message);
             }
+        } catch (error) {
+            console.error(error);
+            alert("Error de conexión");
         }
-    </script>
+    });
+
+    // --- LÓGICA GOOGLE ---
+    function handleCredentialResponse(response) {
+        fetch('/google-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: response.credential })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.setItem('usuarioNombre', data.user.nombre);
+                localStorage.setItem('usuarioRol', data.user.rol);
+                localStorage.setItem('usuarioId', data.user.id);
+                window.location.href = "03-productos.html";
+            } else {
+                alert("Error Google: " + data.message);
+            }
+        });
+    }
+
+    // --- LÓGICA RECUPERAR CONTRASEÑA (MODAL) ---
+    const modal = document.getElementById('modalRecuperar');
+    const btnForgot = document.getElementById('btnForgot');
+    const closeModal = document.getElementById('closeModal');
+    const btnRecuperarAccion = document.getElementById('btnRecuperarAccion');
+
+    // Abrir modal
+    btnForgot.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    // Cerrar modal
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+    
+    // Cerrar si clic fuera
+    window.addEventListener('click', (e) => {
+        if (e.target == modal) modal.style.display = 'none';
+    });
+
+    // Enviar petición de recuperación
+    btnRecuperarAccion.addEventListener('click', async () => {
+        const email = document.getElementById('recEmail').value;
+        const telefono = document.getElementById('recTel').value;
+        const nuevaPass = document.getElementById('recPass').value;
+
+        if(!email || !telefono || !nuevaPass) {
+            alert("Por favor llena todos los campos.");
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/recuperar-password', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    email: email,
+                    telefono: telefono,
+                    nueva_pass: nuevaPass
+                })
+            });
+            const data = await res.json();
+            
+            if(data.success) {
+                alert("✅ Contraseña restablecida. Ahora puedes iniciar sesión.");
+                modal.style.display = 'none';
+                // Limpiar campos
+                document.getElementById('recEmail').value = "";
+                document.getElementById('recTel').value = "";
+                document.getElementById('recPass').value = "";
+            } else {
+                alert("❌ Error: " + data.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error de conexión.");
+        }
+    });
+</script>
+
 </body>
 </html>
