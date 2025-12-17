@@ -333,38 +333,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ===== AGREGAR AL CARRITO (UNA SOLA VEZ) ===== */
-document.addEventListener('click', function (e) {
+ document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('searchInput');
+    if (!input) return;
 
-    if (!e.target.classList.contains('btn-add-to-cart')) return;
-
-    const card = e.target.closest('.product-card');
-
-    const id_producto = card.dataset.id;
-    const nombre = card.dataset.nombre;
-    const precio = parseFloat(card.dataset.precio);
-
-    if (!id_producto || !nombre || isNaN(precio)) {
-        alert('Producto inválido');
-        return;
-    }
-
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-    let producto = cart.find(p => p.id_producto == id_producto);
-
-    if (producto) {
-        producto.cantidad += 1;
-    } else {
-        cart.push({
-            id_producto,
-            nombre,
-            precio,
-            cantidad: 1
+    input.addEventListener('input', () => {
+        const filtro = input.value.toLowerCase();
+        document.querySelectorAll('.product-card').forEach(card => {
+            const nombre = card.dataset.nombre.toLowerCase();
+            card.style.display = nombre.includes(filtro) ? 'block' : 'none';
         });
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    alert('🛒 Producto agregado al carrito');
+    });
 });
 </script>
 
