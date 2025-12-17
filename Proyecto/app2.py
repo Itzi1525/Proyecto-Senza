@@ -515,16 +515,16 @@ def crear_pedido():
 def productos_pedido(id_pedido):
     conn = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor()  # DictCursor
 
         sql = """
             SELECT 
-                p.nombre,
+                p.nombre AS nombre_producto,
                 d.cantidad,
                 d.subtotal
             FROM Detalle_Pedido d
             INNER JOIN Producto p ON d.id_producto = p.id_producto
-            WHERE d.id_pedido = ?
+            WHERE d.id_pedido = %s
         """
 
         cursor.execute(sql, (id_pedido,))
@@ -532,13 +532,12 @@ def productos_pedido(id_pedido):
 
         productos = []
         for r in rows:
-            nombre = r[0]
-            cantidad = int(r[1])
-            subtotal = float(r[2])
+            cantidad = int(r['cantidad'])
+            subtotal = float(r['subtotal'])
             precio = subtotal / cantidad if cantidad > 0 else 0
 
             productos.append({
-                "nombre_producto": nombre,
+                "nombre_producto": r['nombre_producto'],
                 "precio": round(precio, 2),
                 "cantidad": cantidad,
                 "subtotal": round(subtotal, 2)
@@ -547,7 +546,7 @@ def productos_pedido(id_pedido):
         return jsonify(productos)
 
     except Exception as e:
-        print("❌ ERROR productos_pedido REAL:", repr(e))
+        print("❌ ERROR productos_pedido:", repr(e))
         return jsonify([]), 500
 
     finally:
