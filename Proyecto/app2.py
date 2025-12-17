@@ -299,54 +299,54 @@ def obtener_direcciones(id_usuario):
 
     try:
         with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT id_cliente FROM Cliente WHERE id_usuario = %s",
+                (id_usuario,)
+            )
+            cliente = cursor.fetchone()
+            if not cliente:
+                return jsonify([])
+
+            id_cliente = cliente['id_cliente']
+
             cursor.execute("""
-                SELECT
-                    id_direccion,
-                    calle,
-                    numero,
-                    colonia,
-                    ciudad,
-                    codigo_postal,
-                    principal
+                SELECT id_direccion, calle, numero, colonia, ciudad, codigo_postal, principal
                 FROM Direccion
                 WHERE id_cliente = %s
-            """, (id_usuario,))
+            """, (id_cliente,))
 
-            rows = cursor.fetchall()
-
-            direcciones = []
-            for row in rows:
-                direcciones.append({
-                    "id_direccion": row["id_direccion"],
-                    "calle": row["calle"],
-                    "numero": row["numero"],
-                    "colonia": row["colonia"],
-                    "ciudad": row["ciudad"],
-                    "codigo_postal": row["codigo_postal"],
-                    "principal": bool(row["principal"])
-                })
-
-            return jsonify(direcciones)
+            return jsonify(cursor.fetchall())
 
     finally:
         conn.close()
 
-
 @app.route('/api/direcciones', methods=['POST'])
 def agregar_direccion():
     data = request.get_json()
+    id_usuario = session.get('user_id')
+
     conn = get_db_connection()
     if not conn:
         return jsonify({'success': False}), 500
 
     try:
         with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT id_cliente FROM Cliente WHERE id_usuario = %s",
+                (id_usuario,)
+            )
+            cliente = cursor.fetchone()
+            if not cliente:
+                return jsonify({'success': False, 'error': 'Cliente no encontrado'}), 400
+
+            id_cliente = cliente['id_cliente']
+
             cursor.execute("""
                 INSERT INTO Direccion
                 (id_cliente, calle, numero, colonia, ciudad, codigo_postal, principal)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
-                data['id_usuario'],
+                id_cliente,
                 data['calle'],
                 data.get('numero'),
                 data.get('colonia'),
@@ -354,9 +354,9 @@ def agregar_direccion():
                 data['codigo_postal'],
                 data.get('principal', False)
             ))
-            conn.commit()
 
-        return jsonify({'success': True})
+            conn.commit()
+            return jsonify({'success': True})
 
     finally:
         conn.close()
@@ -460,16 +460,32 @@ def registrar_pago():
 def crear_pedido():
     data = request.get_json()
 
-    id_cliente = data.get('id_cliente')
     total = data.get('total')
     carrito = data.get('carrito', [])
+
+    # 1️⃣ Obtener id_usuario desde la sesión
+    id_usuario = session.get('user_id')
+    if not id_usuario:
+        return jsonify({'success': False, 'error': 'Usuario no autenticado'}), 401
 
     conn = get_db_connection()
 
     try:
         cursor = conn.cursor()
 
-        # 1️⃣ Crear pedido
+        # 2️⃣ Convertir id_usuario ➜ id_cliente  (ESTA ERA LA FALLA)
+        cursor.execute(
+            "SELECT id_cliente FROM Cliente WHERE id_usuario = %s",
+            (id_usuario,)
+        )
+        cliente = cursor.fetchone()
+
+        if not cliente:
+            return jsonify({'success': False, 'error': 'Cliente no encontrado'}), 400
+
+        id_cliente = cliente['id_cliente']
+
+        # 3️⃣ Crear pedido (YA CON id_cliente CORRECTO)
         cursor.execute("""
             INSERT INTO Pedido (id_cliente, total)
             VALUES (%s, %s)
@@ -477,30 +493,22 @@ def crear_pedido():
 
         id_pedido = cursor.lastrowid
 
-        # 2️⃣ Detalle del pedido
+        # 4️⃣ Detalle del pedido
         for item in carrito:
-            id_producto = item['id_producto']
-            cantidad = int(item['cantidad'])
-            precio = float(item['precio'])
-            subtotal = cantidad * precio
-
             cursor.execute("""
                 INSERT INTO Detalle_Pedido
                 (id_pedido, id_producto, cantidad, subtotal)
                 VALUES (%s, %s, %s, %s)
             """, (
                 id_pedido,
-                id_producto,
-                cantidad,
-                subtotal
+                item['id_producto'],
+                int(item['cantidad']),
+                float(item['cantidad']) * float(item['precio'])
             ))
 
         conn.commit()
 
-        return jsonify({
-            'success': True,
-            'id_pedido': id_pedido
-        })
+        return jsonify({'success': True, 'id_pedido': id_pedido})
 
     except Exception as e:
         conn.rollback()
