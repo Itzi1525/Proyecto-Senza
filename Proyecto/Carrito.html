@@ -191,13 +191,7 @@
 </footer>
 
 <script>
-/* =========================
-   CARRITO DESDE LOCALSTORAGE
-========================= */
-
-/* =========================
-   ELIMINAR PRODUCTO
-========================= */let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 function renderCart() {
 
@@ -206,21 +200,21 @@ function renderCart() {
     const totalEl = document.getElementById('total');
 
     if (cart.length === 0) {
-    cartContainer.innerHTML = '<p class="empty">Carrito vacío</p>';
-    document.getElementById('summary').style.display = 'none';
-    return;
-}
-let html = `
-    <table class="cart-table">
-        <tr>
-            <th>Producto</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Subtotal</th>
-            <th></th>
-        </tr>
-`;
+        cartContainer.innerHTML = '<p class="empty">Carrito vacío</p>';
+        document.getElementById('summary').style.display = 'none';
+        return;
+    }
 
+    let html = `
+        <table class="cart-table">
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+    `;
 
     let subtotal = 0;
 
@@ -234,14 +228,13 @@ let html = `
                 <td>$${item.precio}</td>
                 <td>
                     <button class="qty-btn" onclick="changeQty(${index}, -1)">-</button>
-${item.cantidad}
-<button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                    ${item.cantidad}
+                    <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
                 </td>
                 <td>$${itemTotal}</td>
                 <td>
-    <button class="delete-btn" onclick="removeItem(${index})">✕</button>
-</td>
-
+                    <button class="delete-btn" onclick="removeItem(${index})">✕</button>
+                </td>
             </tr>
         `;
     });
@@ -252,6 +245,7 @@ ${item.cantidad}
     subtotalEl.textContent = `$${subtotal}`;
     totalEl.textContent = `$${subtotal + 50}`;
     document.getElementById('summary').style.display = 'block';
+
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
@@ -261,25 +255,15 @@ function changeQty(index, delta) {
     renderCart();
 }
 
-renderCart();
-
 function removeItem(index) {
     cart.splice(index, 1);
     renderCart();
 }
 
-/* =========================
-   PROCEDER AL PAGO
-========================= */
-document.addEventListener('DOMContentLoaded', () => {
+renderCart();
 
-    console.log('🟢 JS del carrito cargado');
-
-    const checkoutBtn = document.querySelector('.checkout-btn');
-    console.log('Botón encontrado:', checkoutBtn);
-
-    if (!checkoutBtn) return;
-checkoutBtn.addEventListener('click', async () => {
+/* ===== PROCEDER AL PAGO ===== */
+document.querySelector('.checkout-btn').addEventListener('click', async () => {
 
     const usuarioId = localStorage.getItem('usuarioId');
     if (!usuarioId) {
@@ -287,41 +271,21 @@ checkoutBtn.addEventListener('click', async () => {
         return;
     }
 
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
     if (cart.length === 0) {
         alert('No hay productos en el carrito');
         return;
     }
 
-    // 🔐 limpiar carrito inválido
-    cart = cart.filter(p =>
-        p.id_producto &&
-        !isNaN(p.precio) &&
-        !isNaN(p.cantidad)
-    );
-
-    if (cart.length === 0) {
-        alert('No hay productos válidos');
-        return;
-    }
-
     let subtotal = 0;
-    cart.forEach(p => {
-        subtotal += p.precio * p.cantidad;
-    });
-
+    cart.forEach(p => subtotal += p.precio * p.cantidad);
     const total = subtotal + 50;
-
-    // ✅ guardar total para MetodoPago.html
-    localStorage.setItem('cartTotal', total);
 
     const res = await fetch('/api/pedido', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             id_cliente: usuarioId,
-            total: total,
+            total,
             carrito: cart
         })
     });
@@ -332,10 +296,7 @@ checkoutBtn.addEventListener('click', async () => {
         window.location.href = `MetodoPago.html?id=${data.id_pedido}`;
     } else {
         alert('Error al crear pedido');
-        console.error(data.error);
     }
-});
- renderCart();
 });
 </script>
 

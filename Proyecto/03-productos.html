@@ -329,10 +329,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 `;
             });
-
-        })
-        .catch(err => console.error(err));
+        });
 });
+
+/* ===== AGREGAR AL CARRITO (UNA SOLA VEZ) ===== */
 document.addEventListener('click', function (e) {
 
     if (!e.target.classList.contains('btn-add-to-cart')) return;
@@ -353,7 +353,7 @@ document.addEventListener('click', function (e) {
     let producto = cart.find(p => p.id_producto == id_producto);
 
     if (producto) {
-        producto.cantidad++;
+        producto.cantidad += 1;
     } else {
         cart.push({
             id_producto,
@@ -366,10 +366,10 @@ document.addEventListener('click', function (e) {
     localStorage.setItem('cart', JSON.stringify(cart));
     alert('🛒 Producto agregado al carrito');
 });
-
 </script>
 
 <script src="buscador.js"></script>
+
 
 </body>
 </html>
