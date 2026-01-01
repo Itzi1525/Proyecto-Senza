@@ -622,30 +622,55 @@ def crear_pedido():
     finally:
         conn.close()
 
-# ... (El resto de las rutas de pedido, reportes y reseñas se mantienen igual) ...
-# Para ahorrar espacio aquí, asumo que dejas el resto del archivo igual. 
-# Si quieres, copia y pega las funciones de abajo del archivo anterior.
 
 @app.route('/api/pedido/<int:id_pedido>/productos')
 def productos_pedido(id_pedido):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
+
+        # Usamos LEFT JOIN para que traiga el detalle AUNQUE el producto ya no exista
         sql = """
-            SELECT p.nombre AS nombre_producto, d.cantidad, d.subtotal
+            SELECT 
+                p.nombre AS nombre_producto,
+                d.cantidad,
+                d.subtotal
             FROM Detalle_Pedido d
-            INNER JOIN Producto p ON d.id_producto = p.id_producto
+            LEFT JOIN Producto p ON d.id_producto = p.id_producto
             WHERE d.id_pedido = %s
         """
+
         cursor.execute(sql, (id_pedido,))
         rows = cursor.fetchall()
-        return jsonify(rows)
+
+        productos = []
+        for r in rows:
+            cantidad = int(r['cantidad'])
+            subtotal = float(r['subtotal'])
+            
+            # Calculamos el precio unitario histórico (para que no falle el JS)
+            # Si cantidad es 0 (error raro), ponemos 0 para no dividir por cero
+            precio = subtotal / cantidad if cantidad > 0 else 0
+
+            # Si el producto fue borrado físicamente, p.nombre será None
+            nombre_mostrar = r['nombre_producto'] if r['nombre_producto'] else "Producto no disponible (Eliminado)"
+
+            productos.append({
+                "nombre_producto": nombre_mostrar,
+                "precio": round(precio, 2), # Enviamos el precio calculado
+                "cantidad": cantidad,
+                "subtotal": round(subtotal, 2)
+            })
+
+        return jsonify(productos)
+
     except Exception as e:
         print("❌ ERROR productos_pedido:", repr(e))
         return jsonify([]), 500
+
     finally:
         conn.close()
-
+        
 @app.route('/api/pedido/<int:id_pedido>')
 def obtener_pedido(id_pedido):
     conn = get_db_connection()
