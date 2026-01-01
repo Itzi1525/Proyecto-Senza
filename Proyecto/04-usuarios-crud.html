@@ -1,4 +1,142 @@
-<script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Senza - Administrar usuarios</title>
+    <link rel="icon" type="image/png" href="Imagenes/Senza.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --color-primary: #D2B48C;
+            --color-secondary: #4B3832;
+            --color-background: #F8F8F8;
+            --color-card-bg: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-secondary);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: var(--color-card-bg);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .logo h2 { margin: 0; font-size: 1.5em; font-weight: 600; }
+        .nav-admin a {
+            text-decoration: none;
+            color: var(--color-secondary);
+            font-weight: 600;
+            margin-left: 20px;
+        }
+        .nav-admin a:hover { color: var(--color-primary); }
+
+        .container { padding: 30px; max-width: 1200px; margin: auto; }
+        .grid { display: grid; grid-template-columns: 350px 1fr; gap: 30px; }
+        
+        .card {
+            background-color: var(--color-card-bg);
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+        }
+
+        label { display: block; margin-top: 15px; font-weight: 600; }
+        input, select {
+            width: 100%; padding: 10px; border-radius: 6px;
+            border: 1px solid #ccc; margin-top: 5px; box-sizing: border-box;
+        }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background-color: var(--color-primary); color: white; }
+
+        .btn {
+            padding: 10px 15px; border: 0; border-radius: 5px;
+            background-color: var(--color-secondary); color: white;
+            cursor: pointer; font-weight: 600;
+        }
+        .btn:hover { background-color: #382D26; }
+        .btn.delete { background-color: #e74c3c; margin-left: 5px; }
+        .btn.edit { background-color: #f39c12; }
+    </style>
+</head>
+<body>
+
+    <script>
+        const rol = localStorage.getItem('usuarioRol');
+        if (rol !== 'Administrador') {
+            alert("⛔ Acceso denegado. Solo Administradores.");
+            window.location.href = 'Inicio.html';
+        }
+    </script>
+
+    <header>
+        <div class="logo"><h2>Gestión de Usuarios</h2></div>
+        <nav class="nav-admin">
+            <a href="AdminOpera.html">← Volver al Panel</a>
+            <a href="#" onclick="logout()">Salir</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="grid">
+            <div class="card">
+                <h3 id="formTitle">Crear Nuevo Usuario</h3>
+                <form id="userForm">
+                    <input type="hidden" id="userId"> <label>Nombre</label>
+                    <input id="nombre" type="text" required placeholder="Nombre completo">
+        
+                    <label>Correo</label>
+                    <input id="correo" type="email" required placeholder="ejemplo@senza.mx">
+
+                    <label>Contraseña</label>
+                    <input id="password" type="password" placeholder="(Dejar vacío si no se cambia)">
+                    
+                    <label>Rol</label>
+                    <select id="rolSelect">
+                        <option value="Cliente">Cliente</option>
+                        <option value="Operador">Operador</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+        
+                    <div style="margin-top:20px; display:flex; gap:10px">
+                        <button class="btn" type="submit">Guardar</button>
+                        <button class="btn" type="button" onclick="resetForm()" style="background:#999">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        
+            <div class="card">
+                <h3>Lista de usuarios registrados</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
     const API_URL = ''; // Local
 
     document.addEventListener('DOMContentLoaded', cargarUsuarios);
@@ -58,3 +196,6 @@
         if((await res.json()).success) cargarUsuarios();
     };
 </script>
+    
+</body>
+</html>
